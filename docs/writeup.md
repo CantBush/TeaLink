@@ -17,7 +17,7 @@ The user gets a **top 3** instead of a single answer. Each pick is both a decisi
 | Dynamic discovery | Lantern Leaf registers a shop agent partway through a session, and its drink jumps to #1 |
 | Resolving conflicts | Each agent scores every candidate by its own objective. Scores are blended with the user's learned weights, and a close call goes to the human |
 | Explaining decisions | Live timeline, the Why this order page (score × weight), and the What changed before/after |
-| *Level 3:* comparison with a simpler baseline | The Evidence page: learned vs fixed priorities vs a popularity baseline |
+| *Level 3:* comparison with a simpler baseline | The Evidence page: learned priorities 7/24 hits, fixed priorities 5/24, popularity 2/24 |
 | *Level 3:* human in the loop | A near-tie or an empty result produces a prompt over the top 3 that explains the trade-off |
 
 ## Architecture ✏️ (Track A)
@@ -38,29 +38,31 @@ The user gets a **top 3** instead of a single answer. Each pick is both a decisi
 
 ## Results
 
-**Learning works on simulated users.** Three simulated users each have hidden priorities: a price hunter, an explorer, and a loyalist. Each picks from the top 3 for 8 rounds. A *hit* means the team's #1 was the drink the user picked.
+**Learning beats both baselines on simulated users.** Three simulated users each have hidden priorities: a price hunter, an explorer, and a loyalist. Each picks from the top 3 for 8 rounds, for 24 decisions in total. A *hit* means the recommender's #1 was that user's favorite drink that round: the best in-stock drink under their hidden priorities, which no recommender sees. The full results come from `eval/run_eval.py` and are served at `GET /eval`.
 
-| Recommender | Hits (#1 was picked) |
-|---|---|
-| Agent team, fixed priorities | 11 / 24 (46%) |
-| Agent team, learned priorities | **15 / 24 (63%)** |
-| Most popular drink | ✏️ waiting for Track A's `GET /eval` |
+| Recommender | #1 was the favorite | Favorite in the top 3 | Re-suggested a drink they'd tried | Sold-out recommendations |
+|---|---|---|---|---|
+| Most popular untried drink | 2 / 24 | 2 / 24 | 0% | 0 |
+| Agent team, fixed priorities | 5 / 24 | 8 / 24 | 14% | 0 |
+| Agent team, learned priorities | **7 / 24** | **11 / 24** | **7%** | 0 |
 
-From picks alone, the learned weights land close to the hidden ones:
+From 8 picks alone, the learned weights move toward the hidden ones. Every user starts from the same default priorities (taste 55%, 15% each for the rest):
 
-| User | What dominates their hidden priorities | Hidden | Learned |
+| User | What dominates their hidden priorities | Hidden | Learned after 8 picks |
 |---|---|---|---|
-| Price hunter | price | 55% | 48% |
-| Explorer | something new | 50% | 45% |
-| Loyalist | taste match | 70% | 64% |
+| Loyalist | taste match | 70% | 66% |
+| Price hunter | price | 55% | 37% (up from 15%) |
+| Explorer | something new | 50% | 29% (up from 15%) |
 
-**The adaptation behaves correctly in a scripted run.** This is the exact sequence from the demo, and the results were identical in-process and over AGNTCY:
-1. Start: Thai Tea 78, Wintermelon Tea 76, Pearl Milk Tea 71. Because Thai Tea and Wintermelon are a close call, the team asks the user.
-2. The user picks Pearl Milk Tea. Taste weight goes from 39% to 43% and price weight from 42% to 35%.
+The loyalist converges almost exactly. The price hunter and the explorer are moving the right way but haven't converged in 8 picks. The price hunter also picked up some weight on something new (26% learned vs 5% hidden), likely because cheap drinks in our catalog are often ones the user hasn't tried.
+
+**The adaptation behaves correctly in a scripted run.** This is the exact sequence from the demo, run over AGNTCY. In-process mode gives identical results.
+1. Start: Thai Tea 78, Wintermelon Tea 77, Pearl Milk Tea 71. Because Thai Tea and Wintermelon are a close call, the team asks the user.
+2. The user picks Pearl Milk Tea. Taste weight goes from 41% to 45% and price weight from 43% to 36%.
 3. Thai Tea sells out. Kung Fu Tea's agent vetoes it, and the team re-ranks.
-4. Lantern Leaf joins. Its $4.95 Brown Sugar Hojicha Milk goes to #1 at 80.
+4. Lantern Leaf joins. Its $4.95 Brown Sugar Hojicha Milk goes to #1 at 81.
 5. "I don't like brown sugar." That drink leaves the top 3.
-6. Sunright goes offline. Its three drinks are ruled out, and the team never recommends a drink it can't confirm.
+6. Lantern Leaf goes offline. Its drinks are ruled out, and the team never recommends a drink it can't confirm.
 
 *Caveat: the sample is small (3 personas × 8 rounds), so treat these numbers as early evidence, not a benchmark.*
 
@@ -70,6 +72,7 @@ From picks alone, the learned weights land close to the hidden ones:
 - **Make the decision human-sized.** A single answer hides the trade-off. A top 3 with a "close call" prompt turned the user's pick into a learning signal and gave us human-in-the-loop for free.
 - **A "neutral" score matters.** Unrated drinks first scored 0 with the Social agent, so a newly joined shop could never win. Treating "nobody has rated it" as neutral fixed dynamic discovery.
 - **Every demo button has to change something visible.** We tuned the scenario (for example, pricing Lantern Leaf's drink at $4.95) so that each event produces a clear, explainable change on screen.
+- **Define "success" honestly.** Our first eval counted a hit when the team's #1 matched the user's pick from the three options *we* chose, which flattered us (63%). Scoring against the user's true favorite across the whole in-stock menu gives smaller numbers (29%), but they actually mean something, and learning still wins.
 - **Plan for the bus to fail.** AGNTCY over NATS runs the same agent classes as in-process mode, with a per-call fallback, so the demo never depends on the broker being up.
 - **Split by file ownership, and agree on contracts first.** Two people worked in parallel all day without merge conflicts. The `/eval` and offers formats were agreed up front, so the frontend was built against mocks before the backend existed.
 - ✏️ *Add any from Track A (for example, what was hard about the AGNTCY SDK).*

@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 2:10 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 2:25 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -91,14 +91,16 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ AGNTCY badge on the timeline ("AGNTCY · N agents over NATS", or "In-process fallback"), read from `/health`, with a dot on each agent that answered over the bus
 - ✅ An empty result now shows a clear "Nothing survived" card instead of a blank #1 card
 - ✅ README covers AGNTCY mode (the `bus` extra, running NATS without Docker)
-- 🟡 `docs/writeup.md` drafted: overview, Level 2 mapping, results, lessons. Track A's architecture and implementation sections and the popularity numbers are still to come.
+- 🟡 `docs/writeup.md` drafted: overview, Level 2 mapping, results (now Track A's three-way eval), lessons. Track A's architecture and implementation sections are still to come.
+- ✅ Evidence page on live `GET /eval`: hits shown as counts (7/24, 5/24, 2/24), wording matches the stricter "user's favorite" definition, and the offline copy is the real results
+- ✅ Demo script and recorded mocks refreshed after Track A's re-seed (Sarah's 5/5 Hojicha Cream Tea is now a Social proposal in the script)
 - ⬜ Offer badge (if A builds offers)
 - ⬜ Stretch: ElevenLabs voices
 - ⬜ Write-up and backup video
 
 ## Known issues and decisions to revisit
 
-- **Track A, demo-blocking in AGNTCY mode: Reset demo drops every agent about 30 seconds later.** In `_prepare` (`api/main.py`, around line 329), `transport.listen(lambda agent_id: _on_remote_heartbeat(runtime, agent_id))` captures the runtime that existed at first connect. `/events/reset` swaps in a fresh runtime, but bus heartbeats keep refreshing the old registry. The new registry is marked online once during the reset and then hits the 30-second timeout, so `/recommend` selects no agents and returns "Nothing survived." To reproduce: run with `TRANSPORT=agntcy`, `POST /events/reset`, wait 35 seconds, then `POST /recommend`. Suggested fix: `lambda agent_id: _on_remote_heartbeat(get_runtime(), agent_id)`. Local mode is not affected.
+- **Track A, demo-blocking in AGNTCY mode, still open at 2:25 PM (`main.py` line 342): Reset demo drops every agent about 30 seconds later.** In `_prepare` (`api/main.py`, around line 329), `transport.listen(lambda agent_id: _on_remote_heartbeat(runtime, agent_id))` captures the runtime that existed at first connect. `/events/reset` swaps in a fresh runtime, but bus heartbeats keep refreshing the old registry. The new registry is marked online once during the reset and then hits the 30-second timeout, so `/recommend` selects no agents and returns "Nothing survived." To reproduce: run with `TRANSPORT=agntcy`, `POST /events/reset`, wait 35 seconds, then `POST /recommend`. Suggested fix: `lambda agent_id: _on_remote_heartbeat(get_runtime(), agent_id)`. Local mode is not affected.
 - **Setup note:** AGNTCY mode needs `pip install -e ".[dev,bus]"`. Without the `bus` extra, `make agents` exits with "agntcy-app-sdk is not installed", and the API quietly runs in-process.
 - **Sarah is Andrew's top match again.** Her seeded reviews follow his milky, low-fruit orders, plus Hojicha Cream Tea at 5/5. Hana is second.
 - **The candidate pool is small** (about 11 drinks per round), so sold-out drinks eventually run the pool dry. The evaluation stops at 8 rounds for this reason.
