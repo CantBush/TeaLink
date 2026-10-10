@@ -77,45 +77,103 @@ TeaLink/
     state/session.ts  api/client.ts  api/types.ts  mocks/sample_session.json
 ```
 
-## Phases
+## Already done (Phases 0 to 2, plus most of 3)
 
-Person A (Andrew) owns agents and backend. Person B owns data, frontend, and the demo. Emily is working ahead on the agent team and learning, on branch `feature/top3-preference-learning`.
+- ✅ Skeleton, schemas and types, SSE gateway, seed data (6 shops, 43 drinks, users, reviews, and Andrew's past picks)
+- ✅ All six agent kinds, capability selection, both rounds, the resolver, top 3, and the learning Preference agent
+- ✅ Discover and Why This on live data, the timeline, and control panel buttons that re-run deliberation
+- ✅ Sold-out, shop offline, shop joining mid-session, the preference flip, and ask-the-human
+- ✅ **6:00 checkpoint met early:** real disagreement on screen, end to end
 
-### Phase 0, 12:00 to 12:45: skeleton and contracts ✅
-- ✅ Repo skeleton, shared schemas and types, FastAPI SSE gateway, mock frontend
-- ⬜ Send someone to the Cisco workshop (check Discord for the time)
+## Two-person split
 
-### Phase 1, 12:45 to 3:00: foundations 🟡
-- ⬜ **A: AGNTCY spike.** Get one Taste agent answering over NATS. **Go/no-go at 2:00**: if it isn't working, stay on `TRANSPORT=local`.
-- ✅ A: `core/taste.py` and `core/retrieval.py`
-- ✅ B: seed data (6 shops including the late-joining Lantern Leaf, 43 drinks, users, reviews, and Andrew's past picks)
-- 🟡 B: Discover ✅, Why This ✅, Counterfactual (still scripted)
-- ⬜ Merge `feature/top3-preference-learning` into main
+The remaining work runs as two parallel tracks. **Track A** is the backend: agents, transport, and evidence. **Track B** is the frontend, demo, and write-ups. Each track owns its files outright, so the two of you don't block each other or hit merge conflicts. The default is Andrew on A and Emily on B; swap if you prefer.
 
-### Phase 2, 3:00 to 6:00: agent team ✅ (finished early)
-- ✅ Social, Explorer, Budget, Shop, and Preference agents; capability selection; both rounds; resolver; top 3
-- ✅ Live SSE stream, timeline with supports, concerns, and vetoes, and selection reasons
-- ✅ **6:00 checkpoint:** "What should I get next?" runs end to end with real disagreement on screen
+### Ground rules
 
-### Phase 3, 6:30 to 9:00: adaptation 🟡
-- ✅ Heartbeats and offline detection, sold-out, shop joining mid-session, preference flip, and the ask-human rule
-- ✅ Control panel buttons that re-run deliberation, plus a demo reset
-- ✅ Learning from picks (Preference agent)
-- ⬜ Counterfactual page: show a before/after diff using `previousDecision` and `decision` from the session store
-- ⬜ Update `sample_session.json` so the offline fallback shows the top 3 and the priorities panel
-- ⬜ Decide on the Sarah story: real similarity ranks her 5th for Andrew. Either tune her seeded reviews or change the script.
+1. **First, together (1:15 to 1:30):** merge `feature/top3-preference-learning` into `main`. Both pull, and both confirm `make api` and `make web` run.
+2. **Branches:** A works on `a/<topic>` and B works on `b/<topic>`. Open small PRs into `main`, merge at every sync point, and pull `main` right after.
+3. **Shared files:** `schemas.py` and `types.ts` are the only shared files. A changes `schemas.py` and posts the diff in chat. B then mirrors it in `types.ts`. Neither of you changes the other's files.
+4. **Never blocked:** B builds against mock JSON in `frontend/src/mocks/` that matches the contracts below. A tests with `pytest` and `curl`. The real data replaces the mocks once A merges.
+5. **`PROGRESS.md`:** whoever merges a PR updates their own track's section.
 
-### Phase 4, 9:00 to 10:00: evidence and freeze ⬜
-- 🟡 A: `eval/run_eval.py`. Learning vs fixed weights is done. Still to do: `core/baseline.py` (popularity) and a combined table covering hit rate, sold-out recommendations, and repeat picks.
-- ⬜ B: scripted demo scenario, plus a replay mode if we use an LLM
-- ⬜ **Feature freeze at 9:30.** Commit and push before the venue closes.
-- ⬜ Overnight, docs only: `docs/architecture.md` and the README
+### File ownership
 
-### Phase 5, Sunday 9:00 to 1:00: ship ⬜
-- 9:00 to 10:30: bug fixes and polish on the screens the demo shows
-- 10:30 to 11:30: write-ups (architecture, implementation, results, lessons learned) and a backup demo video
-- 11:30 to 12:15: rehearse three times
-- **Submit by 12:30**
+| Track A owns (backend) | Track B owns (frontend, demo, docs) |
+|---|---|
+| `backend/tealink/**` (agents, core, concierge, api, data/seed) | `frontend/src/**` |
+| `backend/eval/**`, `backend/tests/**`, `backend/data/*.json` | `frontend/src/mocks/**` (including mocks for A's upcoming endpoints) |
+| `Makefile`, `docker-compose.yml`, `.env.example` | `docs/demo-script.md`, `docs/writeup.md`, the demo video |
+| `docs/architecture.md` | `README.md` (A sends B notes on endpoints and setup) |
+
+### Contracts to agree on now
+
+So B can build the UI before A's backend is ready:
+
+```ts
+// GET /eval  (A serves backend/data/eval_results.json; B mocks frontend/src/mocks/eval.json)
+type EvalResult = {
+  rounds: number;
+  methods: {
+    method: "popularity" | "fixed_weights" | "learning";
+    hit_rate: number;        // 0..1: the team's #1 was the drink the user picked
+    top3_rate: number;       // 0..1: the pick was anywhere in the top 3
+    sold_out_recs: number;   // how many recommendations were sold out
+    repeat_rate: number;     // 0..1: share of recommendations the user had already tried
+  }[];
+  personas: {
+    name: string;
+    hidden_weights: Record<Dimension, number>;
+    learned_weights: Record<Dimension, number>;
+  }[];
+};
+
+// Stretch, only if A builds shop offers: a new optional field and a new event type
+type Offer = { shop_id: string; percent: number; price_after: number; reason: string };
+// RankedDrink.offer?: Offer | null      LensEventType adds "offer"
+```
+
+### Track A: backend, agents, evidence
+
+| When | Task | Done when |
+|---|---|---|
+| 1:30 to 2:00 | ⬜ **AGNTCY spike.** Get one Taste agent answering over NATS through `AgntcyTransport` (`docker compose up nats`, then `python -m tealink.agents.serve --agent taste`) | One `/recommend` with `TRANSPORT=agntcy` gets a Taste reply over NATS |
+| **2:00** | **Go/no-go.** If the spike fails, stay on `TRANSPORT=local`. Either way, tell B | |
+| 2:00 to 3:30 | ⬜ If go: serve every agent over NATS, run shop heartbeats over the bus, add `make agents`, and a startup fallback to local. If no-go: skip straight to the baseline | The demo flow passes on both transports |
+| 3:30 to 5:00 | ⬜ `core/baseline.py` (most popular untried drink that's in stock). Extend `eval/run_eval.py` to popularity vs fixed weights vs learning, write `eval_results.json`, and add `GET /eval` | `GET /eval` matches the contract, with a test |
+| 5:00 to 6:00 | ⬜ Story data fixes: tune Sarah's seed reviews so she's Andrew's top match, re-seed, and update the tests | `/users/similar?user_id=andrew` returns Sarah first |
+| **6:00** | **Sync:** merge, then run the full demo together | |
+| 6:30 to 8:00 | ⬜ Stretch: **shop offers.** In a near-tie, the trailing shop's agent offers up to 10% off from its budget. The resolver re-scores the cost dimension, and an `offer` event is emitted | The offer appears in the timeline and can flip the #1 |
+| 8:00 to 9:00 | ⬜ Optional LLM wording for rationales (template fallback stays the default). Edge-case tests: all vetoed, no reviews, every shop offline | Tests pass with no API key set |
+| **9:00** | **Merge.** Feature freeze at 9:30 | |
+| Overnight | ⬜ `docs/architecture.md`: mermaid diagram, protocol, Level 2 mapping | |
+| Sun 9:00 to 11:30 | Backend bug fixes; architecture and implementation sections of the write-up | |
+
+### Track B: frontend, demo, write-ups
+
+| When | Task | Done when |
+|---|---|---|
+| 1:30 to 3:00 | ⬜ **Counterfactual page on live data.** Show a before/after of the top 3 using `previousDecision` and `decision` from the session store: what moved, what was ruled out, which event caused it, and the weight shifts | Clicking any control button, then opening Counterfactual, shows the real diff |
+| 3:00 to 4:00 | ⬜ Clean-up: update `sample_session.json` so the offline fallback shows the top 3 and priorities; delete `RecommendationCard.tsx`; point Friends at `/users/similar` (or hide the tab) | `npm run build` and lint pass; the app still works with the API stopped |
+| 4:00 to 6:00 | ⬜ **Evidence page** (`/evidence`) built against `mocks/eval.json`: a methods table, hit-rate bars, and hidden vs learned weights per persona | Renders from the mock, then switches to `GET /eval` after A merges |
+| **6:00** | **Sync:** merge, then run the full demo together | |
+| 6:30 to 7:30 | ⬜ Ask-the-human polish: when `ask_human` is set, the prompt names both options and what separates them, and the pick resolves it. Timeline readability (group by round, collapse selection events) | A judge can follow one run without explanation |
+| 7:30 to 9:00 | ⬜ `docs/demo-script.md` (exact clicks and lines, 3 minutes). If A builds offers, add an offer badge on cards and an `offer` timeline style. Stretch: ElevenLabs voice for each agent's line | Two dry runs from a reset |
+| **9:00** | **Merge.** Feature freeze at 9:30 | |
+| Sun 9:00 to 11:30 | UI polish; results and lessons sections of `docs/writeup.md`; record the backup demo video | |
+
+### Sync points
+
+| Time | Both of you |
+|---|---|
+| 1:15 | Merge the feature branch. Both run the app |
+| 2:00 | AGNTCY go/no-go (A tells B) |
+| 4:00 | Quick merge of whatever is ready; B checks `GET /eval` progress |
+| 6:00 | Merge, then a full demo run-through. Re-cut scope if anything is behind |
+| 9:00 to 9:30 | Final merge and freeze. Push before the venue closes |
+| Sun 11:30 to 12:15 | Rehearse three times together. **Submit by 12:30** |
+
+If one track finishes early, take the other track's next unstarted task, but say so first so you don't both pick it up.
 
 ## Demo script (draft)
 
@@ -144,6 +202,8 @@ Person A (Andrew) owns agents and backend. Person B owns data, frontend, and the
 - TBAC / agent identity from AGNTCY.
 
 ## Plan change log
+
+- **1:15 PM:** Split the remaining work into Track A (backend, agents, evidence) and Track B (frontend, demo, write-ups), with separate file ownership, agreed contracts for `/eval` and offers, and shared sync points. Added an Evidence page, and an AGNTCY-plus-baseline block for A.
 
 - **1:10 PM:** The plan moved into this file (`docs/PLAN.md`) so the team can edit it on GitHub.
 - **12:50 PM:**

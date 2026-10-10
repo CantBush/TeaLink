@@ -63,16 +63,28 @@ A "hit" means the team's #1 was the drink the user picked. The sample is small, 
 
 ## To do
 
-| Priority | Task | Owner |
-|---|---|---|
-| 1 | Review and merge `feature/top3-preference-learning` into main | Andrew + Emily |
-| 2 | AGNTCY spike: one agent answering over NATS via `AgntcyTransport`. Go/no-go at 2:00, otherwise stay on `TRANSPORT=local` | Andrew |
-| 3 | Counterfactual page is still scripted. Wire it to `previousDecision` and the live `decision` from the session store | B |
-| 4 | Popularity baseline in `core/baseline.py`, plus a results table that combines it with the learning evaluation | A |
-| 5 | Demo script and rehearsal: reset, pick, sell out, Lantern Leaf joins, no brown sugar, shop offline | B |
-| 6 | The Friends page is still static (Sarah). Either point it at `/users/similar` or cut it, since it's first on the cut list | B |
-| 7 | Update `sample_session.json` mocks so the offline fallback shows the top 3 and the priorities panel | B |
-| 8 | Optional: LLM wording for rationales (numbers stay in code), ElevenLabs voices, and the SLIM group session | Stretch |
+The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). Update your track's lines here as you merge.
+
+**Both:** ⬜ Merge `feature/top3-preference-learning` into main (1:15)
+
+**Track A (backend, agents, evidence):**
+- ⬜ AGNTCY spike, go/no-go at 2:00
+- ⬜ Serve all agents over NATS (if go)
+- ⬜ Popularity baseline, three-way eval, `GET /eval`
+- ⬜ Sarah seed fix
+- ⬜ Stretch: shop offers
+- ⬜ Stretch: LLM wording and edge-case tests
+- ⬜ `docs/architecture.md`
+
+**Track B (frontend, demo, write-ups):**
+- ⬜ Live Counterfactual diff
+- ⬜ Mocks refresh, remove `RecommendationCard`, Friends on `/users/similar`
+- ⬜ Evidence page (against `mocks/eval.json`)
+- ⬜ Ask-the-human and timeline polish
+- ⬜ `docs/demo-script.md`
+- ⬜ Offer badge (if A builds offers)
+- ⬜ Stretch: ElevenLabs voices
+- ⬜ Write-up and backup video
 
 ## Known issues and decisions to revisit
 
