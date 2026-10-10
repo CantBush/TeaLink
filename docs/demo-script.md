@@ -15,7 +15,7 @@
 
 ## 0:20 to 0:55: one round, with real disagreement
 
-On the TeaLink tab, point at the **At the counter** timeline, top to bottom:
+On the TeaLink tab, tap **See how the agents decided** under **At the counter** (it stays open for the rest of the demo, including after Reset demo), then go top to bottom:
 
 1. **Team selected:** "The concierge picks agents by capability, and you can open this to see why each one was chosen. Each agent is its own process. The badge up here shows all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
 2. **Andrew's priorities:** "From his last 4 orders, the Preference agent thinks price matters most to him (43%), then taste (41%)."

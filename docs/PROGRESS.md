@@ -95,7 +95,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Evidence page on live `GET /eval`: hits shown as counts (7/24, 5/24, 2/24), wording matches the stricter "user's favorite" definition, and the offline copy is the real results
 - ✅ Technical click-through of the full demo over AGNTCY after Track A's reset fix: every step matches the script. Fixes from it: shop names instead of raw ids in ruled-out reasons, a truthful "now ranks below the top 3" for drinks that weren't ruled out, and two close-call lines in the script.
 - ✅ Demo script and recorded mocks refreshed after Track A's re-seed (Sarah's 5/5 Hojicha Cream Tea is now a Social proposal in the script)
-- ⬜ Offer badge. The backend now emits it; see the seam notes below. The scripted 3-minute demo does not produce an offer, so the script numbers stay as they are.
+- ✅ Offer badge. A discounted drink's card shows "10% off from (shop)" with the old price struck through, and the timeline gets an "A shop makes an offer" step. Checked live: Hana's round has Boba Guys take 10% off House Milk Tea ($5.75 to $5.17), which moves it to #1; Elena's round also gets an offer. Andrew's scripted run still produces none, and the full script sequence still matches (78/77/71, then 79/75/73 after the Pearl pick, then the Wintermelon 75 vs Pearl 73 close call after the sell-out).
 - ⬜ Write-up and backup video
 
 **Social layer (new, 2:55 PM; full spec and contracts in [`PLAN.md`](PLAN.md#social-layer-added-255-pm)):**
@@ -104,7 +104,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
   - ✅ Types, sample data built from the seed (`node frontend/scripts/build-social-mocks.mjs`), and client calls that fall back to an in-browser mock until A's routes exist.
   - ✅ App shell: bottom tabs on phones, top nav on desktop.
   - ✅ Profile page (`/u/:handle`): header, personality, taste match, go-to order, stats grid, reviews, and follow. The edit sheet covers name, bio, emoji avatar, colors, pinned order, and show/hide and reorder stats.
-  - 🟡 Home feed (`/home`): suggestions, likes, and comments are in; "send a rec" and folding in Friends are left.
+  - ✅ Home feed (`/home`): suggestions, likes, comments, review photos, and "send a rec" (from a drink's sheet in Discover or from someone's profile, over live `POST /recs`). A rec sent to you has a "Try this" button that opens the drink in Discover. Friends is folded into Discover.
   - ✅ Onboarding quiz at `/welcome`, checked against the live API:
     - Sign-up asks for an avatar, a name, and a handle.
     - Six questions, one per screen, with a progress bar.
@@ -116,7 +116,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 **UI cleanup and five tabs (new, 3:30 PM; spec in [`PLAN.md`](PLAN.md#ui-cleanup-and-five-tabs-added-330-pm)):**
 - Track A: ✅ `GET /drinks` (all 43 drinks, `photo_url: null`) · ✅ `GET /shops` (all 6, including Lantern Leaf, `photo_url: null`) · ✅ reserved `photo_url` on feed items and `cover_url` on profiles (both `null`) · ✅ shop offers · ⬜ stretch, after the freeze: photo uploads
-- Track B: ✅ five tabs and routes (Home, Discover, TeaLink at `/`, Stats, Profile), with Friends folded in (`/friends` now opens Discover's People view) · ✅ Discover with search, filters, and the drink detail sheet · ✅ Stats tab · ⬜ placeholder images for drinks, shops, and covers · ⬜ readability pass across every tab
+- Track B: ✅ five tabs and routes (Home, Discover, TeaLink at `/`, Stats, Profile), with Friends folded in (`/friends` now opens Discover's People view) · ✅ Discover with search, filters, and the drink detail sheet · ✅ Stats tab · ✅ placeholder images: 10 drink styles, 6 shops, and 6 covers in `frontend/public/img/` (generated; each drink maps to a style by name and flavor tags, and any real `photo_url` / `cover_url` replaces the placeholder) · ✅ photos on feed cards, top 3 cards, Discover rows, shop cards, and the drink sheet, plus a profile cover and an Instagram-style grid/list of posts · ✅ cover picker in Edit profile · 🟡 readability pass: the TeaLink timeline is collapsed behind "See how the agents decided" (it stays open once tapped; the demo script says so), and the new screens use 15px body text and 44px targets; the older pages still need a pass
 
 **Track A social backend (branch `a/social-backend`, 3:35 PM).** All Track A blocks from 3:00 to 6:00 are done, and 36 backend tests pass. The demo is unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71, with the close-call prompt, and `eval_results.json` is byte-identical.
 - **Seed:** `make seed` also writes `backend/data/social.json`: a profile for each of the 15 users (handle = user id, emoji avatar, bio, accent), follows (Andrew follows Sarah, Hana, Nora, Chris, and Marco), and 177 feed items. Every seeded review is a feed item, plus Andrew's 4 past picks, a "joined" item per user, likes, 3 comments, and Sarah's rec of Hojicha Cream Tea to Andrew (the newest item in his feed). Reset demo reloads all of it and drops users created since.
@@ -136,6 +136,8 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 **The social API matches the frontend contract.** `GET /quiz`, `GET /users?viewer=`, and `GET /feed` return bare lists. Likes and comments take `{viewer}`. Every feed item and comment carries an `author`, and `GET /feed?author=` is one person's posts. `toppings` is a 0–1 number. A missing user returns 404 with `detail: "user not found"`, so the frontend does not treat it as a route that has not shipped. After Reset demo, users created through `/users` are gone.
 
 ## Known issues and decisions to revisit
+
+- **For Track A (small, optional): let `PATCH /users/{ref}` take a cover.** Track B has six placeholder covers (`pearls`, `leaves`, `swirl`, `fruit`, `matcha`, `lineup`). Until `cover_url` is patchable, a chosen cover is saved only in that browser, and other viewers see a default based on the user's top flavor. If `PATCH` accepts `cover_url` as one of those ids (or a URL later), the frontend will use it with no other change.
 
 - **Quiz flavors now reach `top_notes`.** A user with no reviews keeps the flavors they picked, in that order. Fruity, Floral, and Matcha come back as `["fruit", "jasmine", "matcha"]` instead of notes inferred from matching drinks.
 

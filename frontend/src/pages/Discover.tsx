@@ -5,8 +5,10 @@ import type { FeedItem, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
-import { type CatalogDrink, type DrinkBase, allDrinks, drinkBase } from "../lib/catalog.ts";
+import { SendRec } from "../components/SendRec.tsx";
+import { type CatalogDrink, type DrinkBase, allDrinks, drinkBase, drinkInfo } from "../lib/catalog.ts";
 import { SHOP_IDS, matchPercent, price, shopLabel } from "../lib/format.ts";
+import { drinkPhoto, shopPhoto } from "../lib/images.ts";
 import { noteLabel } from "../lib/stats.ts";
 import { useMe } from "../state/me.ts";
 import { profilesChanged } from "../state/social.ts";
@@ -60,7 +62,8 @@ function SectionTitle({ children, count }: { children: string; count: number }) 
 function DrinkRow({ drink, onOpen }: { drink: CatalogDrink; onOpen: () => void }) {
   return (
     <li>
-      <button type="button" onClick={onOpen} className="flex w-full items-center gap-4 py-3.5 text-left">
+      <button type="button" onClick={onOpen} className="flex w-full items-center gap-4 py-3 text-left">
+        <img src={drinkPhoto(drink.id) ?? ""} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-2xl object-cover" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[17px] font-semibold">{drink.name}</span>
           <span className="block truncate text-sm text-mute">
@@ -100,6 +103,8 @@ function PersonCard({ person, onFollow }: { person: UserProfile; onFollow: () =>
 }
 
 function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews: FeedItem[]; onClose: () => void }) {
+  const [sharing, setSharing] = useState(false);
+  if (sharing) return <SendRec drinkId={drink.id} onClose={onClose} />;
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
       <section
@@ -109,6 +114,7 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
         onClick={(event) => event.stopPropagation()}
         className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-t-[32px] bg-foam p-6 sm:rounded-[32px]"
       >
+        <img src={drinkPhoto(drink.id) ?? ""} alt={drink.name} className="-mx-6 -mt-6 mb-5 aspect-[4/3] w-[calc(100%+3rem)] max-w-none object-cover" />
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="font-display text-3xl leading-tight">{drink.name}</h2>
@@ -129,6 +135,14 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
             ))}
           </ul>
         ) : null}
+
+        <button
+          type="button"
+          onClick={() => setSharing(true)}
+          className="mt-5 min-h-11 w-full rounded-full border border-ink font-semibold text-ink"
+        >
+          Send to a friend
+        </button>
 
         <h3 className="mt-6 mb-3 font-display text-xl">How it tastes</h3>
         <TasteBars profile={drink.attributes} />
@@ -164,7 +178,15 @@ export function Discover() {
   const [cheap, setCheap] = useState(false);
   const [flavor, setFlavor] = useState<string | null>(null);
   const [shop, setShop] = useState<string | null>(null);
-  const [open, setOpen] = useState<CatalogDrink | null>(null);
+  const [open, setOpenState] = useState<CatalogDrink | null>(() => drinkInfo(params.get("drink")));
+  const setOpen = (drink: CatalogDrink | null) => {
+    setOpenState(drink);
+    if (!drink && params.has("drink")) {
+      const copy = new URLSearchParams(params);
+      copy.delete("drink");
+      setParams(copy, { replace: true });
+    }
+  };
   const [people, setPeople] = useState<UserProfile[]>([]);
   const [feed, setFeed] = useState<FeedItem[]>([]);
 
@@ -287,10 +309,11 @@ export function Discover() {
                       setShop(shop === id ? null : id);
                       setScope("drinks");
                     }}
-                    className={`w-44 rounded-3xl border p-4 text-left ${shop === id ? "border-ink" : "border-line"} bg-foam`}
+                    className={`block w-52 overflow-hidden rounded-3xl border text-left ${shop === id ? "border-ink" : "border-line"} bg-foam`}
                   >
-                    <span className="block font-display text-lg leading-tight">{shopLabel(id)}</span>
-                    <span className="mt-1 block text-sm text-mute">
+                    <img src={shopPhoto(id) ?? ""} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                    <span className="block px-4 pt-3 font-display text-lg leading-tight">{shopLabel(id)}</span>
+                    <span className="block px-4 pb-3 text-sm text-mute">
                       {menu.length} drinks · {price(low)}–{price(high)}
                     </span>
                   </button>

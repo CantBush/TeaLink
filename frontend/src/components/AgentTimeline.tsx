@@ -1,9 +1,12 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import type { Health, LensEvent } from "../api/types.ts";
 import { agentLabel, price, readableShops } from "../lib/format.ts";
 
 /** Notes the frontend adds itself (e.g. "Thai Tea just sold out.") use seq numbers from here up. */
 const LOCAL_SEQ_START = 100000;
+
+/** Remembered so the timeline stays open across What-if reruns once the presenter opens it. */
+const OPEN_KEY = "tealink.timeline.open";
 
 interface Phases {
   changes: LensEvent[];
@@ -136,6 +139,21 @@ export function AgentTimeline({
   };
   const shown = (Object.keys(present) as (keyof typeof present)[]).filter((key) => present[key]);
   const stepOf = (key: keyof typeof present) => shown.indexOf(key) + 1;
+  const [open, setOpen] = useState(() => localStorage.getItem(OPEN_KEY) === "1");
+  const toggle = () => {
+    localStorage.setItem(OPEN_KEY, open ? "0" : "1");
+    setOpen(!open);
+  };
+  const proposalCount = [...phases.proposals.values()].reduce((sum, list) => sum + list.length, 0);
+  const summary = [
+    phases.selections.length ? `${phases.selections.length} agents` : null,
+    proposalCount ? `${proposalCount} proposals` : null,
+    phases.debate.length ? `${phases.debate.length} objections` : null,
+    phases.dropped.length ? `${phases.dropped.length} ruled out` : null,
+    phases.offers.length ? "1 shop offer" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <section className="rounded-[28px] border border-line bg-foam/80 p-5 sm:p-6">
@@ -159,6 +177,21 @@ export function AgentTimeline({
 
       {events.length === 0 ? (
         <p className="text-sm text-mute">{started ? "Asking the counter…" : "The round has not started."}</p>
+      ) : !open ? (
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={false}
+          className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl border border-line bg-cream px-4 py-3 text-left"
+        >
+          <span>
+            <span className="block font-semibold">See how the agents decided</span>
+            {summary ? <span className="block text-sm text-mute">{summary}</span> : null}
+          </span>
+          <span aria-hidden className="text-xl text-amber">
+            ›
+          </span>
+        </button>
       ) : (
         <ol className="space-y-5">
           {phases.selections.length > 0 ? (
@@ -282,6 +315,11 @@ export function AgentTimeline({
           ) : null}
         </ol>
       )}
+      {open && events.length > 0 ? (
+        <button type="button" onClick={toggle} aria-expanded className="mt-4 min-h-11 text-sm font-semibold text-mute hover:text-ink">
+          Hide the details
+        </button>
+      ) : null}
     </section>
   );
 }

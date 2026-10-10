@@ -287,8 +287,8 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 | 4:00 to 5:00 | ✅ **Onboarding quiz** at `/welcome`: one question per screen, big tappable option cards, progress bar, then a personality reveal and a "Boba card" (Wrapped-style). New visitors without a user id land here | Finishing the quiz creates a user and opens Discover with their own weights |
 | 5:00 to 6:00 | ✅ (done early) **Profile page** at `/u/:handle`: Instagram-style header, stats grid, pinned drink and store, drinks-tried grid, taste match, follow button. **Edit profile** sheet: name, bio, emoji avatar and color, accent, show/hide and reorder stats | Edits and hidden stats persist after a reload |
 | **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
-| 6:30 to 8:00 | 🟡 (started early; likes, comments, and suggestions are done; "send a rec," "Try this," and folding in Friends are left) **Home feed**: friend activity cards, likes, comments, "send a rec," and "Try this" that opens Discover. Fold the current Friends page into profiles and follow lists | Liking and commenting work on two users in two tabs |
-| 8:00 to 9:00 | ⬜ Offer badge if A built offers (from the earlier block); demo script gains an optional 20-second "social" beat (quiz → profile → feed) | Main demo still fits in 3 minutes without the social beat |
+| 6:30 to 8:00 | ✅ **Home feed**: friend activity cards, likes, comments, "send a rec," and "Try this" that opens Discover. Fold the current Friends page into profiles and follow lists | Liking and commenting work on two users in two tabs |
+| 8:00 to 9:00 | 🟡 (offer badge done) Offer badge if A built offers (from the earlier block); demo script gains an optional 20-second "social" beat (quiz → profile → feed) | Main demo still fits in 3 minutes without the social beat |
 
 **If time runs short, cut in this order:** comments and recs, then the feed, then stat reordering. **Keep:** the quiz and the profile with stats toggles.
 
@@ -372,9 +372,9 @@ This reshuffles B's remaining evening; the earlier Track B social rows keep thei
 | 4:00 to 5:00 | ✅ Onboarding quiz and Boba card (unchanged) | See the social-frontend table |
 | 5:00 to 6:00 | ✅ Five-tab navigation and routes; the TeaLink tab links to What changed, Why this order, and Evidence; Friends folded in | Every tab works on phone and desktop, and the demo script still runs from `/` |
 | **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
-| 6:30 to 7:30 | 🟡 (Discover with search, filters, and the drink detail sheet is done; images are left) Generate the placeholder images; Discover with search, filters, and the drink detail sheet | Searching "matcha" finds drinks, shops, and people |
-| 7:30 to 8:30 | 🟡 (Stats tab done) Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
-| 8:30 to 9:00 | ⬜ Feed leftovers ("send a rec") and the offer badge, if A built offers | |
+| 6:30 to 7:30 | ✅ Generate the placeholder images; Discover with search, filters, and the drink detail sheet | Searching "matcha" finds drinks, shops, and people |
+| 7:30 to 8:30 | 🟡 (Stats tab, photos, and the collapsed timeline are done; the older pages still need the readability pass) Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
+| 8:30 to 9:00 | ✅ Feed leftovers ("send a rec") and the offer badge, if A built offers | |
 
 ### Sync points
 

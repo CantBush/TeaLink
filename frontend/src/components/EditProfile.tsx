@@ -3,6 +3,7 @@ import { social } from "../api/social.ts";
 import type { StatKey, UserProfile } from "../api/types.ts";
 import { allDrinks } from "../lib/catalog.ts";
 import { SHOP_IDS, shopLabel } from "../lib/format.ts";
+import { COVERS, type CoverId, coverId, coverPhoto, setCover } from "../lib/images.ts";
 import { ALL_STATS, STAT_LABELS } from "../lib/stats.ts";
 import { profilesChanged } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
@@ -50,6 +51,7 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
   const [drink, setDrink] = useState(profile.pinned_drink_id ?? "");
   const [shop, setShop] = useState(profile.pinned_shop_id ?? "");
   const [shown, setShown] = useState<StatKey[]>(profile.visible_stats);
+  const [cover, setCoverChoice] = useState<CoverId>(coverId(profile));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +65,7 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
   };
 
   const save = () => {
+    setCover(profile.user_id, cover);
     setSaving(true);
     setError(null);
     social
@@ -105,9 +108,30 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
         </header>
 
         <div className="space-y-6 overflow-y-auto px-5 py-5">
-          <div className="flex justify-center">
-            <Avatar avatar={{ emoji, color }} size="lg" ring={accent} />
+          <div className="relative">
+            <img src={coverPhoto(profile, cover)} alt="" className="h-24 w-full rounded-2xl object-cover" />
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
+              <Avatar avatar={{ emoji, color }} size="lg" ring={accent} />
+            </div>
           </div>
+
+          <Field label="Cover">
+            <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Cover">
+              {COVERS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  role="radio"
+                  aria-checked={cover === item}
+                  aria-label={`${item} cover`}
+                  onClick={() => setCoverChoice(item)}
+                  className={`overflow-hidden rounded-xl border-2 ${cover === item ? "border-ink" : "border-transparent"}`}
+                >
+                  <img src={`/img/covers/${item}.jpg`} alt="" className="aspect-[16/9] w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </Field>
 
           <Field label="Avatar">
             <div className="grid grid-cols-10 gap-1">

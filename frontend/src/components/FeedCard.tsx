@@ -4,6 +4,7 @@ import { social } from "../api/social.ts";
 import type { FeedItem } from "../api/types.ts";
 import { drinkInfo } from "../lib/catalog.ts";
 import { price, shopLabel, timeAgo } from "../lib/format.ts";
+import { drinkPhoto } from "../lib/images.ts";
 import { useMe } from "../state/me.ts";
 import { Avatar } from "./Avatar.tsx";
 
@@ -43,6 +44,7 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const drink = drinkInfo(item.drink_id);
+  const photo = drinkPhoto(item.drink_id, item.photo_url);
 
   const toggleLike = () => {
     const on = !item.liked_by_me;
@@ -63,7 +65,7 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
         <Link to={`/u/${item.author.handle}`}>
           <Avatar avatar={item.author.avatar} />
         </Link>
-        <p className="min-w-0 flex-1 text-sm leading-snug">
+        <p className="min-w-0 flex-1 text-[15px] leading-snug">
           <Link to={`/u/${item.author.handle}`} className="font-semibold hover:underline">
             {item.author.display_name}
           </Link>{" "}
@@ -75,17 +77,30 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
       </header>
 
       {drink ? (
-        <div className="mt-3 rounded-2xl bg-cream px-4 py-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="font-display text-xl leading-tight">{drink.name}</p>
-            {item.rating ? <Stars rating={item.rating} /> : null}
+        <div className="mt-3 overflow-hidden rounded-2xl bg-cream">
+          {photo ? (
+            <img src={photo} alt={drink.name} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+          ) : null}
+          <div className="px-4 py-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="font-display text-xl leading-tight">{drink.name}</p>
+              {item.rating ? <Stars rating={item.rating} /> : null}
+            </div>
+            <p className="text-sm text-mute">
+              {shopLabel(drink.shop_id)} · {price(drink.price)}
+            </p>
           </div>
-          <p className="text-sm text-mute">
-            {shopLabel(drink.shop_id)} · {price(drink.price)}
-          </p>
         </div>
       ) : null}
       {item.text ? <p className="mt-3 text-[15px]">{item.text}</p> : null}
+      {item.kind === "rec" && item.to_user_id === me && drink ? (
+        <Link
+          to={`/discover?drink=${drink.id}`}
+          className="mt-3 inline-flex min-h-11 items-center rounded-full bg-ink px-5 text-sm font-semibold text-foam"
+        >
+          Try this
+        </Link>
+      ) : null}
 
       {item.kind !== "joined" ? (
         <footer className="mt-3 flex items-center gap-5 text-sm font-semibold text-mute">

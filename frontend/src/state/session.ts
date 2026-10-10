@@ -11,6 +11,7 @@ import type {
   TasteProfile,
 } from "../api/types.ts";
 import { social } from "../api/social.ts";
+import { resetCovers } from "../lib/images.ts";
 import { sampleSession } from "../mocks/sample.ts";
 import { resetSocialMock } from "../mocks/socialStore.ts";
 import { DEMO_USER, getMe, setMe } from "./me.ts";
@@ -224,6 +225,7 @@ export function switchUser() {
 export async function resetAll() {
   await client.resetDemo().catch(() => {});
   resetSocialMock();
+  resetCovers();
   const switched = getMe() !== DEMO_USER;
   setMe(DEMO_USER);
   profilesChanged();

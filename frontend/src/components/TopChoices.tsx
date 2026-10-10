@@ -3,6 +3,7 @@ import type { Decision, Dimension, RankedDrink } from "../api/types.ts";
 import { topOptions } from "../lib/diff.ts";
 import { drinkInfo } from "../lib/catalog.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent, price, readableShops, shopLabel } from "../lib/format.ts";
+import { drinkPhoto } from "../lib/images.ts";
 
 /** Score gaps below this aren't worth calling out as a trade-off. */
 const EDGE_MIN = 0.05;
@@ -165,8 +166,13 @@ export function TopChoices({
               <span className="text-xs font-semibold text-mute">#{index + 1}</span>
               <span className="font-display text-xl text-amber">{matchPercent(option.score)}</span>
             </div>
-            <h3 className="mt-1 font-display text-2xl leading-tight">{option.drink_name}</h3>
-            <p className="mt-1 text-sm text-mute">
+            <div className="mt-1 flex items-center gap-3">
+              {drinkPhoto(option.drink_id) ? (
+                <img src={drinkPhoto(option.drink_id)!} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+              ) : null}
+              <h3 className="font-display text-2xl leading-tight">{option.drink_name}</h3>
+            </div>
+            <p className="mt-2 text-sm text-mute">
               {shopLabel(option.shop_id ?? decision.shop_id)}
               {price(option.price) ? ` · ${price(option.price)}` : ""}
               {option.offer && drinkInfo(option.drink_id) ? (
