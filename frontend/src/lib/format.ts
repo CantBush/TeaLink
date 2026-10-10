@@ -29,6 +29,18 @@ export function shopLabel(shopId: string): string {
   return SHOPS[shopId] ?? shopId;
 }
 
+const SHOP_ID_PATTERN = new RegExp(
+  `\\b(${Object.keys(SHOPS)
+    .filter((id) => !id.includes(":"))
+    .join("|")})\\b`,
+  "g",
+);
+
+/** Swap raw shop ids in backend text for display names: "online for lantern_leaf" → "online for Lantern Leaf". */
+export function readableShops(text: string): string {
+  return text.replace(SHOP_ID_PATTERN, (id) => shopLabel(id));
+}
+
 /** "taste" → "Taste", "shop_kungfu" / "shop:kungfu" → "Kung Fu Tea". */
 export function agentLabel(agentId: string): string {
   const shop = agentId.match(/^shop[_:](.+)$/);

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { Decision } from "../api/types.ts";
 import { ControlPanel } from "../components/ControlPanel.tsx";
 import { type Movement, diffDecisions, topOptions } from "../lib/diff.ts";
-import { dimensionLabel, matchPercent, price, shopLabel } from "../lib/format.ts";
+import { dimensionLabel, matchPercent, price, readableShops, shopLabel } from "../lib/format.ts";
 import { sampleSession } from "../mocks/sample.ts";
 import { startRecommendation, useSession } from "../state/session.ts";
 
@@ -124,7 +124,7 @@ export function Counterfactual() {
                   <span className="font-semibold">{item.option.drink_name}</span>
                   <span className="text-mute"> (was #{item.rank})</span>
                   <p className="text-mute">
-                    {item.reason ?? "Outranked: other drinks scored higher after the change."}
+                    {item.reason ? readableShops(item.reason) : "Not ruled out, but it now ranks below the top 3."}
                   </p>
                 </li>
               ))}

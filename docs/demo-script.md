@@ -5,7 +5,7 @@
 ## Before you start
 
 - **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the timeline header says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
-- Start every run from the seeded state. ⚠️ **Until Track A fixes the reset bug (see `PROGRESS.md`), don't press Reset demo in AGNTCY mode**, because every agent drops out about 30 seconds later. Restart the API instead. In local mode (`TRANSPORT=local`), Reset demo is fine.
+- Press **Reset demo** on Discover before every run. It works in both AGNTCY and local mode.
 - Have a second tab on `/evidence`.
 - Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" on the timeline. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
 
@@ -40,11 +40,11 @@ Point at **What Andrew cares about**, where the change since the last pick is sh
 Each button starts a fresh deliberation. After each one, point at the new top 3 and the timeline.
 
 1. **#1 sells out** (Thai Tea).
-   > "Kung Fu Tea's agent vetoes it, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop."
+   > "Kung Fu Tea's agent vetoes it, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop. Wintermelon and Pearl are within two points, so it's a close call again, and the team asks rather than guesses."
 2. **Lantern Leaf joins.**
    > "A new shop registers its agent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 81, with Lantern Leaf's Osmanthus Milk Tea right behind it."
 3. **I don't like brown sugar.**
-   > "New information from the user. Brown Sugar Hojicha drops out of the top 3, and Osmanthus Milk Tea moves up to #1."
+   > "New information from the user. Brown Sugar Hojicha drops out of the top 3, and Osmanthus Milk Tea moves up to #1, in a dead heat with Wintermelon at 75."
    Click **What changed** in the nav: "Before and after: what moved, what left and why, and notice his priorities didn't change. The world changed, not his taste."
 4. **#1's shop goes offline** (Lantern Leaf).
    > "The shop that just joined drops off the network. Its agent stops responding, so its drinks are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. The team falls back to Wintermelon, Pearl, and Thai Milk Tea."
@@ -78,6 +78,7 @@ AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every agent is a s
 
 | # | When | Who | Time | Notes |
 |---|---|---|---|---|
+| 0 | Sat 2:30 PM | Track B, technical click-through over AGNTCY | n/a | Every step matched. Added the two close-call lines, and replaced raw shop ids ("lantern_leaf") with names in the ruled-out reasons |
 | 1 | | | | |
 | 2 | | | | |
 | 3 | | | | |

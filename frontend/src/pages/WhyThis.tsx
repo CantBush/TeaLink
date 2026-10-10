@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import type { Decision, FactorContribution, Proposal } from "../api/types.ts";
-import { DIMENSIONS, dimensionLabel, factorLabel, matchPercent, shopLabel } from "../lib/format.ts";
+import { DIMENSIONS, dimensionLabel, factorLabel, matchPercent, readableShops, shopLabel } from "../lib/format.ts";
 import { sampleDecision, sampleProposal } from "../mocks/sample.ts";
 import { useSession } from "../state/session.ts";
 
@@ -96,7 +96,7 @@ function PriorityMath({ decision }: { decision: Decision }) {
           <ul className="mt-2 space-y-1 text-sm text-mute">
             {decision.dropped.map((item) => (
               <li key={item.drink_id}>
-                <span className="font-semibold text-ink">{item.drink_name}</span>: {item.reason}
+                <span className="font-semibold text-ink">{item.drink_name}</span>: {readableShops(item.reason)}
               </li>
             ))}
           </ul>

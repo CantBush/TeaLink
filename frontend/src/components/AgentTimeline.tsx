@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Health, LensEvent } from "../api/types.ts";
-import { agentLabel, price } from "../lib/format.ts";
+import { agentLabel, price, readableShops } from "../lib/format.ts";
 
 /** Notes the frontend adds itself (e.g. "Thai Tea just sold out.") use seq numbers from here up. */
 const LOCAL_SEQ_START = 100000;
@@ -238,7 +238,7 @@ export function AgentTimeline({
             <Phase step={stepOf("dropped")} title="Ruled out">
               <ul className="space-y-1.5 rounded-2xl border border-[#b4533c]/40 bg-cream px-4 py-3 text-sm">
                 {phases.dropped.map((event) => (
-                  <li key={event.seq}>{event.message.replace(/^Dropped /, "")}</li>
+                  <li key={event.seq}>{readableShops(event.message.replace(/^Dropped /, ""))}</li>
                 ))}
               </ul>
             </Phase>
