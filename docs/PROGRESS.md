@@ -98,6 +98,10 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ⬜ Offer badge (if A builds offers)
 - ⬜ Write-up and backup video
 
+**Social layer (new, 2:55 PM; full spec and contracts in [`PLAN.md`](PLAN.md#social-layer-added-255-pm)):**
+- Track A: ⬜ social schemas and seed · ⬜ boba stats and quiz mapping (seeds the Preference agent) · ⬜ profile, follow, feed, like, comment, and rec endpoints · ⬜ optional follow boost in the Social agent
+- Track B: ⬜ types, mocks, and app shell with bottom tabs · ⬜ onboarding quiz and Boba card · ⬜ profile page and edit sheet with stat toggles · ⬜ home feed with likes, comments, and recs
+
 ## Known issues and decisions to revisit
 
 - **AGNTCY reset heartbeat is fixed.** Bus heartbeats now update whichever runtime is serving requests, so Reset demo no longer lets the new registry time out. Local mode was already fine.

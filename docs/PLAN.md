@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sat Oct 10, 2:10 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sat Oct 10, 2:55 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -15,6 +15,7 @@ TeaLink is an explainable boba recommender. A team of agents with different goal
 - **Numbers come from code, never the LLM.** Scores, weights, vetoes, rankings, and the learned priorities are all computed in code. An LLM may only reword rationales (optional, through LiteLLM and the `LLM_MODEL` setting, with fixed template wording otherwise).
 - **The user picks from a top 3** rather than getting a single answer. Each pick is a learning signal. *(Changed 12:50 PM.)*
 - **Each agent has its own objective.** Every agent scores every candidate by its own objective, and the resolver blends those scores with weights learned for this user. No agent gets a casting vote. *(Changed 12:50 PM.)*
+- **TeaLink is social.** Profiles, boba stats, follows, and a friends feed sit around the recommender, and a first-visit quiz seeds the Preference agent. See "Social layer" under the two-person split. *(Added 2:55 PM.)*
 ## Agent team
 
 | Agent | Objective | Proposes? | Notes |
@@ -160,6 +161,127 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 | **9:00** | **Merge.** Feature freeze at 9:30 | |
 | Sun 9:00 to 11:30 | UI polish; results and lessons sections of `docs/writeup.md`; record the backup demo video | |
 
+### Social layer (added 2:55 PM)
+
+**Goal:** TeaLink should feel like a social app, not a tool. Users follow each other, react to what friends drink, show off their boba stats on a profile they customize, and get personalized from their very first visit through a short quiz.
+
+**Inspiration, borrowing one idea from each:**
+- **Instagram:** a profile header (avatar, name, bio, follower counts), a grid of drinks tried, and a bottom tab bar on phones.
+- **Letterboxd:** log and rate drinks, with short reviews friends can like and comment on.
+- **Spotify Wrapped:** a bold, shareable "Boba card" of your stats.
+- **Strava:** a friends feed of activity ("Sarah tried Osmanthus Milk Tea, 5/5") with quick reactions.
+- **BuzzFeed / 16Personalities:** a fun onboarding quiz that ends in a named "boba personality."
+
+**Features:**
+1. **Onboarding quiz** (6 questions, under a minute) for new users:
+   - **Questions:** sweetness level, milk vs fruit vs tea-forward, favorite toppings, typical budget, how adventurous you are, and one shop you already like.
+   - **Results:** your starting taste profile, your starting priority weights for the Preference agent, and a boba personality, such as "Floral Explorer" or "Brown Sugar Loyalist."
+   - **Rule:** like every other number in TeaLink, the backend computes the mapping from answers to profile and weights in code.
+2. **Boba stats:**
+   - favorite drink and favorite store;
+   - sweet vs not sweet;
+   - go-to toppings;
+   - milk vs fruit split;
+   - drinks tried and shops visited;
+   - a weekly streak;
+   - top taste notes;
+   - the learned priority mix ("cares most about price").
+   Each stat has a show/hide toggle, so the user chooses what's public.
+3. **Customizable profile:**
+   - display name, @handle, and bio;
+   - avatar (an emoji plus a background color, so no image uploads);
+   - a pinned favorite drink and store;
+   - a profile accent color;
+   - which stats to show, and in what order.
+4. **Interacting with other users:**
+   - follow and unfollow;
+   - a friends feed of reviews and picks;
+   - likes and short comments;
+   - "send a rec" to a friend;
+   - "% taste match" on every profile (reuses the existing similarity code).
+
+**Ground rules:**
+- **The demo stays safe.** Andrew (the demo user) is already onboarded, so the 3-minute demo doesn't depend on any social feature. Reset demo also restores the social seed data.
+- **No real accounts.** "Signing up" just picks a handle, and the user id is kept in `localStorage`. Social data lives in JSON files and in memory, like picks do today.
+- **How it ties into the agents:**
+  - The quiz solves the Preference agent's cold start: it gives a new user non-default weights from round one.
+  - Follows can optionally feed the Social agent (people you follow count a little more).
+
+**Contracts** (A adds these to `schemas.py`; B mirrors them in `types.ts` and builds against mocks first):
+
+```ts
+type StatKey = "fav_drink" | "fav_shop" | "sweetness" | "toppings" | "milk_vs_fruit"
+             | "tried_count" | "shops_visited" | "streak" | "top_notes" | "priorities";
+
+type BobaStats = {
+  fav_drink_id: string | null; fav_shop_id: string | null;
+  sweetness: number;                  // 0 = not sweet, 1 = very sweet
+  toppings: string[]; milk_vs_fruit: number;  // 0 = fruit, 1 = milk
+  tried_count: number; shops_visited: number; streak_weeks: number;
+  top_notes: Dimension[]; priorities: Record<Dimension, number>;
+  personality: string;                // "Floral Explorer"
+};
+
+type UserProfile = {
+  user_id: string; handle: string; display_name: string; bio: string;
+  avatar: { emoji: string; color: string }; accent: string;
+  pinned_drink_id: string | null; pinned_shop_id: string | null;
+  visible_stats: StatKey[];           // in display order; hidden stats are left out
+  followers: number; following: number; followed_by_me: boolean;
+  taste_match: number | null;         // 0..1 vs the viewer
+  stats: Partial<BobaStats>;          // only the visible stats for other viewers
+};
+
+type QuizQuestion = { id: string; prompt: string; options: { id: string; label: string; emoji?: string }[]; multi?: boolean };
+type QuizResult = { user_id: string; personality: string; stats: BobaStats; weights: Record<Dimension, number> };
+
+type FeedItem = {
+  id: string; user_id: string; kind: "review" | "pick" | "rec" | "joined";
+  drink_id: string | null; rating: number | null; text: string | null; to_user_id?: string;
+  created_at: string; likes: number; liked_by_me: boolean;
+  comments: { id: string; user_id: string; text: string; created_at: string }[];
+};
+```
+
+**Endpoints (A):**
+- **Quiz and sign-up:**
+  - `GET /quiz` returns the questions.
+  - `POST /users` takes `{handle, display_name}`, creates a user, and returns the profile.
+  - `POST /quiz` takes `{user_id, answers}` and returns a `QuizResult`. It also seeds the Preference agent.
+- **Profiles:**
+  - `GET /users/{id}?viewer=` returns a `UserProfile`.
+  - `PATCH /users/{id}` saves profile edits.
+  - `POST /users/{id}/follow` and `DELETE /users/{id}/follow` take `{viewer}`.
+- **Feed:**
+  - `GET /feed?user_id=` returns the feed.
+  - `POST /feed/{id}/like` likes an item.
+  - `POST /feed/{id}/comments` adds a comment.
+  - `POST /recs` takes `{from, to, drink_id, text}` to send a recommendation.
+
+The existing `GET /profile/{id}` (taste profile) stays as it is.
+
+#### Track A: social backend
+
+| When | Task | Done when |
+|---|---|---|
+| 3:00 to 4:00 | ⬜ Schemas above in `schemas.py`; seed social data for the existing users (handles, bios, avatars, follows, a few feed items from real reviews); Reset demo restores it | Seed loads, and `GET /users/sarah?viewer=andrew` returns a full profile |
+| 4:00 to 5:00 | ⬜ `core/stats.py`: boba stats and personality from reviews and picks. Quiz questions and the answer → taste profile + weights mapping, unit-tested | `POST /quiz` returns stats and weights; a new user's first `/recommend` uses those weights |
+| 5:00 to 6:00 | ⬜ Profile, follow, feed, like, comment, and rec endpoints; picks and reviews post feed items; visibility respected for other viewers | Tests cover hidden stats, follow counts, and feed order |
+| 8:00 to 9:00 | ⬜ Optional: Social agent gives a small boost to people the user follows (replaces the LLM wording block if time is short) | The boost shows up in the Social agent's evidence |
+
+#### Track B: social frontend
+
+| When | Task | Done when |
+|---|---|---|
+| 3:00 to 4:00 | ⬜ Mirror the contracts in `types.ts`, mocks in `frontend/src/mocks/social/`, client calls with mock fallback. App shell: bottom tab bar on phones (Home, Discover, Profile), top nav on desktop | Every new screen renders from mocks with the API stopped |
+| 4:00 to 5:00 | ⬜ **Onboarding quiz** at `/welcome`: one question per screen, big tappable option cards, progress bar, then a personality reveal and a "Boba card" (Wrapped-style). New visitors without a user id land here | Finishing the quiz creates a user and opens Discover with their own weights |
+| 5:00 to 6:00 | ⬜ **Profile page** at `/u/:handle`: Instagram-style header, stats grid, pinned drink and store, drinks-tried grid, taste match, follow button. **Edit profile** sheet: name, bio, emoji avatar and color, accent, show/hide and reorder stats | Edits and hidden stats persist after a reload |
+| **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
+| 6:30 to 8:00 | ⬜ **Home feed**: friend activity cards, likes, comments, "send a rec," and "Try this" that opens Discover. Fold the current Friends page into profiles and follow lists | Liking and commenting work on two users in two tabs |
+| 8:00 to 9:00 | ⬜ Offer badge if A built offers (from the earlier block); demo script gains an optional 20-second "social" beat (quiz → profile → feed) | Main demo still fits in 3 minutes without the social beat |
+
+**If time runs short, cut in this order:** comments and recs, then the feed, then stat reordering. **Keep:** the quiz and the profile with stats toggles.
+
 ### Sync points
 
 | Time | Both of you |
@@ -179,10 +301,11 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. Friends tab
-2. Counterfactual page (Why This and the timeline already show the before/after)
-3. LLM wording
-4. AGNTCY (use the local transport)
+1. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+2. Friends tab (once profiles exist, it folds into them)
+3. Counterfactual page (Why This and the timeline already show the before/after)
+4. LLM wording
+5. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, or the baseline comparison.
 
@@ -194,6 +317,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **2:55 PM:** Added the social layer: onboarding quiz, boba stats with show/hide, customizable profiles, follows, a friends feed, likes, comments, and recs. Inspired by Instagram, Letterboxd, Spotify Wrapped, and Strava. Split into Track A (schemas, stats and quiz mapping, social endpoints) and Track B (app shell, quiz, profile, feed), with contracts in the plan. Social extras go first on the cut list; the 3-minute demo doesn't depend on them.
 - **2:36 PM:** Dropped the ElevenLabs voices stretch goal.
 - **2:10 PM:** Track A shipped `GET /eval` (popularity 2/24, fixed weights 5/24, learning 7/24 over 8 rounds) and made Sarah Andrew's closest match. No schema change. Demo top 3 is still Thai Tea, Wintermelon, Pearl Milk Tea; the priority percents and Wintermelon's score moved by a point, so the demo script needs a refresh.
 - **2:25 PM:** Track B wired the Evidence page to live `GET /eval` and refreshed the demo script, write-up results, and recorded mocks for Track A's re-seed. In the demo, "#1's shop goes offline" now takes down Lantern Leaf rather than Sunright. The AGNTCY reset bug is fixed: heartbeats follow the runtime Reset demo installs.
