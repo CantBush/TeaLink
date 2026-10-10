@@ -30,7 +30,7 @@ curl -N -X POST http://localhost:8000/recommend \
 
 `make test` runs the backend tests. `make seed` rewrites `backend/data/*.json` (deterministic, `random.seed(7)`).
 
-Progress, to-dos, and plan changes are tracked in [`docs/PROGRESS.md`](docs/PROGRESS.md).
+The team plan is in [`docs/PLAN.md`](docs/PLAN.md). Progress and to-dos are in [`docs/PROGRESS.md`](docs/PROGRESS.md).
 
 ## Level 2 mapping
 

@@ -2,6 +2,8 @@
 
 *Last updated: Sat Oct 10, 1:15 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
+The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
+
 ## Target
 
 Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Adaptive AI Team)**, plus two Level 3 pieces: a comparison against a simpler baseline, and a rule for when to ask the human. Judging covers functionality, innovation, agent intelligence, engineering, demonstration, and learning and evidence.
