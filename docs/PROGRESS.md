@@ -96,7 +96,6 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Technical click-through of the full demo over AGNTCY after Track A's reset fix: every step matches the script. Fixes from it: shop names instead of raw ids in ruled-out reasons, a truthful "now ranks below the top 3" for drinks that weren't ruled out, and two close-call lines in the script.
 - ✅ Demo script and recorded mocks refreshed after Track A's re-seed (Sarah's 5/5 Hojicha Cream Tea is now a Social proposal in the script)
 - ⬜ Offer badge (if A builds offers)
-- ⬜ Stretch: ElevenLabs voices
 - ⬜ Write-up and backup video
 
 ## Known issues and decisions to revisit
