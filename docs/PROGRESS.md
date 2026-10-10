@@ -107,6 +107,10 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
   - 🟡 Home feed (`/home`): suggestions, likes, and comments are in; "send a rec" and folding in Friends are left.
   - ⬜ Onboarding quiz and Boba card.
 
+**UI cleanup and five tabs (new, 3:30 PM; spec in [`PLAN.md`](PLAN.md#ui-cleanup-and-five-tabs-added-330-pm)):**
+- Track A: ⬜ `GET /drinks` (all 43 drinks, with `photo_url`) · ⬜ reserved `photo_url` on feed items and `cover_url` on profiles (both `null` for now) · ⬜ stretch, after the freeze: photo uploads
+- Track B: ⬜ five tabs and routes (Home, Discover, TeaLink at `/`, Stats, Profile), with Friends folded in · ⬜ Discover with search, filters, and the drink detail sheet · ⬜ Stats tab · ⬜ placeholder images for drinks, shops, and covers · ⬜ readability pass across every tab
+
 **Track A social backend (branch `a/social-backend`, 3:35 PM).** All Track A blocks from 3:00 to 6:00 are done, and 36 backend tests pass. The demo is unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71, with the close-call prompt, and `eval_results.json` is byte-identical.
 - **Seed:** `make seed` also writes `backend/data/social.json`: a profile for each of the 15 users (handle = user id, emoji avatar, bio, accent), follows (Andrew follows Sarah, Hana, Nora, Chris, and Marco), and 177 feed items. Every seeded review is a feed item, plus Andrew's 4 past picks, a "joined" item per user, likes, 3 comments, and Sarah's rec of Hojicha Cream Tea to Andrew (the newest item in his feed). Reset demo reloads all of it and drops users created since.
 - **Quiz (`core/quiz.py`):** the six questions from the frontend mock. Sweetness, base, and toppings set the taste profile. Budget and adventurousness nudge the default priorities, then the usual 5% floor is applied. Chosen flavors become the starting top notes. The quiz profile counts as three five-star reviews, and the weights are the Preference agent's prior. Picks are learned on top.

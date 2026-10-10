@@ -292,6 +292,89 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 
 **If time runs short, cut in this order:** comments and recs, then the feed, then stat reordering. **Keep:** the quiz and the profile with stats toggles.
 
+### UI cleanup and five tabs (added 3:30 PM)
+
+**Goal:** Every screen is easy to read at a glance. The app is organized into five clear tabs, and drinks, reviews, and profiles have pictures.
+
+**Five tabs.** The same five tabs appear in the bottom bar on phones and the top nav on desktop:
+- **Home** (`/home`): the friends feed.
+- **Discover** (`/discover`): browse and search drinks, shops, and people, with filter chips (milk, fruit, or tea; under $5; flavor tags). Tapping a drink opens a detail sheet with its photo, shop, price, and friends' ratings.
+- **TeaLink** (`/`, the center tab): today's picks.
+  - This is the current agent recommender, reframed as "today's top 3": the close call, the debate, What changed, and Why this order.
+  - What changed, Why this order, and Evidence become links inside this tab instead of items in the main nav.
+  - It stays at `/`, so the demo URL and `docs/demo-script.md` don't change.
+- **Stats** (`/stats`): your own stats.
+  - The boba stats grid, taste profile, and learned priorities.
+  - The Wrapped-style Boba card.
+  - Stat visibility settings.
+- **Profile** (`/u/:handle`): identity and posts.
+  - Cover, avatar, bio, and personality.
+  - A compact row of stat highlights that links to Stats.
+  - Go-to order.
+  - An Instagram-style photo grid of reviews.
+
+The current Friends page folds into Discover (the people results) and profiles.
+
+```mermaid
+flowchart LR
+  Home["Home: friend feed"]
+  Discover["Discover: search drinks, shops, people"]
+  TeaLink["TeaLink: today's top 3 and agent debate"]
+  Stats["Stats: boba stats, taste, priorities"]
+  Profile["Profile: identity and photo grid"]
+  TeaLink --> WhatChanged[What changed]
+  TeaLink --> WhyThis[Why this order]
+  TeaLink --> Evidence[Evidence]
+```
+
+**Readability rules for every screen:**
+- **Layout:** one main column, at most about 640px wide on phones, with one primary action per screen.
+- **Type:** a consistent scale of page title, section title, body, and caption. Body text is at least 15px, and muted text still passes contrast.
+- **Fewer boxes inside boxes:** sections are separated by spacing and headers, not nested cards.
+- **Touch and states:** tap targets are at least 44px, and every list has a clear empty, loading, and error state.
+- **TeaLink timeline:** the agent timeline is collapsed by default behind "See how the agents decided." During the demo it opens with one tap.
+
+**Pictures (placeholders now, uploads later):**
+- **Drinks:** about 10 generated images, one per drink style:
+  - classic milk tea, brown sugar, fruit tea, matcha, taro;
+  - Thai tea, hojicha, floral or oolong, horchata or ube, coffee.
+  Each drink maps to one by its flavor tags. Stored in `frontend/public/img/drinks/`.
+- **Shops:** 6 generated storefront images in `frontend/public/img/shops/`.
+- **Profiles:** about 6 generated cover images to choose from in Edit profile.
+- **Where they appear:** review cards in the feed, drink cards on TeaLink and Discover, the profile photo grid, the profile cover, and the Discover detail sheet.
+- **Future uploads:** the contract reserves photo fields that stay `null` for now. When a URL is present, it replaces the placeholder, so adding real uploads later needs no frontend change.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`):
+
+```ts
+// All optional and null for now; the frontend falls back to placeholders.
+FeedItem.photo_url?: string | null;      // a review photo, for future uploads
+UserProfile.cover_url?: string | null;   // a chosen placeholder id, or an uploaded image URL later
+// GET /drinks -> { id, name, shop_id, price, flavor_tags, photo_url }[]  (replaces the frontend's copied catalog)
+```
+
+Search runs in the browser over `GET /drinks`, the shop list, and `GET /users`. The data is small (43 drinks, 6 shops, 15 users), so no search endpoint is needed.
+
+#### Track A: UI cleanup support
+
+| When | Task | Done when |
+|---|---|---|
+| 5:00 to 6:00 (or earlier, since the social endpoints are done) | ⬜ `GET /drinks`, plus the reserved `photo_url` on feed items and `cover_url` on profiles | `GET /drinks` returns all 43 drinks, and the new fields come back as `null` |
+| After the freeze | ⬜ Stretch: a photo upload endpoint for review and profile photos | An uploaded photo's URL comes back in `photo_url` / `cover_url` |
+
+#### Track B: UI cleanup
+
+This reshuffles B's remaining evening; the earlier Track B social rows keep their tasks but follow this order.
+
+| When | Task | Done when |
+|---|---|---|
+| 4:00 to 5:00 | ⬜ Onboarding quiz and Boba card (unchanged) | See the social-frontend table |
+| 5:00 to 6:00 | ⬜ Five-tab navigation and routes; the TeaLink tab links to What changed, Why this order, and Evidence; Friends folded in | Every tab works on phone and desktop, and the demo script still runs from `/` |
+| **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
+| 6:30 to 7:30 | ⬜ Generate the placeholder images; Discover with search, filters, and the drink detail sheet | Searching "matcha" finds drinks, shops, and people |
+| 7:30 to 8:30 | ⬜ Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
+| 8:30 to 9:00 | ⬜ Feed leftovers ("send a rec") and the offer badge, if A built offers | |
+
 ### Sync points
 
 | Time | Both of you |
@@ -311,13 +394,15 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-2. Friends tab (once profiles exist, it folds into them)
-3. Counterfactual page (Why This and the timeline already show the before/after)
-4. LLM wording
-5. AGNTCY (use the local transport)
+1. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+2. Shop images and cover images (keep the drink images)
+3. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+4. Friends tab (once profiles exist, it folds into them)
+5. Counterfactual page (Why This and the timeline already show the before/after)
+6. LLM wording
+7. AGNTCY (use the local transport)
 
-**Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, or the baseline comparison.
+**Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
 ## Stretch ideas (only after the freeze-safe build)
 
@@ -328,6 +413,13 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## Plan change log
 
 - **3:35 PM:** Merged Track A's social backend into main with Track B's social frontend. The API now matches the 3:10 contract: bare lists, `{viewer}` on likes and comments, `author` on feed items, `&author=` on the feed, toppings as a 0–1 number, and the quiz questions from `mocks/social/quiz.json`.
+- **3:30 PM:** Added "UI cleanup and five tabs":
+  - Five tabs: Home, Discover/search, TeaLink (today's picks, at `/`), Stats, and Profile.
+  - Readability rules for every screen.
+  - Placeholder pictures for drinks, shops, and profile covers. User uploads come later, through reserved `photo_url` and `cover_url` fields.
+  - `GET /drinks` for Track A.
+  - Track B's evening re-ordered: quiz, then tabs, then Discover and pictures, then Stats and the readability pass.
+  - The extras go first on the cut list.
 - **3:10 PM:** Contract fixes before anyone builds on them:
   - `BobaStats.toppings` is a 0–1 number and `top_notes` is a list of flavor tags, matching what `drinks.json` actually stores.
   - Added `GET /users?viewer=` (suggestions) and `DELETE /feed/{id}/like`.
