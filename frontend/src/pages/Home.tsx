@@ -8,6 +8,7 @@ import { PreviewNote } from "../components/PreviewNote.tsx";
 import { matchPercent } from "../lib/format.ts";
 import { tint } from "../lib/palette.ts";
 import { hasChosenAccount, useMe } from "../state/me.ts";
+import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
 function Suggested({ users, onFollow }: { users: UserProfile[]; onFollow: (user: UserProfile) => void }) {
@@ -43,6 +44,7 @@ function Suggested({ users, onFollow }: { users: UserProfile[]; onFollow: (user:
 
 export function Home() {
   const me = useMe();
+  const role = useRole();
   const { profile } = useProfile();
   const [feed, setFeed] = useState<FeedItem[] | null>(null);
   const [people, setPeople] = useState<UserProfile[]>([]);
@@ -79,6 +81,7 @@ export function Home() {
 
   const newcomer = profile !== null && (profile.stats.tried_count ?? 0) === 0;
 
+  if (role === "store") return <Navigate to="/shop" replace />;
   if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
 
   return (

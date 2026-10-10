@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { logOut } from "../state/logout.ts";
 import { useProfile } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
 import { BobaMark } from "./BobaMark.tsx";
@@ -45,8 +46,14 @@ interface Tab {
 export function NavBar() {
   const { profile } = useProfile();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const leave = () => {
+    logOut();
+    navigate("/welcome");
+  };
   const profilePath = profile ? `/u/${profile.handle}` : "/me";
-  const quiz = pathname === "/welcome";
+  const store = pathname === "/shop" || pathname.startsWith("/shop/");
+  const hideTabs = pathname === "/welcome" || store;
 
   const tabs: Tab[] = [
     { key: "home", to: "/home", label: "Home", icon: <HomeIcon />, active: (path) => path === "/home" },
@@ -66,33 +73,48 @@ export function NavBar() {
     <>
       <header className="sticky top-0 z-20 border-b border-line bg-foam/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-x-8 px-5 py-3 md:py-4">
-          <NavLink to="/" className="flex items-center gap-2 text-ink" aria-label="TeaLink home">
+          <NavLink
+            to={store ? "/shop" : "/"}
+            className="flex items-center gap-2 text-ink"
+            aria-label={store ? "TeaLink shop" : "TeaLink home"}
+          >
             <BobaMark className="h-9 w-12" />
             <span className="font-logo text-[22px] leading-none tracking-[0.2em] uppercase">TeaLink</span>
           </NavLink>
-          <nav className="hidden items-center gap-7 text-[15px] tracking-[0.08em] lowercase md:flex" aria-label="Main">
-            {tabs.slice(0, 4).map((tab) => (
-              <NavLink
-                key={tab.key}
-                to={tab.to}
-                className={`border-b-[1.5px] py-1.5 ${
-                  tab.active(pathname) ? "border-ink text-ink" : "border-transparent text-ink/60 hover:text-ink"
-                }`}
-              >
-                {tab.label}
-              </NavLink>
-            ))}
-          </nav>
-          <NavLink to={profilePath} className="ml-auto flex items-center gap-2 text-[15px] tracking-[0.04em] text-ink">
-            <span className="hidden lowercase md:inline">{profile?.display_name ?? "profile"}</span>
-            <Avatar avatar={profile?.avatar} size="sm" />
-          </NavLink>
+          {store ? null : (
+            <nav className="hidden items-center gap-7 text-[15px] tracking-[0.08em] lowercase md:flex" aria-label="Main">
+              {tabs.slice(0, 4).map((tab) => (
+                <NavLink
+                  key={tab.key}
+                  to={tab.to}
+                  className={`border-b-[1.5px] py-1.5 ${
+                    tab.active(pathname) ? "border-ink text-ink" : "border-transparent text-ink/60 hover:text-ink"
+                  }`}
+                >
+                  {tab.label}
+                </NavLink>
+              ))}
+            </nav>
+          )}
+          {store ? (
+            <span className="ml-auto" />
+          ) : (
+            <NavLink to={profilePath} className="ml-auto flex items-center gap-2 text-[15px] tracking-[0.04em] text-ink">
+              <span className="hidden lowercase md:inline">{profile?.display_name ?? "profile"}</span>
+              <Avatar avatar={profile?.avatar} size="sm" />
+            </NavLink>
+          )}
+          {pathname === "/welcome" ? null : (
+            <button type="button" onClick={leave} className="text-[15px] tracking-[0.04em] lowercase text-ink/60 hover:text-ink">
+              Log out
+            </button>
+          )}
         </div>
       </header>
 
       <nav
         aria-label="Tabs"
-        className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-foam/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden ${quiz ? "hidden" : ""}`}
+        className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-foam/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden ${hideTabs ? "hidden" : ""}`}
       >
         <div className="mx-auto grid max-w-md grid-cols-5 text-[11px] tracking-[0.06em] lowercase">
           {tabs.map((tab) => {

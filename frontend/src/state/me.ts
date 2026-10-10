@@ -39,6 +39,17 @@ export function setMe(userId: string) {
   listeners.forEach((listener) => listener());
 }
 
+/** Forget the signed-in user. The in-memory id falls back to the demo user, but nothing is stored. */
+export function clearMe() {
+  me = DEMO_USER;
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    /* Private mode: the in-memory id is already cleared. */
+  }
+  listeners.forEach((listener) => listener());
+}
+
 export function useMe(): string {
   return useSyncExternalStore(
     (listener) => {

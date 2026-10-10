@@ -14,6 +14,7 @@ import { coverPhoto, drinkPhoto } from "../lib/images.ts";
 import { tint } from "../lib/palette.ts";
 import { ALL_STATS } from "../lib/stats.ts";
 import { hasChosenAccount, useMe } from "../state/me.ts";
+import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
 function Count({ value, label }: { value: number; label: string }) {
@@ -28,6 +29,8 @@ function Count({ value, label }: { value: number; label: string }) {
 /** `/me` → your own profile. */
 export function MyProfile() {
   const { profile } = useProfile();
+  const role = useRole();
+  if (role === "store") return <Navigate to="/shop" replace />;
   if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
   if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-sm text-mute">Loading your profile…</main>;
   return <Navigate to={`/u/${profile.handle}`} replace />;

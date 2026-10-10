@@ -288,3 +288,21 @@ export interface RecommendRequest {
   query: string;
   preference_overrides: Record<string, number>;
 }
+
+/** GET /drinks. photo_url stays null until real photos exist. */
+export interface DrinkListing {
+  id: string;
+  name: string;
+  shop_id: string;
+  price: number;
+  flavor_tags: string[];
+  photo_url: string | null;
+}
+
+/** GET /shops. Includes shops that have not joined yet. */
+export interface ShopListing {
+  id: string;
+  name: string;
+  neighborhood: string;
+  photo_url: string | null;
+}

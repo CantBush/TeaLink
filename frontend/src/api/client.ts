@@ -1,9 +1,11 @@
 import type {
+  DrinkListing,
   EvalResult,
   Health,
   LensEvent,
   PreferenceReport,
   RecommendRequest,
+  ShopListing,
   SimilarUser,
   TasteProfile,
 } from "./types.ts";
@@ -150,6 +152,22 @@ export async function getSimilar(userId: string): Promise<SimilarUser[]> {
   return body.users;
 }
 
+export async function getDrinks(): Promise<DrinkListing[]> {
+  const response = await fetch(`${apiBase()}/drinks`);
+  if (!response.ok) {
+    throw new Error(`drinks failed (${response.status})`);
+  }
+  return response.json() as Promise<DrinkListing[]>;
+}
+
+export async function getShops(): Promise<ShopListing[]> {
+  const response = await fetch(`${apiBase()}/shops`);
+  if (!response.ok) {
+    throw new Error(`shops failed (${response.status})`);
+  }
+  return response.json() as Promise<ShopListing[]>;
+}
+
 export async function getHealth(): Promise<Health> {
   const response = await fetch(`${apiBase()}/health`);
   if (!response.ok) {
@@ -187,6 +205,8 @@ export const client = {
   getPreferences,
   getSimilar,
   getEval,
+  getDrinks,
+  getShops,
   getHealth,
   shopJoin,
   shopOffline,

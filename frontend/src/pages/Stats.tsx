@@ -7,11 +7,13 @@ import { PreviewNote } from "../components/PreviewNote.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
 import { ALL_STATS } from "../lib/stats.ts";
 import { hasChosenAccount } from "../state/me.ts";
+import { useRole } from "../state/role.ts";
 import { loadProfile, useSession } from "../state/session.ts";
 import { useProfile } from "../state/social.ts";
 
 /** Your own numbers: the shareable card, every stat (public or not), and the taste profile the agents use. */
 export function Stats() {
+  const role = useRole();
   const { profile } = useProfile();
   const session = useSession();
   const [editing, setEditing] = useState(false);
@@ -20,6 +22,7 @@ export function Stats() {
     loadProfile(session.userId);
   }, [session.userId]);
 
+  if (role === "store") return <Navigate to="/shop" replace />;
   if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
   if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-mute">Loading your stats…</main>;
 

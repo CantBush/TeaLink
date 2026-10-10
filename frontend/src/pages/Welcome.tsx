@@ -1,12 +1,16 @@
-import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { social } from "../api/social.ts";
 import type { QuizAnswers, QuizQuestion, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaMark } from "../components/BobaMark.tsx";
+import { Shell } from "../components/OnboardingShell.tsx";
+import { RoleChoice } from "../components/RoleChoice.tsx";
 import { AVATAR_COLORS as STARTER_COLORS } from "../lib/palette.ts";
+import { ShopPicker } from "./shop/ShopPicker.tsx";
 import { DEMO_USER, getMe, hasChosenAccount, setMe } from "../state/me.ts";
+import { getRole, setRole, useRole, useShopId } from "../state/role.ts";
 import { switchUser } from "../state/session.ts";
 import { profilesChanged } from "../state/social.ts";
 
@@ -19,19 +23,20 @@ function handleFrom(name: string): string {
     .slice(0, 20);
 }
 
-type Step = { kind: "account" } | { kind: "question"; index: number } | { kind: "saving" } | { kind: "result"; profile: UserProfile };
+type Step =
+  | { kind: "role" }
+  | { kind: "shop" }
+  | { kind: "account" }
+  | { kind: "question"; index: number }
+  | { kind: "saving" }
+  | { kind: "result"; profile: UserProfile };
 
-function Shell({ children, progress }: { children: ReactNode; progress?: number }) {
-  return (
-    <main className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-xl flex-col px-5 py-6 sm:py-10">
-      {progress !== undefined ? (
-        <div className="mb-8 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={Math.round(progress * 100)}>
-          <div className="h-full rounded-full bg-moss transition-all duration-300" style={{ width: `${progress * 100}%` }} />
-        </div>
-      ) : null}
-      {children}
-    </main>
-  );
+/** Role is asked once. A retake (already a customer, not Andrew) and the demo account skip it. */
+function firstStep(): Step {
+  if (getRole() === "store") return { kind: "shop" };
+  if (hasChosenAccount() && getMe() !== DEMO_USER) return { kind: "question", index: 0 };
+  if (getRole() === "customer" || (hasChosenAccount() && getMe() === DEMO_USER)) return { kind: "account" };
+  return { kind: "role" };
 }
 
 function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
@@ -59,6 +64,7 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
   };
 
   const useDemo = () => {
+    setRole("customer");
     setMe(DEMO_USER);
     switchUser();
     profilesChanged();
@@ -245,15 +251,18 @@ function Result({ profile }: { profile: UserProfile }) {
 
 /** First-visit sign-up and taste quiz. Also reached from "Retake quiz" on your own profile. */
 export function Welcome() {
+  const role = useRole();
+  const shopId = useShopId();
   const retake = hasChosenAccount() && getMe() !== DEMO_USER;
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   // Single-choice questions advance on a timer, so finish() must read the latest answers, not a render's copy.
   const latest = useRef<QuizAnswers>({});
-  const [step, setStep] = useState<Step>(retake ? { kind: "question", index: 0 } : { kind: "account" });
+  const [step, setStep] = useState<Step>(firstStep);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (getRole() === "store") return;
     social
       .getQuiz()
       .then(setQuestions)
@@ -277,13 +286,24 @@ export function Welcome() {
       });
   };
 
-  if (error && !questions) {
+  if (role === "store" && shopId) return <Navigate to="/shop" replace />;
+
+  if (step.kind === "role") {
     return (
-      <Shell>
-        <p className="rounded-3xl border border-line bg-foam p-6">{error}</p>
-      </Shell>
+      <RoleChoice
+        onCustomer={() => {
+          setRole("customer");
+          setStep({ kind: "account" });
+        }}
+        onStore={() => {
+          setRole("store");
+          setStep({ kind: "shop" });
+        }}
+      />
     );
   }
+
+  if (step.kind === "shop") return <ShopPicker />;
 
   if (step.kind === "account") {
     return (
@@ -298,6 +318,14 @@ export function Welcome() {
   }
 
   if (step.kind === "result") return <Result profile={step.profile} />;
+
+  if (error && !questions) {
+    return (
+      <Shell>
+        <p className="rounded-3xl border border-line bg-foam p-6">{error}</p>
+      </Shell>
+    );
+  }
 
   if (!questions || step.kind === "saving") {
     return (
