@@ -37,6 +37,7 @@ async def deliberate(
     preference_overrides: dict[str, float] | None = None,
     sold_out_drink_ids: list[str] | None = None,
     recorder: LensRecorder | None = None,
+    prior_weights: dict[str, float] | None = None,
 ) -> AsyncIterator[LensEvent]:
     log = recorder or LensRecorder()
     seq = 1
@@ -82,16 +83,22 @@ async def deliberate(
         query=query,
         preference_overrides=overrides,
         sold_out_drink_ids=sold_out,
+        prior_weights=prior_weights,
     )
     propose_replies = await transport.broadcast(cards, propose)
 
     report = _preference(propose_replies)
     if report is None:
-        weights = dict(PRIOR)
+        weights = dict(prior_weights or PRIOR)
+        basis = "quiz" if prior_weights else "default"
         yield emit(
             LensEventType.preference,
-            "No Preference agent answered, so default priorities are used.",
-            {"weights": weights, "summary": describe_weights(weights, 0), "choices_seen": 0},
+            f"No Preference agent answered, so {basis} priorities are used.",
+            {
+                "weights": weights,
+                "summary": describe_weights(weights, 0, from_quiz=prior_weights is not None),
+                "choices_seen": 0,
+            },
             None,
         )
     else:

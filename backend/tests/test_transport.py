@@ -42,6 +42,25 @@ def test_unconnected_agntcy_uses_the_in_process_agent():
     assert not remote.connected
 
 
+def test_users_created_after_startup_are_answered_in_process():
+    write_dataset()
+    catalog = load_catalog()
+    agents = {agent.card().id: agent for agent in default_agents(catalog)}
+    remote = AgntcyTransport("nats://127.0.0.1:1", fallback=LocalTransport(agents, catalog), timeout=0.2)
+    remote.connected = True
+
+    async def never(card, msg):
+        raise AssertionError(f"{card.id} was sent over NATS for a user the agent processes never loaded")
+
+    remote._remote = never
+    catalog.set_base_profile("andrew", {"sweetness": 0.9})
+    reply = asyncio.run(
+        remote.send(agents["taste"].card(), DeliberationRequest(round="propose", user_id="andrew", query=""))
+    )
+    assert reply.proposals
+    assert remote.local_replies["taste"] == 1
+
+
 def test_event_texts_reads_a_message_part():
     class _Root:
         text = '{"agent_id":"taste"}'

@@ -20,16 +20,18 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from tealink.agents.roster import default_agents
+from tealink.agents.scoring import user_profile
 from tealink.agents.shop_agent import ShopAgent
+from tealink.api import social
 from tealink.concierge.deliberation import deliberate
 from tealink.concierge.registry import Registry
 from tealink.concierge.transport import AgntcyTransport, LocalTransport
 from tealink.config import get_settings
 from tealink.core import objectives
-from tealink.core.taste import taste_profile
 from tealink.data.loader import Catalog, load_catalog
 from tealink.lens.recorder import LensRecorder
 from tealink.schemas import ChoiceRecord, Decision, DeliberationRequest, LensEventType
+from tealink.social.store import SocialStore, load_social
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -86,6 +88,7 @@ class Runtime:
     catalog: Catalog
     registry: Registry
     transport: LocalTransport | AgntcyTransport
+    social: SocialStore = field(default_factory=lambda: SocialStore([], [], []))
     sold_out: set[str] = field(default_factory=set)
     preferences: dict[str, dict[str, float]] = field(default_factory=dict)
     offline: set[str] = field(default_factory=set)
@@ -115,7 +118,7 @@ def _build_runtime() -> Runtime:
         transport: LocalTransport | AgntcyTransport = AgntcyTransport(settings.nats_url, fallback=local)
     else:
         transport = local
-    return Runtime(catalog=catalog, registry=registry, transport=transport)
+    return Runtime(catalog=catalog, registry=registry, transport=transport, social=load_social())
 
 
 def _refresh_heartbeats(runtime: Runtime) -> None:
@@ -170,7 +173,7 @@ def health() -> dict:
 def profile(user_id: str) -> dict:
     runtime = get_runtime()
     _require_user(runtime, user_id)
-    return taste_profile(runtime.catalog.reviews_for(user_id), runtime.catalog.drinks_by_id)
+    return user_profile(runtime.catalog, user_id)
 
 
 @app.get("/users/similar")
@@ -201,6 +204,7 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
             preference_overrides=overrides,
             sold_out_drink_ids=sorted(runtime.sold_out),
             recorder=LensRecorder(),
+            prior_weights=social.prior_weights(runtime, body.user_id),
         ):
             if event.type == LensEventType.decision:
                 runtime.last_decision[body.user_id] = Decision.model_validate(event.payload)
@@ -217,7 +221,9 @@ async def preferences(user_id: str) -> dict:
     card = runtime.registry.get("preference")
     if card is None:
         raise HTTPException(status_code=503, detail="preference agent is not registered")
-    request = DeliberationRequest(round="propose", user_id=user_id, query="")
+    request = DeliberationRequest(
+        round="propose", user_id=user_id, query="", prior_weights=social.prior_weights(runtime, user_id)
+    )
     reply = await runtime.transport.send(card, request)
     if reply.preference is None:
         raise HTTPException(status_code=503, detail="preference agent did not answer")
@@ -237,10 +243,17 @@ async def choose(body: ChoiceRequest) -> dict:
     if card is None:
         raise HTTPException(status_code=503, detail="preference agent is not registered")
     choice = ChoiceRecord(user_id=body.user_id, chosen_drink_id=body.drink_id, options=decision.options)
-    request = DeliberationRequest(round="learn", user_id=body.user_id, query="", choice=choice)
+    request = DeliberationRequest(
+        round="learn",
+        user_id=body.user_id,
+        query="",
+        choice=choice,
+        prior_weights=social.prior_weights(runtime, body.user_id),
+    )
     reply = await runtime.transport.send(card, request)
     if reply.preference is None:
         raise HTTPException(status_code=503, detail="preference agent did not answer")
+    runtime.social.add(body.user_id, "pick", drink_id=body.drink_id)
     return reply.preference.model_dump(mode="json")
 
 
@@ -364,6 +377,9 @@ def _on_remote_heartbeat(runtime: Runtime, agent_id: str) -> None:
     if agent_id in runtime.offline or runtime.registry.get(agent_id) is None:
         return
     runtime.registry.heartbeat(agent_id)
+
+
+app.include_router(social.router)
 
 
 def _local_agent_map(runtime: Runtime) -> dict:

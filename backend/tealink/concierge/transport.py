@@ -189,6 +189,8 @@ class AgntcyTransport:
     async def send(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply:
         if not self.connected or card.id in self._local_only:
             return await self._local(card, msg)
+        if msg.user_id in self.fallback.catalog.runtime_users:
+            return await self._local(card, msg)
         attempts = 2 if self.remote_replies.get(card.id, 0) == 0 else 1
         last_error: Exception | None = None
         for _ in range(attempts):

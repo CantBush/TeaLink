@@ -16,7 +16,11 @@ TAG_FLOOR = 0.5
 
 
 def user_profile(catalog: Catalog, user_id: str) -> dict[str, float]:
-    return taste_profile(catalog.reviews_for(user_id), catalog.drinks_by_id)
+    return taste_profile(
+        catalog.reviews_for(user_id),
+        catalog.drinks_by_id,
+        base=catalog.base_profiles.get(user_id),
+    )
 
 
 def score_drink(

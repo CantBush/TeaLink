@@ -36,29 +36,31 @@ class PreferenceAgent(BaseAgent):
         )
 
     def handle(self, request: DeliberationRequest, catalog: Catalog) -> AgentReply:
+        prior = request.prior_weights
         if request.round == "learn" and request.choice is not None:
-            return AgentReply(agent_id=self.agent_id, preference=self.learn(request.choice))
+            return AgentReply(agent_id=self.agent_id, preference=self.learn(request.choice, prior))
         if request.round == "propose":
-            return AgentReply(agent_id=self.agent_id, preference=self.report(request.user_id))
+            return AgentReply(agent_id=self.agent_id, preference=self.report(request.user_id, prior))
         return AgentReply(agent_id=self.agent_id)
 
-    def weights(self, user_id: str) -> dict[str, float]:
-        return preferences.fit(self.history.get(user_id, []))
+    def weights(self, user_id: str, prior: dict[str, float] | None = None) -> dict[str, float]:
+        """Picks learned on top of the quiz weights, or the default prior."""
+        return preferences.fit(self.history.get(user_id, []), prior)
 
-    def report(self, user_id: str) -> PreferenceReport:
+    def report(self, user_id: str, prior: dict[str, float] | None = None) -> PreferenceReport:
         seen = len(self.history.get(user_id, []))
-        weights = self.weights(user_id)
+        weights = self.weights(user_id, prior)
         return PreferenceReport(
             user_id=user_id,
             weights=weights,
             choices_seen=seen,
-            summary=preferences.describe_weights(weights, seen),
+            summary=preferences.describe_weights(weights, seen, from_quiz=prior is not None),
         )
 
-    def learn(self, choice: ChoiceRecord) -> PreferenceReport:
-        before = self.weights(choice.user_id)
+    def learn(self, choice: ChoiceRecord, prior: dict[str, float] | None = None) -> PreferenceReport:
+        before = self.weights(choice.user_id, prior)
         self.history.setdefault(choice.user_id, []).append(choice)
-        after = self.weights(choice.user_id)
+        after = self.weights(choice.user_id, prior)
         return PreferenceReport(
             user_id=choice.user_id,
             weights=after,

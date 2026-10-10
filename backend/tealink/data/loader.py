@@ -27,6 +27,20 @@ class Catalog:
         self.reviews_by_user: dict[str, list[Review]] = {}
         for review in reviews:
             self.reviews_by_user.setdefault(review.user_id, []).append(review)
+        # Quiz profiles, keyed by user. They seed the taste profile.
+        self.base_profiles: dict[str, dict[str, float]] = {}
+        # Users created or re-profiled after load. Agent processes over NATS
+        # loaded the catalog at startup and have never seen these changes.
+        self.runtime_users: set[str] = set()
+
+    def add_user(self, user: User) -> None:
+        self.users.append(user)
+        self.users_by_id[user.id] = user
+        self.runtime_users.add(user.id)
+
+    def set_base_profile(self, user_id: str, profile: dict[str, float]) -> None:
+        self.base_profiles[user_id] = dict(profile)
+        self.runtime_users.add(user_id)
 
     def reviews_for(self, user_id: str) -> list[Review]:
         return list(self.reviews_by_user.get(user_id, []))

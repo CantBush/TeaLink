@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sat Oct 10, 2:55 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sat Oct 10, 3:35 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -63,6 +63,9 @@ TeaLink/
       schemas.py  config.py  llm.py
       data/seed.py  loader.py                 # writes backend/data/{shops,drinks,users,reviews,choices}.json
       core/taste.py  retrieval.py  similarity.py  objectives.py  preferences.py  resolution.py  baseline.py
+           quiz.py  stats.py                  # onboarding quiz mapping, boba stats and personality
+      social/store.py  # profiles, follows, feed (in memory, loaded from data/social.json)
+      api/social.py    # /quiz, /users, /users/{id}[/follow|/followers|/following], /feed, /recs
       agents/objective_agent.py  taste_agent.py  social_agent.py  explorer_agent.py
              budget_agent.py  shop_agent.py  preference_agent.py  cards.py  roster.py  serve.py
       concierge/transport.py  registry.py  deliberation.py
@@ -271,9 +274,9 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 
 | When | Task | Done when |
 |---|---|---|
-| 3:00 to 4:00 | ⬜ Schemas above in `schemas.py`; seed social data for the existing users (handles, bios, avatars, follows, a few feed items from real reviews); Reset demo restores it | Seed loads, and `GET /users/sarah?viewer=andrew` returns a full profile |
-| 4:00 to 5:00 | ⬜ `core/stats.py`: boba stats and personality from reviews and picks. Quiz questions and the answer → taste profile + weights mapping, unit-tested | `POST /quiz` returns stats and weights; a new user's first `/recommend` uses those weights |
-| 5:00 to 6:00 | ⬜ Profile, follow, feed, like, comment, and rec endpoints; picks and reviews post feed items; visibility respected for other viewers | Tests cover hidden stats, follow counts, and feed order |
+| 3:00 to 4:00 | ✅ Schemas above in `schemas.py`; seed social data for the existing users (handles, bios, avatars, follows, a few feed items from real reviews); Reset demo restores it | Seed loads, and `GET /users/sarah?viewer=andrew` returns a full profile |
+| 4:00 to 5:00 | ✅ `core/stats.py`: boba stats and personality from reviews and picks. Quiz questions and the answer → taste profile + weights mapping (`core/quiz.py`), unit-tested | `POST /quiz` returns stats and weights; a new user's first `/recommend` uses those weights |
+| 5:00 to 6:00 | ✅ Profile, follow, feed, like, comment, and rec endpoints; picks and reviews post feed items; visibility respected for other viewers | Tests cover hidden stats, follow counts, and feed order |
 | 8:00 to 9:00 | ⬜ Optional: Social agent gives a small boost to people the user follows (replaces the LLM wording block if time is short) | The boost shows up in the Social agent's evidence |
 
 #### Track B: social frontend
@@ -324,6 +327,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **3:35 PM:** Merged Track A's social backend into main with Track B's social frontend. The API now matches the 3:10 contract: bare lists, `{viewer}` on likes and comments, `author` on feed items, `&author=` on the feed, toppings as a 0–1 number, and the quiz questions from `mocks/social/quiz.json`.
 - **3:10 PM:** Contract fixes before anyone builds on them:
   - `BobaStats.toppings` is a 0–1 number and `top_notes` is a list of flavor tags, matching what `drinks.json` actually stores.
   - Added `GET /users?viewer=` (suggestions) and `DELETE /feed/{id}/like`.

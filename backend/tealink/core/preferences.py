@@ -89,10 +89,14 @@ def describe_choice(before: dict[str, float], after: dict[str, float], choice: C
     )
 
 
-def describe_weights(weights: dict[str, float], choices_seen: int) -> str:
+def describe_weights(weights: dict[str, float], choices_seen: int, from_quiz: bool = False) -> str:
     ranked = sorted(DIMENSIONS, key=lambda dim: (-weights[dim], dim))
     top, second = ranked[0], ranked[1]
-    basis = f"{choices_seen} past pick{'s' if choices_seen != 1 else ''}" if choices_seen else "default weights"
+    picks = f"{choices_seen} past pick{'s' if choices_seen != 1 else ''}"
+    if from_quiz:
+        basis = f"your quiz and {picks}" if choices_seen else "your quiz answers"
+    else:
+        basis = picks if choices_seen else "default weights"
     return (
         f"From {basis}: {LABELS[top]} matters most ({round(weights[top] * 100)}%), "
         f"then {LABELS[second]} ({round(weights[second] * 100)}%)."
