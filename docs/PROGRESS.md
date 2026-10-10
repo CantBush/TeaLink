@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 1:45 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 2:10 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -50,16 +50,21 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## Evidence so far
 
-`cd backend && .venv/bin/python eval/run_eval.py` simulates three users with hidden priorities who each pick from the top 3 for 8 rounds:
+`cd backend && .venv/bin/python eval/run_eval.py` writes `backend/data/eval_results.json`, which `GET /eval` serves. Three simulated users with hidden priorities, 8 rounds each. A hit means the recommender's #1 was that user's favorite drink that round (the best in-stock drink under their hidden weights), not just the best of the three it offered.
 
-| User | Fixed weights | Learning | Learned vs hidden weights |
+| Method | #1 was the favorite | Favorite in the top 3 | Already tried |
 |---|---|---|---|
-| Price hunter | 4/8 | 5/8 | cost 48% vs 55% |
-| Explorer | 3/8 | 4/8 | novelty 45% vs 50% |
-| Loyalist | 4/8 | 6/8 | taste 64% vs 70% |
-| **All** | **11/24** | **15/24** | |
+| Most popular untried drink | 2/24 | 2/24 | 0% |
+| Agent team, fixed priorities | 5/24 | 8/24 | 14% |
+| Agent team, learned priorities | 7/24 | 11/24 | 7% |
 
-A "hit" means the team's #1 was the drink the user picked. The sample is small, so present it as early evidence, not a benchmark.
+| User | Learned vs hidden |
+|---|---|
+| Price hunter | cost 37% vs 55% |
+| Explorer | novelty 29% vs 50% |
+| Loyalist | taste 66% vs 70% |
+
+Sold-out recommendations were 0: every method skips drinks that are already gone. The sample is small, so present it as early evidence, not a benchmark.
 
 ## To do
 
@@ -70,8 +75,8 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 **Track A (backend, agents, evidence):**
 - ✅ AGNTCY spike. Go. `TRANSPORT=agntcy` gets Taste (and the rest of the roster) over NATS. `TRANSPORT=local` is still the default, and a down broker falls back to in-process agents. HTTP shapes are unchanged, so Track B does not need a types change.
 - ✅ Serve all agents over NATS, shop heartbeats, `make agents`, startup fallback to local. Demo flow (pick, sold out, Lantern Leaf join, shop offline, reset) passes on the bus.
-- ⬜ Popularity baseline, three-way eval, `GET /eval`
-- ⬜ Sarah seed fix
+- ✅ Popularity baseline, three-way eval, `GET /eval`. Learning 7/24, fixed weights 5/24, popularity 2/24. No schema change; the Evidence page picks this up on its own.
+- ✅ Sarah seed fix. `/users/similar?user_id=andrew` returns Sarah first (about 100% similar).
 - ⬜ Stretch: shop offers
 - ⬜ Stretch: LLM wording and edge-case tests
 - ⬜ `docs/architecture.md`
@@ -89,7 +94,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Known issues and decisions to revisit
 
-- **Sarah isn't Andrew's top match anymore.** The real similarity math ranks Hana, Leo, and Rina first, and Sarah fifth. Either tune Sarah's seeded reviews or update the demo story.
+- **Sarah is Andrew's top match again.** Her seeded reviews follow his milky, low-fruit orders, plus Hojicha Cream Tea at 5/5. Hana is second.
 - **The candidate pool is small** (about 11 drinks per round), so sold-out drinks eventually run the pool dry. The evaluation stops at 8 rounds for this reason.
 - **Wintermelon Tea** (69% taste match) often lands in the top 3 because Andrew's history makes price matter a lot. It's explainable, but check that it reads well in the demo.
 - `RecommendationCard.tsx` is no longer used by Discover. Delete it once nobody needs it.
@@ -97,6 +102,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Plan change log
 
+- **2:10 PM:** Track A: popularity baseline and `GET /eval` are in, and Sarah is Andrew's closest match. Demo order is unchanged (Thai Tea, Wintermelon, Pearl Milk Tea). Priorities are now price 43% and taste 41% (were 42% and 39%), and Wintermelon scores 77 rather than 76.
 - **1:45 PM:** Track A: AGNTCY transport is in. Local remains the default. Next up is the popularity baseline and `GET /eval`.
 - **1:15 PM:** Progress tracking moved to this file. The Google Doc can't be edited by the coding assistant, so the doc stays as the original brief.
 - **12:50 PM:** Replaced the single recommendation with a **top 3** that the user picks from. Added the **Preference agent**, which learns priorities from past and current picks, and the **Budget agent** for cost. Shop agents no longer propose drinks; they only confirm stock or veto.

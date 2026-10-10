@@ -9,6 +9,7 @@ branch on transport.
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -129,6 +130,18 @@ def _refresh_heartbeats(runtime: Runtime) -> None:
 def _require_user(runtime: Runtime, user_id: str) -> None:
     if user_id not in runtime.catalog.users_by_id:
         raise HTTPException(status_code=404, detail="user not found")
+
+
+@app.get("/eval")
+def eval_results() -> dict:
+    """Precomputed popularity vs fixed weights vs learning. See eval/run_eval.py."""
+    path = get_settings().data_dir / "eval_results.json"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="eval results not found")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=500, detail="eval results must be a JSON object")
+    return payload
 
 
 @app.get("/health")

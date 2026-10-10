@@ -104,17 +104,20 @@ ANDREW_REVIEWS: list[tuple[str, int, str]] = [
     ("st_qq", 1, "Way too much passion fruit for me."),
 ]
 
+# Same milky, low-fruit orders as Andrew, plus the hojicha cream he has not tried.
+# That overlap is what makes her his closest match.
 SARAH_REVIEWS: list[tuple[str, int, str]] = [
     ("sr_hojicha_cream", 5, "The hojicha cream tea is perfect."),
-    ("sr_hojicha_latte", 5, "Roasty, creamy, and not too sweet."),
-    ("ts_oolong_milk", 5, "Roasted oolong milk tea, a new favorite."),
-    ("kf_brown_sugar_oolong", 4, "Sweet, but I still like it."),
-    ("bg_classic", 4, "Reliable house milk tea."),
-    ("kf_jasmine_milk", 4, "Jasmine is gentle and milky."),
-    ("st_matcha", 4, "Good matcha with enough milk."),
-    ("sr_pearl_milk", 4, "Classic pearls, easy to finish."),
-    ("kf_passion_fruit", 2, "A bit too sharp and fruity."),
-    ("ts_peach", 2, "Peach overpowers the tea."),
+    ("kf_brown_sugar_oolong", 5, "Brown sugar and oolong, just how I like it."),
+    ("ts_tiger_brown", 5, "Sweet, milky, and plenty of boba."),
+    ("sr_brown_sugar_black", 5, "I would order this every week."),
+    ("st_brown_sugar", 4, "Really sweet, in a good way."),
+    ("kf_classic_milk", 4, "Solid milk tea, not too fruity."),
+    ("bg_classic", 4, "House milk tea hits the spot."),
+    ("kf_taro", 4, "Creamy taro with the right sugar."),
+    ("st_thai", 4, "Milky Thai tea, good sugar level."),
+    ("kf_mango_green", 2, "Too fruity, not enough milk."),
+    ("st_qq", 1, "Way too much passion fruit for me."),
 ]
 
 OTHER_USERS: list[tuple[str, str, str]] = [

@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sat Oct 10, 1:10 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sat Oct 10, 2:10 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -50,7 +50,7 @@ Schemas are in `backend/tealink/schemas.py`, mirrored in `frontend/src/api/types
 | Conflict resolution | The resolver blends objective scores with learned weights, plus an ask-the-human rule | ✅ |
 | Explain who was selected and why | Lens timeline and the Why This page (score times weight, plus ruled-out drinks) | ✅ |
 | New information changes the decision | User picks update the weights. Brown sugar dislike, sell-outs, and shop joins each trigger a fresh deliberation | ✅ |
-| *Level 3:* baseline comparison | So far: learning vs fixed weights (15/24 vs 11/24 hits). Still to build: a popularity baseline | 🟡 |
+| *Level 3:* baseline comparison | Popularity 2/24 hits, fixed weights 5/24, learning 7/24. `GET /eval` serves `eval_results.json` | ✅ |
 | *Level 3:* ask the human | Near-tie or everything ruled out shows a prompt over the top 3 | ✅ |
 | AGNTCY transport | `AgntcyTransport` over NATS | ✅ (go: demo flow passes on NATS, local stays the default) |
 
@@ -63,12 +63,12 @@ TeaLink/
     tealink/
       schemas.py  config.py  llm.py
       data/seed.py  loader.py                 # writes backend/data/{shops,drinks,users,reviews,choices}.json
-      core/taste.py  retrieval.py  similarity.py  objectives.py  preferences.py  resolution.py  baseline.py (todo)
+      core/taste.py  retrieval.py  similarity.py  objectives.py  preferences.py  resolution.py  baseline.py
       agents/objective_agent.py  taste_agent.py  social_agent.py  explorer_agent.py
              budget_agent.py  shop_agent.py  preference_agent.py  cards.py  roster.py  serve.py
       concierge/transport.py  registry.py  deliberation.py
       api/main.py      # /recommend (SSE), /choices, /preferences/{user}, /profile, /users/similar,
-                       # /events/{sold-out,shop-join,shop-offline,preference,reset}
+                       # /eval, /events/{sold-out,shop-join,shop-offline,preference,reset}
     eval/run_eval.py   # learning vs fixed weights on simulated users with hidden priorities
     tests/             # taste, resolution, preferences, end-to-end demo flow
   frontend/src/
@@ -140,8 +140,8 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 | 1:30 to 2:00 | ✅ **AGNTCY spike.** Get one Taste agent answering over NATS through `AgntcyTransport` (`docker compose up nats`, then `python -m tealink.agents.serve --agent taste`) | One `/recommend` with `TRANSPORT=agntcy` gets a Taste reply over NATS |
 | **2:00** | **Go/no-go.** Go. Stay able to run `TRANSPORT=local`. B does not need a frontend change | |
 | 2:00 to 3:30 | ✅ If go: serve every agent over NATS, run shop heartbeats over the bus, add `make agents`, and a startup fallback to local. If no-go: skip straight to the baseline | The demo flow passes on both transports |
-| 3:30 to 5:00 | ⬜ `core/baseline.py` (most popular untried drink that's in stock). Extend `eval/run_eval.py` to popularity vs fixed weights vs learning, write `eval_results.json`, and add `GET /eval` | `GET /eval` matches the contract, with a test |
-| 5:00 to 6:00 | ⬜ Story data fixes: tune Sarah's seed reviews so she's Andrew's top match, re-seed, and update the tests | `/users/similar?user_id=andrew` returns Sarah first |
+| 3:30 to 5:00 | ✅ `core/baseline.py` (most-reviewed untried in-stock drink). Extend `eval/run_eval.py` to popularity vs fixed weights vs learning, write `eval_results.json`, and add `GET /eval` | `GET /eval` matches the contract, with a test |
+| 5:00 to 6:00 | ✅ Story data fixes: tune Sarah's seed reviews so she's Andrew's top match, re-seed, and update the tests | `/users/similar?user_id=andrew` returns Sarah first |
 | **6:00** | **Sync:** merge, then run the full demo together | |
 | 6:30 to 8:00 | ⬜ Stretch: **shop offers.** In a near-tie, the trailing shop's agent offers up to 10% off from its budget. The resolver re-scores the cost dimension, and an `offer` event is emitted | The offer appears in the timeline and can flip the #1 |
 | 8:00 to 9:00 | ⬜ Optional LLM wording for rationales (template fallback stays the default). Edge-case tests: all vetoed, no reviews, every shop offline | Tests pass with no API key set |
@@ -197,6 +197,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **2:10 PM:** Track A shipped `GET /eval` (popularity 2/24, fixed weights 5/24, learning 7/24 over 8 rounds) and made Sarah Andrew's closest match. No schema change. Demo top 3 is still Thai Tea, Wintermelon, Pearl Milk Tea; the priority percents and Wintermelon's score moved by a point, so the demo script needs a refresh.
 - **1:45 PM:** Track B also finished the close-call prompt, the timeline regrouping, and a first draft of `docs/demo-script.md`. B's remaining work waits on Track A (the offer badge and the real `/eval` numbers) or is Sunday work (write-up, video, rehearsal). The "Demo script (draft)" section below is replaced by that file.
 - **1:45 PM:** AGNTCY is a go. Track A serves the roster over NATS, with in-process fallback. No schema change for Track B.
 - **1:30 PM:** Track B finished its first three blocks early (Counterfactual, clean-up, Evidence page). Next up for B: ask-the-human and timeline polish, then the demo script.

@@ -3,6 +3,7 @@
 from tealink.agents.explorer_agent import ExplorerAgent
 from tealink.agents.social_agent import SocialAgent
 from tealink.agents.taste_agent import TasteAgent
+from tealink.core.objectives import neighbors
 from tealink.core.retrieval import retrieve_evidence
 from tealink.core.taste import factor_contributions, match_score, taste_profile
 from tealink.data.loader import load_catalog
@@ -141,6 +142,10 @@ def test_seed_personas_and_agents():
     no_brown_sugar = request.model_copy(update={"preference_overrides": {"brown_sugar": 0.0}})
     marked_down = TasteAgent().handle(no_brown_sugar, catalog).proposals[0]
     assert "brown_sugar" not in catalog.drink(marked_down.drink_id).flavor_tags
+
+    nearest = neighbors(catalog, "andrew")
+    assert nearest[0][0] == "sarah"
+    assert nearest[0][1] > nearest[1][1]
 
 
 def pytest_approx(value: float):

@@ -19,12 +19,12 @@
       {
         "drink_id": "ts_tiger_brown",
         "drink_name": "Tiger Brown Sugar Boba",
-        "score": 0.5691879093737018,
+        "score": 0.6065710882671195,
         "shop_id": "tigersugar",
         "price": 7.0,
         "dimension_scores": {
           "taste": 0.8640000000000001,
-          "social": 0.6265860624913446,
+          "social": 0.8758072551141294,
           "novelty": 0.0,
           "cost": 0.0
         }
@@ -57,7 +57,7 @@
         "price": 5.75,
         "dimension_scores": {
           "taste": 0.9257894736842105,
-          "social": 0.7500000000000001,
+          "social": 0.75,
           "novelty": 0.0,
           "cost": 0.5
         }
@@ -65,12 +65,12 @@
       {
         "drink_id": "sr_brown_sugar_black",
         "drink_name": "Brown Sugar Black Milk",
-        "score": 0.6241842105263158,
+        "score": 0.6616842105263158,
         "shop_id": "sunright",
         "price": 6.5,
         "dimension_scores": {
           "taste": 0.8757894736842106,
-          "social": 0.75,
+          "social": 1.0,
           "novelty": 0.0,
           "cost": 0.19999999999999996
         }
@@ -124,12 +124,12 @@
       {
         "drink_id": "sr_hojicha_cream",
         "drink_name": "Hojicha Cream Tea",
-        "score": 0.6720105263157895,
+        "score": 0.691110016060599,
         "shop_id": "sunright",
         "price": 6.75,
         "dimension_scores": {
           "taste": 0.8354736842105264,
-          "social": 0.7500000000000001,
+          "social": 0.8773299316320626,
           "novelty": 0.5666666666666667,
           "cost": 0.09999999999999998
         }
@@ -170,12 +170,12 @@
       {
         "drink_id": "sr_hojicha_latte",
         "drink_name": "Hojicha Latte",
-        "score": 0.6780105263157895,
+        "score": 0.6405105263157895,
         "shop_id": "sunright",
         "price": 6.5,
         "dimension_scores": {
           "taste": 0.8054736842105263,
-          "social": 0.75,
+          "social": 0.5,
           "novelty": 0.6166666666666667,
           "cost": 0.19999999999999996
         }

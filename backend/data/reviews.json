@@ -79,65 +79,72 @@
   {
     "id": "rev_sarah_02",
     "user_id": "sarah",
-    "drink_id": "sr_hojicha_latte",
+    "drink_id": "kf_brown_sugar_oolong",
     "rating": 5,
-    "text": "Roasty, creamy, and not too sweet."
+    "text": "Brown sugar and oolong, just how I like it."
   },
   {
     "id": "rev_sarah_03",
     "user_id": "sarah",
-    "drink_id": "ts_oolong_milk",
+    "drink_id": "ts_tiger_brown",
     "rating": 5,
-    "text": "Roasted oolong milk tea, a new favorite."
+    "text": "Sweet, milky, and plenty of boba."
   },
   {
     "id": "rev_sarah_04",
     "user_id": "sarah",
-    "drink_id": "kf_brown_sugar_oolong",
-    "rating": 4,
-    "text": "Sweet, but I still like it."
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 5,
+    "text": "I would order this every week."
   },
   {
     "id": "rev_sarah_05",
     "user_id": "sarah",
-    "drink_id": "bg_classic",
+    "drink_id": "st_brown_sugar",
     "rating": 4,
-    "text": "Reliable house milk tea."
+    "text": "Really sweet, in a good way."
   },
   {
     "id": "rev_sarah_06",
     "user_id": "sarah",
-    "drink_id": "kf_jasmine_milk",
+    "drink_id": "kf_classic_milk",
     "rating": 4,
-    "text": "Jasmine is gentle and milky."
+    "text": "Solid milk tea, not too fruity."
   },
   {
     "id": "rev_sarah_07",
     "user_id": "sarah",
-    "drink_id": "st_matcha",
+    "drink_id": "bg_classic",
     "rating": 4,
-    "text": "Good matcha with enough milk."
+    "text": "House milk tea hits the spot."
   },
   {
     "id": "rev_sarah_08",
     "user_id": "sarah",
-    "drink_id": "sr_pearl_milk",
+    "drink_id": "kf_taro",
     "rating": 4,
-    "text": "Classic pearls, easy to finish."
+    "text": "Creamy taro with the right sugar."
   },
   {
     "id": "rev_sarah_09",
     "user_id": "sarah",
-    "drink_id": "kf_passion_fruit",
-    "rating": 2,
-    "text": "A bit too sharp and fruity."
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "Milky Thai tea, good sugar level."
   },
   {
     "id": "rev_sarah_10",
     "user_id": "sarah",
-    "drink_id": "ts_peach",
+    "drink_id": "kf_mango_green",
     "rating": 2,
-    "text": "Peach overpowers the tea."
+    "text": "Too fruity, not enough milk."
+  },
+  {
+    "id": "rev_sarah_11",
+    "user_id": "sarah",
+    "drink_id": "st_qq",
+    "rating": 1,
+    "text": "Way too much passion fruit for me."
   },
   {
     "id": "rev_maya_01",

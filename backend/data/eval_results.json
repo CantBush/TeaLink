@@ -1,0 +1,73 @@
+{
+  "rounds": 8,
+  "methods": [
+    {
+      "method": "popularity",
+      "hit_rate": 0.083333,
+      "top3_rate": 0.083333,
+      "sold_out_recs": 0,
+      "repeat_rate": 0.0
+    },
+    {
+      "method": "fixed_weights",
+      "hit_rate": 0.208333,
+      "top3_rate": 0.333333,
+      "sold_out_recs": 0,
+      "repeat_rate": 0.138889
+    },
+    {
+      "method": "learning",
+      "hit_rate": 0.291667,
+      "top3_rate": 0.458333,
+      "sold_out_recs": 0,
+      "repeat_rate": 0.069444
+    }
+  ],
+  "personas": [
+    {
+      "name": "Price hunter",
+      "hidden_weights": {
+        "taste": 0.3,
+        "social": 0.1,
+        "novelty": 0.05,
+        "cost": 0.55
+      },
+      "learned_weights": {
+        "taste": 0.324391,
+        "social": 0.05,
+        "novelty": 0.255379,
+        "cost": 0.37023
+      }
+    },
+    {
+      "name": "Explorer",
+      "hidden_weights": {
+        "taste": 0.3,
+        "social": 0.1,
+        "novelty": 0.5,
+        "cost": 0.1
+      },
+      "learned_weights": {
+        "taste": 0.417358,
+        "social": 0.05,
+        "novelty": 0.292721,
+        "cost": 0.239921
+      }
+    },
+    {
+      "name": "Loyalist",
+      "hidden_weights": {
+        "taste": 0.7,
+        "social": 0.2,
+        "novelty": 0.05,
+        "cost": 0.05
+      },
+      "learned_weights": {
+        "taste": 0.658735,
+        "social": 0.241265,
+        "novelty": 0.05,
+        "cost": 0.05
+      }
+    }
+  ]
+}
