@@ -339,11 +339,21 @@ async def _prepare(runtime: Runtime) -> None:
             runtime.transport = transport.fallback
             _refresh_heartbeats(runtime)
             return
-        await transport.listen(lambda agent_id: _on_remote_heartbeat(runtime, agent_id))
+        await transport.listen(_remote_heartbeat)
         await transport.reconcile(runtime.registry, offline=runtime.offline)
     for agent_id in transport.local_only:
         if agent_id not in runtime.offline and runtime.registry.get(agent_id) is not None:
             runtime.registry.heartbeat(agent_id)
+
+
+def _remote_heartbeat(agent_id: str) -> None:
+    """Apply a bus heartbeat to whichever runtime is serving requests.
+
+    Reset swaps in a new runtime but keeps this transport and its NATS
+    subscription. Closing over the runtime from connect time would refresh
+    the discarded registry and let the new one time out.
+    """
+    _on_remote_heartbeat(get_runtime(), agent_id)
 
 
 def _on_remote_heartbeat(runtime: Runtime, agent_id: str) -> None:

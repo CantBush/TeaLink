@@ -98,7 +98,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Known issues and decisions to revisit
 
-- **Track A, demo-blocking in AGNTCY mode: Reset demo drops every agent about 30 seconds later.** In `_prepare` (`api/main.py`, around line 329), `transport.listen(lambda agent_id: _on_remote_heartbeat(runtime, agent_id))` captures the runtime that existed at first connect. `/events/reset` swaps in a fresh runtime, but bus heartbeats keep refreshing the old registry. The new registry is marked online once during the reset and then hits the 30-second timeout, so `/recommend` selects no agents and returns "Nothing survived." To reproduce: run with `TRANSPORT=agntcy`, `POST /events/reset`, wait 35 seconds, then `POST /recommend`. Suggested fix: `lambda agent_id: _on_remote_heartbeat(get_runtime(), agent_id)`. Local mode is not affected.
+- **AGNTCY reset heartbeat is fixed.** Bus heartbeats now update whichever runtime is serving requests, so Reset demo no longer lets the new registry time out. Local mode was already fine.
 - **Setup note:** AGNTCY mode needs `pip install -e ".[dev,bus]"`. Without the `bus` extra, `make agents` exits with "agntcy-app-sdk is not installed", and the API quietly runs in-process.
 - **Sarah is Andrew's top match again.** Her seeded reviews follow his milky, low-fruit orders, plus Hojicha Cream Tea at 5/5. Hana is second.
 - **The candidate pool is small** (about 11 drinks per round), so sold-out drinks eventually run the pool dry. The evaluation stops at 8 rounds for this reason.
