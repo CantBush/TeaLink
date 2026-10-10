@@ -32,7 +32,7 @@ export function PriorityBars({
                   <span className="text-mute">
                     {pct}%
                     {delta !== 0 ? (
-                      <span className={delta > 0 ? "ml-1 text-amber" : "ml-1"}>
+                      <span className={delta > 0 ? "ml-1 text-moss" : "ml-1"}>
                         ({delta > 0 ? "+" : ""}
                         {delta})
                       </span>
@@ -40,7 +40,7 @@ export function PriorityBars({
                   </span>
                 </div>
                 <div className="h-2.5 overflow-hidden rounded-full bg-line">
-                  <div className="h-full rounded-full bg-amber transition-all duration-500" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-moss transition-all duration-500" style={{ width: `${pct}%` }} />
                 </div>
               </li>
             );
@@ -50,7 +50,7 @@ export function PriorityBars({
         <p className="mt-4 text-sm text-mute">Waiting for the Preference agent…</p>
       )}
       {learned ? (
-        <p className="mt-4 rounded-2xl border border-amber/60 bg-petal px-4 py-3 text-sm">{learned.summary}</p>
+        <p className="mt-4 rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">{learned.summary}</p>
       ) : summary ? (
         <p className="mt-4 text-sm">{summary}</p>
       ) : null}

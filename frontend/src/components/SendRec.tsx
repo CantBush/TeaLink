@@ -7,7 +7,7 @@ import { drinkPhoto } from "../lib/images.ts";
 import { useMe } from "../state/me.ts";
 import { Avatar } from "./Avatar.tsx";
 
-const input = "w-full rounded-2xl border border-line bg-cream px-4 py-3 text-[15px] outline-none focus:border-amber";
+const input = "w-full rounded-2xl border border-line bg-cream px-4 py-3 text-[15px] outline-none focus:border-moss";
 
 /** Recommend one drink to one person. Either side can be fixed by the caller. */
 export function SendRec({ drinkId, to, onClose }: { drinkId?: string; to?: UserProfile; onClose: () => void }) {

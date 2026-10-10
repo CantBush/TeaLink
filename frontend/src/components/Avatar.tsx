@@ -1,4 +1,5 @@
 import type { Avatar as AvatarData } from "../api/types.ts";
+import { tint } from "../lib/palette.ts";
 
 const SIZES = {
   xs: "h-6 w-6 text-sm",
@@ -21,8 +22,8 @@ export function Avatar({
     <span
       className={`inline-grid shrink-0 place-items-center rounded-full ${SIZES[size]}`}
       style={{
-        background: avatar?.color ?? "#f8e3e6",
-        boxShadow: ring ? `0 0 0 3px #ffffff, 0 0 0 5px ${ring}` : undefined,
+        background: tint(avatar?.color) ?? "#e2ebdd",
+        boxShadow: ring ? `0 0 0 3px #ffffff, 0 0 0 5px ${tint(ring)}` : undefined,
       }}
       aria-hidden
     >

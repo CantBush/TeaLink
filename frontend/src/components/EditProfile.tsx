@@ -4,13 +4,12 @@ import type { StatKey, UserProfile } from "../api/types.ts";
 import { allDrinks } from "../lib/catalog.ts";
 import { SHOP_IDS, shopLabel } from "../lib/format.ts";
 import { COVERS, type CoverId, coverId, coverPhoto, setCover } from "../lib/images.ts";
+import { ACCENT_COLORS, AVATAR_COLORS } from "../lib/palette.ts";
 import { ALL_STATS, STAT_LABELS } from "../lib/stats.ts";
 import { profilesChanged } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
 
 const EMOJIS = ["🧋", "🍵", "🐯", "🌸", "🍓", "🥭", "🍑", "🫖", "🍯", "🐼", "🦊", "🐻", "🍡", "🌙", "⭐", "🐸", "🦄", "🍉", "🌈", "🔥"];
-const COLORS = ["#f3d9b1", "#d8e8c8", "#f6c9c0", "#e3d4f0", "#cfe3ef", "#f9e3a6", "#e8cfc0", "#d5ebe0", "#2c1810"];
-const ACCENTS = ["#c4742a", "#7a9a5b", "#c0605a", "#8b6bb0", "#4d86a8", "#b8892a", "#2c1810"];
 
 function Swatches({ colors, value, onPick, label }: { colors: string[]; value: string; onPick: (color: string) => void; label: string }) {
   return (
@@ -24,7 +23,7 @@ function Swatches({ colors, value, onPick, label }: { colors: string[]; value: s
           aria-label={color}
           onClick={() => onPick(color)}
           className={`h-8 w-8 rounded-full border-2 ${value === color ? "border-ink" : "border-foam"}`}
-          style={{ background: color, boxShadow: "0 0 0 1px #ece3e1" }}
+          style={{ background: color, boxShadow: "0 0 0 1px #dde5d8" }}
         />
       ))}
     </div>
@@ -40,7 +39,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const input = "w-full rounded-2xl border border-line bg-cream px-4 py-2.5 outline-none focus:border-amber";
+const input = "w-full rounded-2xl border border-line bg-cream px-4 py-2.5 outline-none focus:border-moss";
 
 export function EditProfile({ profile, onClose }: { profile: UserProfile; onClose: () => void }) {
   const [name, setName] = useState(profile.display_name);
@@ -102,7 +101,7 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
             Cancel
           </button>
           <h2 className="font-display text-xl">Edit profile</h2>
-          <button type="button" onClick={save} disabled={saving} className="text-sm font-semibold text-amber disabled:opacity-50">
+          <button type="button" onClick={save} disabled={saving} className="text-sm font-semibold text-moss disabled:opacity-50">
             {saving ? "Saving…" : "Save"}
           </button>
         </header>
@@ -141,19 +140,19 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
                   type="button"
                   onClick={() => setEmoji(item)}
                   aria-pressed={emoji === item}
-                  className={`rounded-xl py-1 text-2xl ${emoji === item ? "bg-blush" : "hover:bg-cream"}`}
+                  className={`rounded-xl py-1 text-2xl ${emoji === item ? "bg-sage" : "hover:bg-cream"}`}
                 >
                   {item}
                 </button>
               ))}
             </div>
             <div className="mt-3">
-              <Swatches colors={COLORS} value={color} onPick={setColor} label="Avatar background" />
+              <Swatches colors={[...AVATAR_COLORS, "#1c2b22"]} value={color} onPick={setColor} label="Avatar background" />
             </div>
           </Field>
 
           <Field label="Profile color">
-            <Swatches colors={ACCENTS} value={accent} onPick={setAccent} label="Profile color" />
+            <Swatches colors={ACCENT_COLORS} value={accent} onPick={setAccent} label="Profile color" />
           </Field>
 
           <Field label="Name">

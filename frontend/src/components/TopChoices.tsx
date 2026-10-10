@@ -47,7 +47,7 @@ function CloseCall({
   onPick: (option: RankedDrink) => void;
 }) {
   return (
-    <div className="mt-4 rounded-3xl bg-blush p-4 sm:p-5">
+    <div className="mt-4 rounded-3xl bg-sage p-4 sm:p-5">
       <p className="font-semibold">
         Close call: {a.drink_name} {matchPercent(a.score)} vs {b.drink_name} {matchPercent(b.score)}.
       </p>
@@ -91,7 +91,7 @@ function ScoreRow({ option }: { option: RankedDrink }) {
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-line">
             <div
-              className="h-full rounded-full bg-amber"
+              className="h-full rounded-full bg-moss"
               style={{ width: `${matchPercent(scores[dimension] ?? 0)}%` }}
             />
           </div>
@@ -115,7 +115,7 @@ export function TopChoices({
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="font-hand text-2xl leading-none lowercase text-amber">for {name}</p>
+        <p className="font-hand text-2xl leading-none lowercase text-moss">for {name}</p>
         <h2 className="mt-3 font-display text-3xl text-ink">Steeping your top 3…</h2>
         <p className="mt-2 max-w-md text-mute">
           Taste, Social, Explorer, and Budget are arguing it out, and the shops are checking stock.
@@ -127,12 +127,12 @@ export function TopChoices({
   const options = topOptions(decision);
   if (options.length === 0) {
     return (
-      <article className="rounded-[28px] border border-amber bg-foam p-6 sm:p-8">
+      <article className="rounded-[28px] border border-moss bg-foam p-6 sm:p-8">
         <p className="font-hand text-2xl leading-none lowercase">your top 3</p>
         <h2 className="mt-3 font-display text-3xl">Nothing survived</h2>
         <p className="mt-2 text-mute">{decision.explanation}</p>
         {decision.question ? (
-          <p className="mt-4 rounded-2xl border border-amber/60 bg-petal px-4 py-3 text-sm">{decision.question}</p>
+          <p className="mt-4 rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">{decision.question}</p>
         ) : null}
         <p className="mt-4 text-sm text-mute">
           Rather than recommend something nobody can confirm, the team is asking you. Reset demo brings the shops back.
@@ -152,19 +152,19 @@ export function TopChoices({
       {decision.ask_human && options.length >= 2 ? (
         <CloseCall a={options[0]} b={options[1]} running={running} onPick={onPick} />
       ) : decision.ask_human && decision.question ? (
-        <p className="mt-3 rounded-2xl border border-amber/60 bg-petal px-4 py-3 text-sm">{decision.question}</p>
+        <p className="mt-3 rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">{decision.question}</p>
       ) : null}
       <ol className="mt-5 grid gap-3 @lg:grid-cols-3">
         {options.map((option, index) => (
           <li
             key={option.drink_id}
             className={`flex min-w-0 flex-col rounded-[22px] border p-4 ${
-              index === 0 ? "border-ink bg-petal" : "border-line bg-foam"
+              index === 0 ? "border-ink bg-mist" : "border-line bg-foam"
             }`}
           >
             <div className="flex items-start justify-between gap-2">
               <span className="text-xs tracking-[0.12em] text-mute">no. {index + 1}</span>
-              <span className="font-display text-2xl leading-none text-amber">{matchPercent(option.score)}</span>
+              <span className="font-display text-2xl leading-none text-moss">{matchPercent(option.score)}</span>
             </div>
             <div className="mt-2 flex min-w-0 items-center gap-3 @lg:flex-col @lg:items-start">
               {drinkPhoto(option.drink_id) ? (

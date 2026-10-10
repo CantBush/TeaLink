@@ -19,7 +19,7 @@ export function TeaLinkTabs() {
               end={link.end}
               className={({ isActive }) =>
                 `block rounded-full px-4 py-2 text-sm tracking-[0.06em] whitespace-nowrap lowercase transition-colors ${
-                  isActive ? "bg-ink text-foam" : "bg-blush text-ink/80 hover:bg-ink/10 hover:text-ink"
+                  isActive ? "bg-ink text-foam" : "bg-sage text-ink/80 hover:bg-ink/10 hover:text-ink"
                 }`
               }
             >

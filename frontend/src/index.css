@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 /*
- * Look: HEYTEA's near-white pages, black line doodles, and lowercase spaced nav,
- * blended with Molly Tea's blush surfaces, rose accent, flared display type, and black pills.
- * Token names are kept from the first theme so every screen picks this up.
+ * Look: HEYTEA's near-white pages, line doodles, and lowercase spaced nav, with
+ * Molly Tea's flared uppercase wordmark and pill buttons, in a tea-garden palette:
+ * rice-paper background, deep tea-green ink, moss accent, and sage surfaces.
  */
 @theme {
   --font-display: "Marcellus", "Optima", "Candara", serif;
+  --font-logo: "Marcellus SC", "Marcellus", "Optima", serif;
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-hand: "Gaegu", "Comic Sans MS", cursive;
-  --color-cream: #faf7f5;
-  --color-ink: #161414;
-  --color-amber: #b04f68;
+  --color-cream: #f5f7f2;
+  --color-ink: #15231b;
+  --color-moss: #3d6b4f;
   --color-foam: #ffffff;
-  --color-line: #ece3e1;
-  --color-mute: #6e6466;
-  --color-blush: #f8e3e6;
-  --color-petal: #fdf3f4;
-  --color-leaf: #2f3b2f;
+  --color-line: #dde5d8;
+  --color-mute: #5d6a61;
+  --color-sage: #e2ebdd;
+  --color-mist: #f0f5ec;
+  --color-leaf: #24392b;
 }
 
 html {

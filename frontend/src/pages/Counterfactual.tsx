@@ -11,9 +11,9 @@ function MovementChip({ movement }: { movement: Movement }) {
   const base = "rounded-full px-2 py-0.5 text-xs font-semibold";
   switch (movement.kind) {
     case "new":
-      return <span className={`${base} bg-amber text-cream`}>New</span>;
+      return <span className={`${base} bg-moss text-cream`}>New</span>;
     case "up":
-      return <span className={`${base} bg-blush text-amber`}>Up {movement.by}</span>;
+      return <span className={`${base} bg-sage text-moss`}>Up {movement.by}</span>;
     case "down":
       return <span className={`${base} bg-line text-mute`}>Down {movement.by}</span>;
     case "same":
@@ -34,10 +34,10 @@ function Column({
 }) {
   return (
     <article
-      className={`rounded-[28px] border p-6 ${highlight ? "border-amber bg-foam" : "border-line bg-cream"}`}
+      className={`rounded-[28px] border p-6 ${highlight ? "border-moss bg-foam" : "border-line bg-cream"}`}
     >
       <p
-        className={`text-xs font-semibold tracking-[0.14em] uppercase ${highlight ? "text-amber" : "text-mute"}`}
+        className={`text-xs font-semibold tracking-[0.14em] uppercase ${highlight ? "text-moss" : "text-mute"}`}
       >
         {title}
       </p>
@@ -57,7 +57,7 @@ function Column({
                 </p>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                <span className={`font-display text-xl ${highlight ? "text-amber" : "text-ink"}`}>
+                <span className={`font-display text-xl ${highlight ? "text-moss" : "text-ink"}`}>
                   {matchPercent(option.score)}
                 </span>
                 {movement ? <MovementChip movement={movement} /> : null}
@@ -90,7 +90,7 @@ export function Counterfactual() {
     <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
       <TeaLinkTabs />
       <header>
-        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">What changed</p>
+        <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">What changed</p>
         <h1 className="mt-2 font-display text-4xl leading-tight">
           {change ?? "The agents re-planned"}
         </h1>
@@ -145,7 +145,7 @@ export function Counterfactual() {
                     <span className="font-semibold">{dimensionLabel(shift.dimension)}</span>
                     <span className="text-mute">
                       {matchPercent(shift.before)}% → {matchPercent(shift.after)}%
-                      <span className={delta > 0 ? "ml-1 text-amber" : "ml-1"}>
+                      <span className={delta > 0 ? "ml-1 text-moss" : "ml-1"}>
                         ({delta > 0 ? "+" : ""}
                         {delta})
                       </span>

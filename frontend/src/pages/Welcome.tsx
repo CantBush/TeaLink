@@ -5,12 +5,12 @@ import type { QuizAnswers, QuizQuestion, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaMark } from "../components/BobaMark.tsx";
+import { AVATAR_COLORS as STARTER_COLORS } from "../lib/palette.ts";
 import { DEMO_USER, getMe, hasChosenAccount, setMe } from "../state/me.ts";
 import { switchUser } from "../state/session.ts";
 import { profilesChanged } from "../state/social.ts";
 
 const STARTER_EMOJIS = ["🧋", "🍵", "🐯", "🌸", "🍓", "🐼", "🦊", "🌙"];
-const STARTER_COLORS = ["#f3d9b1", "#d8e8c8", "#f6c9c0", "#e3d4f0", "#cfe3ef", "#f9e3a6", "#e8cfc0", "#d5ebe0"];
 
 function handleFrom(name: string): string {
   return name
@@ -26,7 +26,7 @@ function Shell({ children, progress }: { children: ReactNode; progress?: number 
     <main className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-xl flex-col px-5 py-6 sm:py-10">
       {progress !== undefined ? (
         <div className="mb-8 h-1.5 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={Math.round(progress * 100)}>
-          <div className="h-full rounded-full bg-amber transition-all duration-300" style={{ width: `${progress * 100}%` }} />
+          <div className="h-full rounded-full bg-moss transition-all duration-300" style={{ width: `${progress * 100}%` }} />
         </div>
       ) : null}
       {children}
@@ -67,7 +67,7 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
 
   return (
     <Shell>
-      <div className="flex items-center gap-2 font-display text-2xl">
+      <div className="flex items-center gap-2 font-logo text-2xl tracking-[0.2em] uppercase">
         <BobaMark /> TeaLink
       </div>
       <h1 className="mt-6 font-display text-4xl leading-tight sm:text-5xl">Find your next favorite boba.</h1>
@@ -92,7 +92,7 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
                 onClick={() => setEmoji(item)}
                 aria-pressed={emoji === item}
                 aria-label={`Avatar ${item}`}
-                className={`rounded-full p-0.5 ${emoji === item ? "ring-2 ring-amber" : ""}`}
+                className={`rounded-full p-0.5 ${emoji === item ? "ring-2 ring-moss" : ""}`}
               >
                 <Avatar avatar={{ emoji: item, color: STARTER_COLORS[index] }} size="md" />
               </button>
@@ -107,12 +107,12 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
             maxLength={40}
             autoFocus
             placeholder="Emily"
-            className="w-full rounded-2xl border border-line bg-foam px-4 py-3 text-lg outline-none focus:border-amber"
+            className="w-full rounded-2xl border border-line bg-foam px-4 py-3 text-lg outline-none focus:border-moss"
           />
         </label>
         <label className="block">
           <span className="mb-2 block text-sm font-semibold">Handle</span>
-          <span className="flex items-center rounded-2xl border border-line bg-foam px-4 focus-within:border-amber">
+          <span className="flex items-center rounded-2xl border border-line bg-foam px-4 focus-within:border-moss">
             <span className="text-lg text-mute">@</span>
             <input
               value={shownHandle}
@@ -171,7 +171,7 @@ function QuestionStep({
 
   return (
     <Shell progress={index / total}>
-      <p className="text-sm font-semibold text-amber">
+      <p className="text-sm font-semibold text-moss">
         Question {index + 1} of {total}
       </p>
       <h1 className="mt-2 font-display text-4xl leading-tight">{question.prompt}</h1>
@@ -187,7 +187,7 @@ function QuestionStep({
                 onClick={() => toggle(option.id)}
                 aria-pressed={on}
                 className={`flex w-full items-center gap-4 rounded-3xl border-2 px-5 py-4 text-left text-lg font-semibold transition ${
-                  on ? "border-amber bg-petal" : "border-line bg-foam hover:border-ink/30"
+                  on ? "border-moss bg-mist" : "border-line bg-foam hover:border-ink/30"
                 }`}
               >
                 {option.emoji ? (
@@ -219,7 +219,7 @@ function QuestionStep({
 function Result({ profile }: { profile: UserProfile }) {
   return (
     <Shell progress={1}>
-      <p className="text-center text-sm font-semibold tracking-[0.16em] text-amber uppercase">You're all set</p>
+      <p className="text-center text-sm font-semibold tracking-[0.16em] text-moss uppercase">You're all set</p>
       <h1 className="mt-2 mb-8 text-center font-display text-4xl leading-tight">Meet your boba self</h1>
       <BobaCard
         name={profile.display_name}

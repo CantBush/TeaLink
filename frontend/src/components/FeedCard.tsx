@@ -10,7 +10,7 @@ import { Avatar } from "./Avatar.tsx";
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span className="text-amber" aria-label={`${rating} out of 5`}>
+    <span className="text-moss" aria-label={`${rating} out of 5`}>
       {"★".repeat(rating)}
       <span className="text-line">{"★".repeat(Math.max(0, 5 - rating))}</span>
     </span>
@@ -147,7 +147,7 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
               onChange={(event) => setDraft(event.target.value)}
               maxLength={200}
               placeholder="Add a comment…"
-              className="min-w-0 flex-1 rounded-full border border-line bg-cream px-4 py-2 text-sm outline-none focus:border-amber"
+              className="min-w-0 flex-1 rounded-full border border-line bg-cream px-4 py-2 text-sm outline-none focus:border-moss"
             />
             <button type="submit" disabled={!draft.trim()} className="rounded-full bg-ink px-4 text-sm font-semibold text-foam disabled:opacity-40">
               Post

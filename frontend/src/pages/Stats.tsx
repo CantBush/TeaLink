@@ -69,7 +69,7 @@ export function Stats() {
 
       <p className="text-center text-[15px] text-mute">
         Want today's picks from these numbers?{" "}
-        <Link to="/" className="font-semibold text-amber">
+        <Link to="/" className="font-semibold text-moss">
           Open TeaLink
         </Link>
       </p>

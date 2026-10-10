@@ -12,7 +12,7 @@ function Stars({ rating }: { rating: number }) {
         <svg
           key={index}
           viewBox="0 0 20 20"
-          className={`h-4 w-4 ${index < rating ? "text-amber" : "text-line"}`}
+          className={`h-4 w-4 ${index < rating ? "text-moss" : "text-line"}`}
           fill="currentColor"
           aria-hidden="true"
         >
@@ -34,14 +34,14 @@ function FactorBars({ factors }: { factors: FactorContribution[] }) {
           <li key={factor.factor}>
             <div className="mb-1 flex items-baseline justify-between text-sm">
               <span className="font-semibold">{factorLabel(factor.factor)}</span>
-              <span className={positive ? "text-amber" : "text-mute"}>
+              <span className={positive ? "text-moss" : "text-mute"}>
                 {positive ? "+" : ""}
                 {factor.weight.toFixed(2)}
               </span>
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-line">
               <div
-                className={`h-full rounded-full ${positive ? "bg-amber" : "bg-[#b9aeb0]"}`}
+                className={`h-full rounded-full ${positive ? "bg-moss" : "bg-[#aab6ad]"}`}
                 style={{ width: `${width}%` }}
               />
             </div>
@@ -78,7 +78,7 @@ function PriorityMath({ decision }: { decision: Decision }) {
               <td className="py-2 font-semibold">{dimensionLabel(dimension)}</td>
               <td className="py-2 text-right">{matchPercent(scores[dimension])}</td>
               <td className="py-2 text-right">{matchPercent(weights[dimension])}%</td>
-              <td className="py-2 text-right text-amber">
+              <td className="py-2 text-right text-moss">
                 {(scores[dimension] * weights[dimension] * 100).toFixed(0)}
               </td>
             </tr>
@@ -87,13 +87,13 @@ function PriorityMath({ decision }: { decision: Decision }) {
             <td className="py-2" colSpan={3}>
               Overall
             </td>
-            <td className="py-2 text-right text-amber">{matchPercent(top.score)}</td>
+            <td className="py-2 text-right text-moss">{matchPercent(top.score)}</td>
           </tr>
         </tbody>
       </table>
       {decision.dropped && decision.dropped.length > 0 ? (
         <div className="mt-5">
-          <h3 className="text-sm font-semibold tracking-wide text-amber uppercase">Ruled out</h3>
+          <h3 className="text-sm font-semibold tracking-wide text-moss uppercase">Ruled out</h3>
           <ul className="mt-2 space-y-1 text-sm text-mute">
             {decision.dropped.map((item) => (
               <li key={item.drink_id}>
@@ -123,7 +123,7 @@ export function WhyThis() {
     <main className="mx-auto max-w-3xl space-y-6 px-5 py-8">
       <TeaLinkTabs />
       <header className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">
+        <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">
           Why this
         </p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
@@ -131,7 +131,7 @@ export function WhyThis() {
             <h1 className="font-display text-4xl leading-tight">{decision.drink_name}</h1>
             <p className="mt-2 text-mute">at {shopLabel(decision.shop_id)}</p>
           </div>
-          <p className="font-display text-5xl text-amber">{pct}%</p>
+          <p className="font-display text-5xl text-moss">{pct}%</p>
         </div>
         <p className="mt-5 max-w-xl leading-relaxed">{decision.explanation}</p>
         {proposal ? (
@@ -172,7 +172,7 @@ export function WhyThis() {
 
       <Link
         to="/counterfactual"
-        className="inline-flex rounded-full bg-amber px-5 py-2.5 text-sm font-semibold tracking-wide text-cream"
+        className="inline-flex rounded-full bg-moss px-5 py-2.5 text-sm font-semibold tracking-wide text-cream"
       >
         WHAT WOULD CHANGE THIS?
       </Link>

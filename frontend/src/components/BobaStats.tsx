@@ -1,6 +1,7 @@
 import type { BobaStats as Stats, StatKey } from "../api/types.ts";
 import { drinkInfo } from "../lib/catalog.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent, shopLabel } from "../lib/format.ts";
+import { tint } from "../lib/palette.ts";
 import { STAT_LABELS, milkFruitWord, noteLabel, sweetnessWord, toppingsWord } from "../lib/stats.ts";
 
 function Meter({ value, left, right, accent }: { value: number; left: string; right: string; accent: string }) {
@@ -120,7 +121,7 @@ export function BobaStatsGrid({
   accent: string;
   hidden?: StatKey[];
 }) {
-  const cards = order.map((key) => ({ key, content: body(key, stats, accent) })).filter((card) => card.content);
+  const cards = order.map((key) => ({ key, content: body(key, stats, tint(accent)) })).filter((card) => card.content);
   if (cards.length === 0) {
     return <p className="rounded-3xl border border-dashed border-line p-6 text-center text-sm text-mute">No boba stats shared yet.</p>;
   }

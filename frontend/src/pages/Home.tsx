@@ -6,6 +6,7 @@ import { Avatar } from "../components/Avatar.tsx";
 import { FeedCard } from "../components/FeedCard.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { matchPercent } from "../lib/format.ts";
+import { tint } from "../lib/palette.ts";
 import { hasChosenAccount, useMe } from "../state/me.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
@@ -23,13 +24,13 @@ function Suggested({ users, onFollow }: { users: UserProfile[]; onFollow: (user:
               <p className="truncate text-xs text-mute">{user.stats.personality ?? `@${user.handle}`}</p>
             </Link>
             {user.taste_match !== null ? (
-              <p className="mt-1 text-xs font-semibold text-amber">{matchPercent(user.taste_match)}% taste match</p>
+              <p className="mt-1 text-xs font-semibold text-moss">{matchPercent(user.taste_match)}% taste match</p>
             ) : null}
             <button
               type="button"
               onClick={() => onFollow(user)}
               className="mt-3 w-full rounded-full py-1.5 text-sm font-semibold text-foam"
-              style={{ background: user.accent }}
+              style={{ background: tint(user.accent) }}
             >
               Follow
             </button>
@@ -85,7 +86,7 @@ export function Home() {
       <PreviewNote />
       <header className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">Your friends</p>
+          <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">Your friends</p>
           <h1 className="mt-1 font-display text-4xl">What everyone's sipping</h1>
         </div>
         <Link to="/" className="hidden shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam sm:block">

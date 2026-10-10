@@ -70,7 +70,7 @@ function split(events: LensEvent[]): Phases {
 function Phase({ step, title, children }: { step: number; title: string; children: ReactNode }) {
   return (
     <li className="timeline-in">
-      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-amber uppercase">
+      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-moss uppercase">
         {step}. {title}
       </p>
       {children}
@@ -103,7 +103,7 @@ function TransportBadge({ health, busCount, usingMock }: { health: Health | null
   }
   if (health.transport === "agntcy") {
     return (
-      <span className={`${base} bg-blush`} title="AGNTCY is configured, but the bus didn't answer, so agents ran in-process">
+      <span className={`${base} bg-sage`} title="AGNTCY is configured, but the bus didn't answer, so agents ran in-process">
         In-process fallback
       </span>
     );
@@ -195,7 +195,7 @@ export function AgentTimeline({
       {phases.changes.length > 0 ? (
         <div className="space-y-2 px-5 pb-4">
           {phases.changes.map((event) => (
-            <p key={event.seq} className="timeline-in rounded-2xl bg-blush px-4 py-2.5 text-sm font-semibold">
+            <p key={event.seq} className="timeline-in rounded-2xl bg-sage px-4 py-2.5 text-sm font-semibold">
               {event.message}
             </p>
           ))}
@@ -212,10 +212,10 @@ export function AgentTimeline({
                     {phases.selections.map((event) => (
                       <span
                         key={event.seq}
-                        className="flex items-center gap-1 rounded-full bg-blush px-2.5 py-0.5 text-xs font-semibold"
+                        className="flex items-center gap-1 rounded-full bg-sage px-2.5 py-0.5 text-xs font-semibold"
                       >
                         {overBus.has(event.agent_id ?? "") ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-label="over NATS" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-moss" aria-label="over NATS" />
                         ) : null}
                         {agentLabel(event.agent_id ?? "")}
                       </span>
@@ -238,7 +238,7 @@ export function AgentTimeline({
 
           {phases.preference ? (
             <Phase step={stepOf("priorities")} title={`${name}'s priorities`}>
-              <p className="rounded-2xl border border-amber/60 bg-petal px-4 py-3 text-sm">
+              <p className="rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">
                 {phases.preference.message}
               </p>
             </Phase>
@@ -274,7 +274,7 @@ export function AgentTimeline({
                   const { card, tag } = debateTone(event);
                   return (
                     <li key={event.seq} className={`rounded-2xl border px-4 py-3 text-sm ${card}`}>
-                      <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-amber uppercase">
+                      <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-moss uppercase">
                         {tag}
                       </span>
                       {event.message}
@@ -318,7 +318,7 @@ export function AgentTimeline({
 
           {phases.decision ? (
             <Phase step={stepOf("decision")} title="Decision">
-              <p className="rounded-2xl border border-amber bg-petal px-4 py-3 font-semibold">
+              <p className="rounded-2xl border border-moss bg-mist px-4 py-3 font-semibold">
                 {phases.decision.message}
               </p>
             </Phase>

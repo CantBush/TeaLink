@@ -21,7 +21,7 @@ function Bar({ value, tone }: { value: number; tone: "strong" | "soft" }) {
   return (
     <div className="h-2.5 overflow-hidden rounded-full bg-line">
       <div
-        className={`h-full rounded-full ${tone === "strong" ? "bg-amber" : "bg-[#b9aeb0]"}`}
+        className={`h-full rounded-full ${tone === "strong" ? "bg-moss" : "bg-[#aab6ad]"}`}
         style={{ width: `${Math.min(100, matchPercent(value))}%` }}
       />
     </div>
@@ -58,7 +58,7 @@ export function Evidence() {
     <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
       <TeaLinkTabs />
       <header>
-        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">Evidence</p>
+        <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">Evidence</p>
         <h1 className="mt-2 font-display text-4xl leading-tight">Does the team learn what you want?</h1>
         <p className="mt-2 max-w-2xl text-mute">
           {result.personas.length} simulated users with hidden priorities each pick from the top 3 for{" "}
@@ -74,10 +74,10 @@ export function Evidence() {
       </header>
 
       {learning && fixed ? (
-        <section className="rounded-[28px] border border-amber bg-foam p-6 sm:p-8">
+        <section className="rounded-[28px] border border-moss bg-foam p-6 sm:p-8">
           <p className="font-display text-3xl leading-snug">
             With learning, the team's #1 was the user's favorite{" "}
-            <span className="text-amber">{count(learning.hit_rate)}</span> times, vs {count(fixed.hit_rate)} with
+            <span className="text-moss">{count(learning.hit_rate)}</span> times, vs {count(fixed.hit_rate)} with
             fixed priorities
             {popularity ? ` and ${count(popularity.hit_rate)} for the most popular drink` : ""}.
           </p>

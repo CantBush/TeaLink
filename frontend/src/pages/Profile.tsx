@@ -11,6 +11,7 @@ import { SendRec } from "../components/SendRec.tsx";
 import { drinkInfo } from "../lib/catalog.ts";
 import { matchPercent, price, shopLabel } from "../lib/format.ts";
 import { coverPhoto, drinkPhoto } from "../lib/images.ts";
+import { tint } from "../lib/palette.ts";
 import { ALL_STATS } from "../lib/stats.ts";
 import { hasChosenAccount, useMe } from "../state/me.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
@@ -62,7 +63,7 @@ export function Profile() {
     return (
       <main className="mx-auto max-w-3xl space-y-4 px-5 py-8">
         <p className="rounded-[28px] border border-line bg-foam p-6">{error}</p>
-        <Link to="/home" className="text-sm font-semibold text-amber">
+        <Link to="/home" className="text-sm font-semibold text-moss">
           Back to Home
         </Link>
       </main>
@@ -93,11 +94,11 @@ export function Profile() {
           src={coverPhoto(profile)}
           alt=""
           className="h-28 w-full object-cover sm:h-40"
-          style={{ background: profile.accent }}
+          style={{ background: tint(profile.accent) }}
         />
         <div className="px-5 pb-5 sm:px-7">
           <div className="-mt-12 flex items-end justify-between gap-3 sm:-mt-14">
-            <Avatar avatar={profile.avatar} size="xl" ring={profile.accent} />
+            <Avatar avatar={profile.avatar} size="xl" ring={tint(profile.accent)} />
             <div className="flex gap-2 pb-1">
               {own ? (
                 <>
@@ -124,7 +125,7 @@ export function Profile() {
                     className={`rounded-full px-5 py-2 text-sm font-semibold ${
                       profile.followed_by_me ? "border border-line text-ink" : "text-foam"
                     }`}
-                    style={profile.followed_by_me ? undefined : { background: profile.accent }}
+                    style={profile.followed_by_me ? undefined : { background: tint(profile.accent) }}
                   >
                     {profile.followed_by_me ? "Following" : "Follow"}
                   </button>
@@ -137,12 +138,12 @@ export function Profile() {
           <p className="text-sm text-mute">@{profile.handle}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {profile.stats.personality ? (
-              <span className="rounded-full px-3 py-1 text-xs font-semibold text-foam" style={{ background: profile.accent }}>
+              <span className="rounded-full px-3 py-1 text-xs font-semibold text-foam" style={{ background: tint(profile.accent) }}>
                 {profile.stats.personality}
               </span>
             ) : null}
             {profile.taste_match !== null ? (
-              <span className="rounded-full bg-blush px-3 py-1 text-xs font-semibold">
+              <span className="rounded-full bg-sage px-3 py-1 text-xs font-semibold">
                 {matchPercent(profile.taste_match)}% taste match with you
               </span>
             ) : null}
@@ -184,7 +185,7 @@ export function Profile() {
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <h2 className="font-display text-2xl">{own ? "Highlights" : "Boba stats"}</h2>
           {own ? (
-            <Link to="/stats" className="text-sm font-semibold text-amber">
+            <Link to="/stats" className="text-sm font-semibold text-moss">
               All stats{hiddenCount > 0 ? ` (${hiddenCount} hidden)` : ""}
             </Link>
           ) : null}

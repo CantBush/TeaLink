@@ -51,9 +51,9 @@ export function TeaLink() {
               {session.similar.map((friend) => (
                 <li
                   key={friend.id}
-                  className="flex min-w-0 items-center gap-3 rounded-2xl bg-petal px-4 py-3"
+                  className="flex min-w-0 items-center gap-3 rounded-2xl bg-mist px-4 py-3"
                 >
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-blush font-display text-lg">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sage font-display text-lg">
                     {friend.name.slice(0, 1)}
                   </span>
                   <span className="min-w-0">

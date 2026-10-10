@@ -51,7 +51,7 @@ export function NavBar() {
   const tabs: Tab[] = [
     { key: "home", to: "/home", label: "Home", icon: <HomeIcon />, active: (path) => path === "/home" },
     { key: "discover", to: "/discover", label: "Discover", icon: <SearchIcon />, active: (path) => path === "/discover" },
-    { key: "tealink", to: "/", label: "TeaLink", icon: <BobaMark />, active: (path) => TEALINK_PATHS.includes(path) },
+    { key: "tealink", to: "/", label: "TeaLink", icon: <BobaMark className="h-7 w-9" />, active: (path) => TEALINK_PATHS.includes(path) },
     { key: "stats", to: "/stats", label: "Stats", icon: <StatsIcon />, active: (path) => path === "/stats" },
     {
       key: "profile",
@@ -66,9 +66,9 @@ export function NavBar() {
     <>
       <header className="sticky top-0 z-20 border-b border-line bg-foam/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-x-8 px-5 py-3 md:py-4">
-          <NavLink to="/" className="flex items-center gap-1.5 font-hand text-[28px] leading-none text-ink">
-            <BobaMark className="h-8 w-8" />
-            tealink
+          <NavLink to="/" className="flex items-center gap-2 text-ink" aria-label="TeaLink home">
+            <BobaMark className="h-9 w-12" />
+            <span className="font-logo text-[22px] leading-none tracking-[0.2em] uppercase">TeaLink</span>
           </NavLink>
           <nav className="hidden items-center gap-7 text-[15px] tracking-[0.08em] lowercase md:flex" aria-label="Main">
             {tabs.slice(0, 4).map((tab) => (
@@ -108,7 +108,7 @@ export function NavBar() {
                 <span
                   className={`grid place-items-center ${
                     center
-                      ? `-mt-5 h-12 w-12 rounded-full border-4 border-foam ${on ? "bg-ink text-foam" : "bg-blush text-ink"}`
+                      ? `-mt-5 h-12 w-12 rounded-full border-4 border-foam ${on ? "bg-ink text-foam" : "bg-sage text-ink"}`
                       : "h-7"
                   }`}
                 >

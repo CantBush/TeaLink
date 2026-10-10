@@ -14,7 +14,7 @@ export function TasteBars({ profile }: { profile: TasteProfile }) {
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-line">
               <div
-                className="h-full rounded-full bg-amber"
+                className="h-full rounded-full bg-moss"
                 style={{ width: `${pct}%` }}
               />
             </div>

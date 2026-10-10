@@ -129,7 +129,7 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
         {drink.flavor_tags.length ? (
           <ul className="mt-4 flex flex-wrap gap-2">
             {drink.flavor_tags.map((tag) => (
-              <li key={tag} className="rounded-full bg-blush px-3 py-1 text-sm font-semibold">
+              <li key={tag} className="rounded-full bg-sage px-3 py-1 text-sm font-semibold">
                 {noteLabel(tag)}
               </li>
             ))}
@@ -157,7 +157,7 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
                 <Avatar avatar={item.author.avatar} size="sm" />
                 <p className="text-[15px]">
                   <span className="font-semibold">{item.author.display_name}</span>{" "}
-                  <span className="text-amber">{"★".repeat(item.rating ?? 0)}</span>
+                  <span className="text-moss">{"★".repeat(item.rating ?? 0)}</span>
                   {item.text ? <span className="block text-ink/80">{item.text}</span> : null}
                 </p>
               </li>
@@ -254,7 +254,7 @@ export function Discover() {
       <PreviewNote />
       <header>
         <h1 className="font-display text-4xl">Discover</h1>
-        <label className="mt-4 flex items-center gap-3 rounded-full border border-line bg-foam px-5 focus-within:border-amber">
+        <label className="mt-4 flex items-center gap-3 rounded-full border border-line bg-foam px-5 focus-within:border-moss">
           <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-mute" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" strokeLinecap="round" />
@@ -286,7 +286,7 @@ export function Discover() {
             ))}
           </ul>
           {scope === "all" && folks.length > 4 ? (
-            <button type="button" onClick={() => setScope("people")} className="mt-1 min-h-11 text-sm font-semibold text-amber">
+            <button type="button" onClick={() => setScope("people")} className="mt-1 min-h-11 text-sm font-semibold text-moss">
               See all {folks.length} people
             </button>
           ) : null}
@@ -357,7 +357,7 @@ export function Discover() {
             </ul>
           )}
           {scope === "all" && drinks.length > 8 ? (
-            <button type="button" onClick={() => setScope("drinks")} className="mt-1 min-h-11 text-sm font-semibold text-amber">
+            <button type="button" onClick={() => setScope("drinks")} className="mt-1 min-h-11 text-sm font-semibold text-moss">
               See all {drinks.length} drinks
             </button>
           ) : null}

@@ -134,7 +134,7 @@ function author(userId: string): Author {
   const user = store.users.find((item) => item.user_id === userId);
   return user
     ? { handle: user.handle, display_name: user.display_name, avatar: user.avatar }
-    : { handle: userId, display_name: userId, avatar: { emoji: "🧋", color: "#f0e2d0" } };
+    : { handle: userId, display_name: userId, avatar: { emoji: "🧋", color: "#e6ece1" } };
 }
 
 function feedView(item: StoredFeedItem, viewerId: string): FeedItem {
@@ -171,8 +171,8 @@ export const socialMock = {
       handle: clean,
       display_name: displayName.trim() || clean,
       bio: "",
-      avatar: { emoji: "🧋", color: "#f3d9b1" },
-      accent: "#c4742a",
+      avatar: { emoji: "🧋", color: "#dfe9d6" },
+      accent: "#3d6b4f",
       pinned_drink_id: null,
       pinned_shop_id: null,
       visible_stats: ["sweetness", "milk_vs_fruit", "toppings", "top_notes", "priorities"],
