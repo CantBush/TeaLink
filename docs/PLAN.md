@@ -413,6 +413,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **3:50 PM:** Track A fixed quiz flavors: a new user's `top_notes` are the flavors they picked, not notes inferred from matching drinks.
 - **3:45 PM:** Track A shipped `GET /drinks`, `GET /shops`, null `photo_url` / `cover_url`, and shop offers. A near-tie discount is up to 10% and only when the runner-up is losing on price, so it can flip #1 without changing the scripted demo. Track B: mirror `offer` on `LensEventType` and `RankedDrink`, and call the two new lists. Shapes are in `PROGRESS.md`.
 - **3:35 PM:** Merged Track A's social backend into main with Track B's social frontend. The API now matches the 3:10 contract: bare lists, `{viewer}` on likes and comments, `author` on feed items, `&author=` on the feed, toppings as a 0–1 number, and the quiz questions from `mocks/social/quiz.json`.
 - **3:30 PM:** Added "UI cleanup and five tabs":

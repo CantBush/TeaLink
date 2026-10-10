@@ -137,10 +137,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Known issues and decisions to revisit
 
-- **For Track A: quiz flavors don't reach `top_notes`.**
-  - **Repro:** a test user who picked Fruity, Floral, and Matcha in the quiz got `top_notes: ["fruit", "oolong"]`.
-  - **Cause:** `core/stats.py` uses `top_notes(liked) or quiz_flavors`, and the quiz's synthetic five-star reviews count as liked drinks, so the chosen flavors are never used.
-  - **Suggested fix:** for a user with no real reviews, use the quiz flavors first, or put them ahead of the inferred notes.
+- **Quiz flavors now reach `top_notes`.** A user with no reviews keeps the flavors they picked, in that order. Fruity, Floral, and Matcha come back as `["fruit", "jasmine", "matcha"]` instead of notes inferred from matching drinks.
 
 - **AGNTCY reset heartbeat is fixed.** Bus heartbeats now update whichever runtime is serving requests, so Reset demo no longer lets the new registry time out. Local mode was already fine.
 - **Setup note:** AGNTCY mode needs `pip install -e ".[dev,bus]"`. Without the `bus` extra, `make agents` exits with "agntcy-app-sdk is not installed", and the API quietly runs in-process.
