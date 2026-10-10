@@ -142,7 +142,7 @@ export function Profile() {
               </span>
             ) : null}
             {profile.taste_match !== null ? (
-              <span className="rounded-full bg-[#f0e2d0] px-3 py-1 text-xs font-semibold">
+              <span className="rounded-full bg-blush px-3 py-1 text-xs font-semibold">
                 {matchPercent(profile.taste_match)}% taste match with you
               </span>
             ) : null}

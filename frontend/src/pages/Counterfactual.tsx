@@ -13,9 +13,9 @@ function MovementChip({ movement }: { movement: Movement }) {
     case "new":
       return <span className={`${base} bg-amber text-cream`}>New</span>;
     case "up":
-      return <span className={`${base} bg-[#f0e2d0] text-amber`}>Up {movement.by}</span>;
+      return <span className={`${base} bg-blush text-amber`}>Up {movement.by}</span>;
     case "down":
-      return <span className={`${base} bg-[#eadfce] text-mute`}>Down {movement.by}</span>;
+      return <span className={`${base} bg-line text-mute`}>Down {movement.by}</span>;
     case "same":
       return <span className={`${base} text-mute`}>Same</span>;
   }

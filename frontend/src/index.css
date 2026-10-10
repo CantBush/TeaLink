@@ -1,14 +1,23 @@
 @import "tailwindcss";
 
+/*
+ * Look: HEYTEA's near-white pages, black line doodles, and lowercase spaced nav,
+ * blended with Molly Tea's blush surfaces, rose accent, flared display type, and black pills.
+ * Token names are kept from the first theme so every screen picks this up.
+ */
 @theme {
-  --font-display: "Fraunces", "Iowan Old Style", Palatino, serif;
-  --font-sans: "Source Sans 3", ui-sans-serif, sans-serif;
-  --color-cream: #f6f1e7;
-  --color-ink: #2c1810;
-  --color-amber: #c4742a;
-  --color-foam: #fffaf3;
-  --color-line: #e6d5c3;
-  --color-mute: #8a7264;
+  --font-display: "Marcellus", "Optima", "Candara", serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Gaegu", "Comic Sans MS", cursive;
+  --color-cream: #faf7f5;
+  --color-ink: #161414;
+  --color-amber: #b04f68;
+  --color-foam: #ffffff;
+  --color-line: #ece3e1;
+  --color-mute: #6e6466;
+  --color-blush: #f8e3e6;
+  --color-petal: #fdf3f4;
+  --color-leaf: #2f3b2f;
 }
 
 html {
@@ -18,14 +27,28 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f6f1e7;
-  color: #2c1810;
+  background: var(--color-cream);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+p,
+li,
+span {
+  overflow-wrap: break-word;
+}
+
+/* Marcellus has one weight; letter-spacing does the work bold would. */
+.font-display {
+  letter-spacing: 0.01em;
 }
 
 @keyframes timeline-in {

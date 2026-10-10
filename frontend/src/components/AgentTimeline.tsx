@@ -103,7 +103,7 @@ function TransportBadge({ health, busCount, usingMock }: { health: Health | null
   }
   if (health.transport === "agntcy") {
     return (
-      <span className={`${base} bg-[#f0e2d0]`} title="AGNTCY is configured, but the bus didn't answer, so agents ran in-process">
+      <span className={`${base} bg-blush`} title="AGNTCY is configured, but the bus didn't answer, so agents ran in-process">
         In-process fallback
       </span>
     );
@@ -156,44 +156,54 @@ export function AgentTimeline({
     .join(" · ");
 
   return (
-    <section className="rounded-[28px] border border-line bg-foam/80 p-5 sm:p-6">
-      <div className="mb-4 flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-2xl">At the counter</h2>
-        {started || usingMock ? (
-          <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} />
-        ) : (
-          <p className="text-xs text-mute">Waiting</p>
-        )}
-      </div>
-
-      {phases.changes.map((event) => (
-        <p
-          key={event.seq}
-          className="timeline-in mb-4 rounded-2xl border border-amber bg-[#f8efe2] px-4 py-3 text-sm font-semibold"
-        >
-          {event.message}
-        </p>
-      ))}
-
-      {events.length === 0 ? (
-        <p className="text-sm text-mute">{started ? "Asking the counter…" : "The round has not started."}</p>
-      ) : !open ? (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-expanded={false}
-          className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl border border-line bg-cream px-4 py-3 text-left"
-        >
-          <span>
-            <span className="block font-semibold">See how the agents decided</span>
-            {summary ? <span className="block text-sm text-mute">{summary}</span> : null}
+    <section className="min-w-0 self-start rounded-[28px] border border-line bg-foam">
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={events.length === 0}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3 px-5 py-4 text-left disabled:cursor-default"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="font-hand text-[26px] leading-none lowercase">at the counter</span>
+            {started || usingMock ? (
+              <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} />
+            ) : null}
           </span>
-          <span aria-hidden className="text-xl text-amber">
-            ›
+          <span className="mt-1 block text-[15px] font-semibold">
+            {events.length === 0
+              ? started
+                ? "Asking the counter…"
+                : "The round has not started."
+              : open
+                ? "How the agents decided"
+                : "See how the agents decided"}
           </span>
-        </button>
-      ) : (
-        <ol className="space-y-5">
+          {!open && summary ? <span className="block truncate text-xs text-mute">{summary}</span> : null}
+        </span>
+        {events.length > 0 ? (
+          <span className="flex shrink-0 items-center gap-1 text-sm tracking-[0.08em] text-ink/70 lowercase">
+            {open ? "hide" : "show"}
+            <svg viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <path d="m5 8 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        ) : null}
+      </button>
+
+      {phases.changes.length > 0 ? (
+        <div className="space-y-2 px-5 pb-4">
+          {phases.changes.map((event) => (
+            <p key={event.seq} className="timeline-in rounded-2xl bg-blush px-4 py-2.5 text-sm font-semibold">
+              {event.message}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {events.length === 0 || !open ? null : (
+        <ol className="space-y-5 border-t border-line px-5 py-5">
           {phases.selections.length > 0 ? (
             <Phase step={stepOf("team")} title="Team selected">
               <details className="rounded-2xl border border-line/80 bg-cream px-4 py-3">
@@ -202,7 +212,7 @@ export function AgentTimeline({
                     {phases.selections.map((event) => (
                       <span
                         key={event.seq}
-                        className="flex items-center gap-1 rounded-full bg-[#f0e2d0] px-2.5 py-0.5 text-xs font-semibold"
+                        className="flex items-center gap-1 rounded-full bg-blush px-2.5 py-0.5 text-xs font-semibold"
                       >
                         {overBus.has(event.agent_id ?? "") ? (
                           <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-label="over NATS" />
@@ -228,7 +238,7 @@ export function AgentTimeline({
 
           {phases.preference ? (
             <Phase step={stepOf("priorities")} title={`${name}'s priorities`}>
-              <p className="rounded-2xl border border-amber/60 bg-[#fbf4ea] px-4 py-3 text-sm">
+              <p className="rounded-2xl border border-amber/60 bg-petal px-4 py-3 text-sm">
                 {phases.preference.message}
               </p>
             </Phase>
@@ -308,7 +318,7 @@ export function AgentTimeline({
 
           {phases.decision ? (
             <Phase step={stepOf("decision")} title="Decision">
-              <p className="rounded-2xl border border-amber bg-[#f8efe2] px-4 py-3 font-semibold">
+              <p className="rounded-2xl border border-amber bg-petal px-4 py-3 font-semibold">
                 {phases.decision.message}
               </p>
             </Phase>
@@ -316,8 +326,13 @@ export function AgentTimeline({
         </ol>
       )}
       {open && events.length > 0 ? (
-        <button type="button" onClick={toggle} aria-expanded className="mt-4 min-h-11 text-sm font-semibold text-mute hover:text-ink">
-          Hide the details
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded
+          className="min-h-11 px-5 pb-4 text-sm tracking-[0.08em] text-mute lowercase hover:text-ink"
+        >
+          hide the details
         </button>
       ) : null}
     </section>

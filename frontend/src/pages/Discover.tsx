@@ -129,7 +129,7 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
         {drink.flavor_tags.length ? (
           <ul className="mt-4 flex flex-wrap gap-2">
             {drink.flavor_tags.map((tag) => (
-              <li key={tag} className="rounded-full bg-[#f0e2d0] px-3 py-1 text-sm font-semibold">
+              <li key={tag} className="rounded-full bg-blush px-3 py-1 text-sm font-semibold">
                 {noteLabel(tag)}
               </li>
             ))}

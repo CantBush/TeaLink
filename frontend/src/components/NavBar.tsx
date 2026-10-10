@@ -64,25 +64,27 @@ export function NavBar() {
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-line/80 bg-cream/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-x-6 px-5 py-3 md:py-4">
-          <NavLink to="/" className="flex items-center gap-2 font-display text-2xl tracking-tight text-ink">
-            <BobaMark />
-            TeaLink
+      <header className="sticky top-0 z-20 border-b border-line bg-foam/95 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center gap-x-8 px-5 py-3 md:py-4">
+          <NavLink to="/" className="flex items-center gap-1.5 font-hand text-[28px] leading-none text-ink">
+            <BobaMark className="h-8 w-8" />
+            tealink
           </NavLink>
-          <nav className="hidden items-center gap-1 text-sm font-semibold md:flex" aria-label="Main">
+          <nav className="hidden items-center gap-7 text-[15px] tracking-[0.08em] lowercase md:flex" aria-label="Main">
             {tabs.slice(0, 4).map((tab) => (
               <NavLink
                 key={tab.key}
                 to={tab.to}
-                className={`rounded-full px-3.5 py-2 ${tab.active(pathname) ? "bg-ink text-foam" : "text-ink/75 hover:text-ink"}`}
+                className={`border-b-[1.5px] py-1.5 ${
+                  tab.active(pathname) ? "border-ink text-ink" : "border-transparent text-ink/60 hover:text-ink"
+                }`}
               >
                 {tab.label}
               </NavLink>
             ))}
           </nav>
-          <NavLink to={profilePath} className="ml-auto flex items-center gap-2 text-sm font-semibold text-ink">
-            <span className="hidden md:inline">{profile?.display_name ?? "Profile"}</span>
+          <NavLink to={profilePath} className="ml-auto flex items-center gap-2 text-[15px] tracking-[0.04em] text-ink">
+            <span className="hidden lowercase md:inline">{profile?.display_name ?? "profile"}</span>
             <Avatar avatar={profile?.avatar} size="sm" />
           </NavLink>
         </div>
@@ -92,7 +94,7 @@ export function NavBar() {
         aria-label="Tabs"
         className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-foam/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden ${quiz ? "hidden" : ""}`}
       >
-        <div className="mx-auto grid max-w-md grid-cols-5 text-[11px] font-semibold">
+        <div className="mx-auto grid max-w-md grid-cols-5 text-[11px] tracking-[0.06em] lowercase">
           {tabs.map((tab) => {
             const on = tab.active(pathname);
             const center = tab.key === "tealink";
@@ -101,11 +103,13 @@ export function NavBar() {
                 key={tab.key}
                 to={tab.to}
                 aria-current={on ? "page" : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 py-1.5 ${on ? "text-amber" : "text-ink/70"}`}
+                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 py-1.5 ${on ? "font-semibold text-ink" : "text-ink/55"}`}
               >
                 <span
                   className={`grid place-items-center ${
-                    center ? `-mt-5 h-12 w-12 rounded-full border-4 border-foam shadow ${on ? "bg-ink" : "bg-[#f0e2d0]"}` : "h-7"
+                    center
+                      ? `-mt-5 h-12 w-12 rounded-full border-4 border-foam ${on ? "bg-ink text-foam" : "bg-blush text-ink"}`
+                      : "h-7"
                   }`}
                 >
                   {tab.icon}

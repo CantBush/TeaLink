@@ -21,7 +21,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
 
   return (
     <section className="rounded-[28px] border border-line bg-foam p-5 sm:p-6">
-      <h2 className="font-display text-2xl">What if</h2>
+      <h2 className="font-hand text-[26px] leading-none lowercase">what if…</h2>
       <p className="mt-1 text-sm text-mute">
         Change the world, then watch the agents re-plan. Each button starts a fresh deliberation.
       </p>

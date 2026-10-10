@@ -11,15 +11,15 @@ const LINKS = [
 export function TeaLinkTabs() {
   return (
     <nav aria-label="TeaLink" className="-mx-5 overflow-x-auto px-5 lg:col-span-full">
-      <ul className="flex w-max gap-2 rounded-full border border-line bg-foam p-1">
+      <ul className="flex w-max gap-2">
         {LINKS.map((link) => (
           <li key={link.to}>
             <NavLink
               to={link.to}
               end={link.end}
               className={({ isActive }) =>
-                `block rounded-full px-4 py-2.5 text-sm font-semibold whitespace-nowrap ${
-                  isActive ? "bg-ink text-foam" : "text-ink/70 hover:text-ink"
+                `block rounded-full px-4 py-2 text-sm tracking-[0.06em] whitespace-nowrap lowercase transition-colors ${
+                  isActive ? "bg-ink text-foam" : "bg-blush text-ink/80 hover:bg-ink/10 hover:text-ink"
                 }`
               }
             >

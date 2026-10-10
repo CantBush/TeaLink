@@ -19,9 +19,9 @@ const METHOD_NOTES: Record<EvalMethodName, string> = {
 
 function Bar({ value, tone }: { value: number; tone: "strong" | "soft" }) {
   return (
-    <div className="h-2.5 overflow-hidden rounded-full bg-[#eadfce]">
+    <div className="h-2.5 overflow-hidden rounded-full bg-line">
       <div
-        className={`h-full rounded-full ${tone === "strong" ? "bg-amber" : "bg-[#b7a89a]"}`}
+        className={`h-full rounded-full ${tone === "strong" ? "bg-amber" : "bg-[#b9aeb0]"}`}
         style={{ width: `${Math.min(100, matchPercent(value))}%` }}
       />
     </div>

@@ -12,7 +12,7 @@ export function TasteBars({ profile }: { profile: TasteProfile }) {
               <span className="font-semibold">{attributeLabel(key)}</span>
               <span className="text-mute">{pct}%</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-[#eadfce]">
+            <div className="h-2.5 overflow-hidden rounded-full bg-line">
               <div
                 className="h-full rounded-full bg-amber"
                 style={{ width: `${pct}%` }}

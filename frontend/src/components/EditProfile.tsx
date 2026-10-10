@@ -24,7 +24,7 @@ function Swatches({ colors, value, onPick, label }: { colors: string[]; value: s
           aria-label={color}
           onClick={() => onPick(color)}
           className={`h-8 w-8 rounded-full border-2 ${value === color ? "border-ink" : "border-foam"}`}
-          style={{ background: color, boxShadow: "0 0 0 1px #e6d5c3" }}
+          style={{ background: color, boxShadow: "0 0 0 1px #ece3e1" }}
         />
       ))}
     </div>
@@ -141,7 +141,7 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
                   type="button"
                   onClick={() => setEmoji(item)}
                   aria-pressed={emoji === item}
-                  className={`rounded-xl py-1 text-2xl ${emoji === item ? "bg-[#f0e2d0]" : "hover:bg-cream"}`}
+                  className={`rounded-xl py-1 text-2xl ${emoji === item ? "bg-blush" : "hover:bg-cream"}`}
                 >
                   {item}
                 </button>

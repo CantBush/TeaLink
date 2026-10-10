@@ -31,7 +31,7 @@ export function BobaCard({
   return (
     <article
       className="relative mx-auto w-full max-w-sm overflow-hidden rounded-[36px] p-7 text-foam shadow-xl"
-      style={{ background: `linear-gradient(160deg, ${accent} 0%, #2c1810 85%)` }}
+      style={{ background: `linear-gradient(160deg, ${accent} 0%, #161414 88%)` }}
     >
       <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-foam/10" aria-hidden />
       <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-foam/5" aria-hidden />

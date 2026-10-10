@@ -21,8 +21,8 @@ export function Avatar({
     <span
       className={`inline-grid shrink-0 place-items-center rounded-full ${SIZES[size]}`}
       style={{
-        background: avatar?.color ?? "#f0e2d0",
-        boxShadow: ring ? `0 0 0 3px #fffaf3, 0 0 0 5px ${ring}` : undefined,
+        background: avatar?.color ?? "#f8e3e6",
+        boxShadow: ring ? `0 0 0 3px #ffffff, 0 0 0 5px ${ring}` : undefined,
       }}
       aria-hidden
     >

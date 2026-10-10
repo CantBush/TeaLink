@@ -39,9 +39,9 @@ function FactorBars({ factors }: { factors: FactorContribution[] }) {
                 {factor.weight.toFixed(2)}
               </span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-[#eadfce]">
+            <div className="h-2.5 overflow-hidden rounded-full bg-line">
               <div
-                className={`h-full rounded-full ${positive ? "bg-amber" : "bg-[#b7a89a]"}`}
+                className={`h-full rounded-full ${positive ? "bg-amber" : "bg-[#b9aeb0]"}`}
                 style={{ width: `${width}%` }}
               />
             </div>

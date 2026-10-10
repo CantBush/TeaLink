@@ -6,7 +6,7 @@ import { STAT_LABELS, milkFruitWord, noteLabel, sweetnessWord, toppingsWord } fr
 function Meter({ value, left, right, accent }: { value: number; left: string; right: string; accent: string }) {
   return (
     <div className="mt-3">
-      <div className="relative h-2.5 rounded-full bg-[#eadfce]">
+      <div className="relative h-2.5 rounded-full bg-line">
         <span
           className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foam shadow"
           style={{ left: `${Math.min(Math.max(value, 0.04), 0.96) * 100}%`, background: accent }}
@@ -94,7 +94,7 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string) {
           {order.map((dimension) => (
             <li key={dimension} className="flex items-center gap-2 text-xs font-semibold">
               <span className="w-24 shrink-0 text-mute">{dimensionLabel(dimension)}</span>
-              <span className="h-2 flex-1 overflow-hidden rounded-full bg-[#eadfce]">
+              <span className="h-2 flex-1 overflow-hidden rounded-full bg-line">
                 <span className="block h-full rounded-full" style={{ width: `${matchPercent(weights[dimension])}%`, background: accent }} />
               </span>
               <span className="w-8 text-right">{matchPercent(weights[dimension])}%</span>

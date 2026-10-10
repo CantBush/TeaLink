@@ -187,7 +187,7 @@ function QuestionStep({
                 onClick={() => toggle(option.id)}
                 aria-pressed={on}
                 className={`flex w-full items-center gap-4 rounded-3xl border-2 px-5 py-4 text-left text-lg font-semibold transition ${
-                  on ? "border-amber bg-[#fbf1e3]" : "border-line bg-foam hover:border-ink/30"
+                  on ? "border-amber bg-petal" : "border-line bg-foam hover:border-ink/30"
                 }`}
               >
                 {option.emoji ? (
