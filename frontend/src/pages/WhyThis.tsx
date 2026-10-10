@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { Decision, FactorContribution, Proposal } from "../api/types.ts";
+import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { DIMENSIONS, dimensionLabel, factorLabel, matchPercent, readableShops, shopLabel } from "../lib/format.ts";
 import { sampleDecision, sampleProposal } from "../mocks/sample.ts";
 import { useSession } from "../state/session.ts";
@@ -120,9 +121,7 @@ export function WhyThis() {
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-5 py-8">
-      <Link to="/" className="text-sm font-semibold text-mute hover:text-ink">
-        Back to Discover
-      </Link>
+      <TeaLinkTabs />
       <header className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
         <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">
           Why this

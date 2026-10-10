@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import type { Decision } from "../api/types.ts";
 import { ControlPanel } from "../components/ControlPanel.tsx";
+import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { type Movement, diffDecisions, topOptions } from "../lib/diff.ts";
 import { dimensionLabel, matchPercent, price, readableShops, shopLabel } from "../lib/format.ts";
 import { sampleSession } from "../mocks/sample.ts";
@@ -88,9 +88,7 @@ export function Counterfactual() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
-      <Link to="/why" className="text-sm font-semibold text-mute hover:text-ink">
-        Back to Why this
-      </Link>
+      <TeaLinkTabs />
       <header>
         <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">What changed</p>
         <h1 className="mt-2 font-display text-4xl leading-tight">

@@ -5,7 +5,7 @@
 ## Before you start
 
 - **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the timeline header says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
-- Press **Reset demo** on Discover before every run. It works in both AGNTCY and local mode.
+- Press **Reset demo** on the TeaLink tab (`/`) before every run. It works in both AGNTCY and local mode.
 - Have a second tab on `/evidence`.
 - Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" on the timeline. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
 
@@ -15,7 +15,7 @@
 
 ## 0:20 to 0:55: one round, with real disagreement
 
-On Discover, point at the **At the counter** timeline, top to bottom:
+On the TeaLink tab, point at the **At the counter** timeline, top to bottom:
 
 1. **Team selected:** "The concierge picks agents by capability, and you can open this to see why each one was chosen. Each agent is its own process. The badge up here shows all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
 2. **Andrew's priorities:** "From his last 4 orders, the Preference agent thinks price matters most to him (43%), then taste (41%)."
@@ -45,7 +45,7 @@ Each button starts a fresh deliberation. After each one, point at the new top 3 
    > "A new shop registers its agent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 81, with Lantern Leaf's Osmanthus Milk Tea right behind it."
 3. **I don't like brown sugar.**
    > "New information from the user. Brown Sugar Hojicha drops out of the top 3, and Osmanthus Milk Tea moves up to #1, in a dead heat with Wintermelon at 75."
-   Click **What changed** in the nav: "Before and after: what moved, what left and why, and notice his priorities didn't change. The world changed, not his taste."
+   Click **What changed** in the TeaLink sub-tabs: "Before and after: what moved, what left and why, and notice his priorities didn't change. The world changed, not his taste."
 4. **#1's shop goes offline** (Lantern Leaf).
    > "The shop that just joined drops off the network. Its agent stops responding, so its drinks are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. The team falls back to Wintermelon, Pearl, and Thai Milk Tea."
 

@@ -173,7 +173,7 @@ export function Profile() {
         <h2 className="mb-3 font-display text-2xl">Reviews</h2>
         {reviews.length === 0 ? (
           <p className="rounded-3xl border border-dashed border-line p-6 text-center text-sm text-mute">
-            {own ? "Pick a drink on Discover and it shows up here." : "Nothing posted yet."}
+            {own ? "Pick a drink on TeaLink and it shows up here." : "Nothing posted yet."}
           </p>
         ) : (
           <div className="space-y-3">

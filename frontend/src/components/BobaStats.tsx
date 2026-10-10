@@ -108,8 +108,18 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string) {
 
 const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink"];
 
-/** The stats a profile chose to show, in the order it chose. */
-export function BobaStatsGrid({ stats, order, accent }: { stats: Partial<Stats>; order: StatKey[]; accent: string }) {
+/** The stats a profile chose to show, in the order it chose. Keys in `hidden` are marked as private. */
+export function BobaStatsGrid({
+  stats,
+  order,
+  accent,
+  hidden = [],
+}: {
+  stats: Partial<Stats>;
+  order: StatKey[];
+  accent: string;
+  hidden?: StatKey[];
+}) {
   const cards = order.map((key) => ({ key, content: body(key, stats, accent) })).filter((card) => card.content);
   if (cards.length === 0) {
     return <p className="rounded-3xl border border-dashed border-line p-6 text-center text-sm text-mute">No boba stats shared yet.</p>;
@@ -119,9 +129,14 @@ export function BobaStatsGrid({ stats, order, accent }: { stats: Partial<Stats>;
       {cards.map((card) => (
         <li
           key={card.key}
-          className={`rounded-3xl border border-line bg-foam p-4 ${WIDE.includes(card.key) ? "col-span-2 sm:col-span-1" : ""}`}
+          className={`rounded-3xl border p-4 ${WIDE.includes(card.key) ? "col-span-2 sm:col-span-1" : ""} ${
+            hidden.includes(card.key) ? "border-dashed border-line bg-cream" : "border-line bg-foam"
+          }`}
         >
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-mute uppercase">{STAT_LABELS[card.key]}</p>
+          <p className="flex justify-between gap-2 text-[11px] font-semibold tracking-[0.12em] text-mute uppercase">
+            {STAT_LABELS[card.key]}
+            {hidden.includes(card.key) ? <span className="tracking-normal normal-case">Only you</span> : null}
+          </p>
           {card.content}
         </li>
       ))}

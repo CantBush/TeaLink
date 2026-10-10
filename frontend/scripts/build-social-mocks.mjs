@@ -185,7 +185,14 @@ const feed = ordered.map((review, index) => {
   };
 });
 
-const catalog = drinks.map(({ id, name, shop_id, price, flavor_tags }) => ({ id, name, shop_id, price, flavor_tags }));
+const catalog = drinks.map(({ id, name, shop_id, price, flavor_tags, attributes }) => ({
+  id,
+  name,
+  shop_id,
+  price,
+  flavor_tags,
+  attributes,
+}));
 
 const quiz = [
   {

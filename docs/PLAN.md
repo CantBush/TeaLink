@@ -370,10 +370,10 @@ This reshuffles B's remaining evening; the earlier Track B social rows keep thei
 | When | Task | Done when |
 |---|---|---|
 | 4:00 to 5:00 | ✅ Onboarding quiz and Boba card (unchanged) | See the social-frontend table |
-| 5:00 to 6:00 | ⬜ Five-tab navigation and routes; the TeaLink tab links to What changed, Why this order, and Evidence; Friends folded in | Every tab works on phone and desktop, and the demo script still runs from `/` |
+| 5:00 to 6:00 | ✅ Five-tab navigation and routes; the TeaLink tab links to What changed, Why this order, and Evidence; Friends folded in | Every tab works on phone and desktop, and the demo script still runs from `/` |
 | **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
-| 6:30 to 7:30 | ⬜ Generate the placeholder images; Discover with search, filters, and the drink detail sheet | Searching "matcha" finds drinks, shops, and people |
-| 7:30 to 8:30 | ⬜ Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
+| 6:30 to 7:30 | 🟡 (Discover with search, filters, and the drink detail sheet is done; images are left) Generate the placeholder images; Discover with search, filters, and the drink detail sheet | Searching "matcha" finds drinks, shops, and people |
+| 7:30 to 8:30 | 🟡 (Stats tab done) Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
 | 8:30 to 9:00 | ⬜ Feed leftovers ("send a rec") and the offer badge, if A built offers | |
 
 ### Sync points

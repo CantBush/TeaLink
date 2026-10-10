@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { client } from "../api/client.ts";
 import type { EvalMethodName, EvalResult } from "../api/types.ts";
+import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { DIMENSIONS, dimensionLabel, matchPercent } from "../lib/format.ts";
 import { sampleEval } from "../mocks/sample.ts";
 
@@ -55,6 +56,7 @@ export function Evidence() {
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
+      <TeaLinkTabs />
       <header>
         <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">Evidence</p>
         <h1 className="mt-2 font-display text-4xl leading-tight">Does the team learn what you want?</h1>

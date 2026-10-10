@@ -1,6 +1,7 @@
 import type { Avatar as AvatarData } from "../api/types.ts";
 
 const SIZES = {
+  xs: "h-6 w-6 text-sm",
   sm: "h-8 w-8 text-base",
   md: "h-11 w-11 text-xl",
   lg: "h-20 w-20 text-4xl",
