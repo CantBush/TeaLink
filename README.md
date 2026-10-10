@@ -1,6 +1,6 @@
 # TeaLink
 
-Explainable multi-agent boba recommender for the Cisco Cloud AI track (Level 2). Five specialist agents propose a drink, object to each other, and the resolver picks a winner. Match scores, factor contributions, and vetoes are computed in code. LiteLLM is only used for wording, and only when `LLM_MODEL` and a provider key are set. Without a key, templates keep the demo moving.
+Explainable multi-agent boba recommender for the Cisco Cloud AI track (Level 2). Taste, Social, Explorer, and Budget agents each argue for a different objective, shop agents confirm stock or veto, and a Preference agent learns what each user cares about from their picks. The user gets a top 3. Match scores, factor contributions, weights, and vetoes are computed in code. LiteLLM is only used for wording, and only when `LLM_MODEL` and a provider key are set. Without a key, templates keep the demo moving.
 
 ## Run locally
 
@@ -28,7 +28,9 @@ curl -N -X POST http://localhost:8000/recommend \
   -d '{"user_id":"andrew","query":"What should I get next?","preference_overrides":{}}'
 ```
 
-`make test` runs the backend tests. `make seed` rewrites `backend/data/*.json` (deterministic, `random.seed(7)`).
+`make test` runs the backend tests. `make seed` rewrites `backend/data/*.json` (deterministic, `random.seed(7)`). `node frontend/scripts/capture-mock.mjs` re-records the frontend's offline fallback from a running API.
+
+The 3-minute demo is scripted in [`docs/demo-script.md`](docs/demo-script.md).
 
 The team plan is in [`docs/PLAN.md`](docs/PLAN.md). Progress and to-dos are in [`docs/PROGRESS.md`](docs/PROGRESS.md).
 
@@ -48,4 +50,14 @@ The team plan is in [`docs/PLAN.md`](docs/PLAN.md). Progress and to-dos are in [
 
 ## AGNTCY transport
 
-`TRANSPORT=agntcy` is the NATS spike. `make bus` starts `nats:latest` on ports 4222 and 8222. `make agents` prints the four `python -m tealink.agents.serve` commands (add `--shop-id` for a shop). Those processes need `agntcy-app-sdk`. If the SDK is missing or its API does not match, serve exits 1 and the local transport is the path to use. A SLIM broker is optional under the compose profile `slim` and is not started by `make bus`.
+With `TRANSPORT=agntcy`, every agent runs as its own process and speaks A2A over a NATS bus through `agntcy-app-sdk`. The HTTP API and the frontend are the same in both modes. If the broker or an agent is down, that call is answered in-process.
+
+```bash
+cd backend && pip install -e ".[dev,bus]" && cd ..   # the AGNTCY SDK is an optional extra
+make bus            # NATS in Docker on 4222. Without Docker: brew install nats-server && nats-server -p 4222
+TRANSPORT=agntcy make agents   # serves all 11 agents (Lantern Leaf waits on standby until it joins)
+TRANSPORT=agntcy make api
+make web
+```
+
+`curl localhost:8000/health` shows `"effective": "agntcy"` and a per-agent count of replies received over the bus. The timeline header in the app shows the same: "AGNTCY · N agents over NATS", with a dot on each agent that answered over the bus. A SLIM broker is optional under the compose profile `slim` and is not started by `make bus`.

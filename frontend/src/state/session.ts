@@ -3,6 +3,7 @@ import { client } from "../api/client.ts";
 import type {
   Decision,
   DimensionScores,
+  Health,
   LensEvent,
   PreferenceReport,
   Proposal,
@@ -27,6 +28,10 @@ export interface SessionState {
   /** What the last pick taught the Preference agent. */
   learned: PreferenceReport | null;
   similar: SimilarUser[];
+  /** Which transport answered, from /health after each round. */
+  health: Health | null;
+  /** Agents whose replies arrived over the AGNTCY bus during the latest round. */
+  busAgents: string[];
   usingMock: boolean;
   started: boolean;
   running: boolean;
@@ -44,6 +49,8 @@ let state: SessionState = {
   preferenceSummary: null,
   learned: null,
   similar: [],
+  health: null,
+  busAgents: [],
   usingMock: false,
   started: false,
   running: false,
@@ -137,7 +144,23 @@ function run(note?: string) {
     .catch(() => {
       if (state.decision === null) replayMock();
     })
-    .finally(() => set({ running: false }));
+    .finally(() => {
+      set({ running: false });
+      refreshHealth();
+    });
+}
+
+function refreshHealth() {
+  const previous = state.health?.remote_replies ?? {};
+  void client
+    .getHealth()
+    .then((health) => {
+      const busAgents = Object.entries(health.remote_replies)
+        .filter(([agent, count]) => count > (previous[agent] ?? 0))
+        .map(([agent]) => agent);
+      set({ health, busAgents });
+    })
+    .catch(() => set({ health: null, busAgents: [] }));
 }
 
 export function startRecommendation() {

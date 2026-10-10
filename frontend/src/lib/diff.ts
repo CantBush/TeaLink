@@ -3,6 +3,7 @@ import { DIMENSIONS, matchPercent } from "./format.ts";
 
 export function topOptions(decision: Decision): RankedDrink[] {
   if (decision.options && decision.options.length > 0) return decision.options;
+  if (!decision.drink_id) return [];
   return [
     { drink_id: decision.drink_id, drink_name: decision.drink_name, score: decision.score, shop_id: decision.shop_id },
     ...decision.alternatives,

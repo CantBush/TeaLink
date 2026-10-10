@@ -1,5 +1,6 @@
 import type {
   EvalResult,
+  Health,
   LensEvent,
   PreferenceReport,
   RecommendRequest,
@@ -149,6 +150,14 @@ export async function getSimilar(userId: string): Promise<SimilarUser[]> {
   return body.users;
 }
 
+export async function getHealth(): Promise<Health> {
+  const response = await fetch(`${apiBase()}/health`);
+  if (!response.ok) {
+    throw new Error(`health failed (${response.status})`);
+  }
+  return response.json() as Promise<Health>;
+}
+
 export async function getEval(): Promise<EvalResult> {
   const response = await fetch(`${apiBase()}/eval`);
   if (!response.ok) {
@@ -178,6 +187,7 @@ export const client = {
   getPreferences,
   getSimilar,
   getEval,
+  getHealth,
   shopJoin,
   shopOffline,
   resetDemo,

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { LensEvent } from "../api/types.ts";
+import type { Health, LensEvent } from "../api/types.ts";
 import { agentLabel, price } from "../lib/format.ts";
 
 /** Notes the frontend adds itself (e.g. "Thai Tea just sold out.") use seq numbers from here up. */
@@ -82,15 +82,41 @@ function proposalLine(event: LensEvent): string {
   return cost ? `${name} · ${cost}` : name;
 }
 
+function TransportBadge({ health, busCount, usingMock }: { health: Health | null; busCount: number; usingMock: boolean }) {
+  const base = "rounded-full px-2.5 py-0.5 text-xs font-semibold";
+  if (usingMock) return <span className={`${base} text-mute`}>Saved round</span>;
+  if (!health) return <span className={`${base} text-mute`}>Live</span>;
+  if (health.effective === "agntcy" && busCount > 0) {
+    return (
+      <span className={`${base} bg-ink text-cream`} title="Agents answered over A2A on a NATS bus (Cisco AGNTCY)">
+        AGNTCY · {busCount} agents over NATS
+      </span>
+    );
+  }
+  if (health.transport === "agntcy") {
+    return (
+      <span className={`${base} bg-[#f0e2d0]`} title="AGNTCY is configured, but the bus didn't answer, so agents ran in-process">
+        In-process fallback
+      </span>
+    );
+  }
+  return <span className={`${base} text-mute`}>In-process agents</span>;
+}
+
 export function AgentTimeline({
   events,
   usingMock,
   started,
+  health = null,
+  busAgents = [],
 }: {
   events: LensEvent[];
   usingMock: boolean;
   started: boolean;
+  health?: Health | null;
+  busAgents?: string[];
 }) {
+  const overBus = new Set(busAgents);
   const phases = split(events);
   const present = {
     team: phases.selections.length > 0,
@@ -107,7 +133,11 @@ export function AgentTimeline({
     <section className="rounded-[28px] border border-line bg-foam/80 p-5 sm:p-6">
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <h2 className="font-display text-2xl">At the counter</h2>
-        <p className="text-xs text-mute">{usingMock ? "Saved round" : started ? "Live" : "Waiting"}</p>
+        {started || usingMock ? (
+          <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} />
+        ) : (
+          <p className="text-xs text-mute">Waiting</p>
+        )}
       </div>
 
       {phases.changes.map((event) => (
@@ -131,14 +161,19 @@ export function AgentTimeline({
                     {phases.selections.map((event) => (
                       <span
                         key={event.seq}
-                        className="rounded-full bg-[#f0e2d0] px-2.5 py-0.5 text-xs font-semibold"
+                        className="flex items-center gap-1 rounded-full bg-[#f0e2d0] px-2.5 py-0.5 text-xs font-semibold"
                       >
+                        {overBus.has(event.agent_id ?? "") ? (
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-label="over NATS" />
+                        ) : null}
                         {agentLabel(event.agent_id ?? "")}
                       </span>
                     ))}
                   </span>
                   <span className="mt-2 block text-xs text-mute">
-                    Picked by capability. Tap to see why each agent was chosen.
+                    Picked by capability.
+                    {overBus.size > 0 ? " A dot means the agent answered over the AGNTCY bus." : ""} Tap to see
+                    why each agent was chosen.
                   </span>
                 </summary>
                 <ul className="mt-3 space-y-1.5 text-sm text-mute">

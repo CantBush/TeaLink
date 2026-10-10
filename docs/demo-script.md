@@ -1,11 +1,11 @@
 # TeaLink demo script (3 minutes)
 
-*Owner: Track B. The numbers below come from a real run of this exact sequence on Sat 1:40 PM. If the seed data or the agents change, re-run the sequence and update the numbers. Lines in quotes are what the presenter says.*
+*Owner: Track B. The numbers below come from a real run of this exact sequence on Sat 1:40 PM, re-checked over AGNTCY at 1:55 PM with identical results. If the seed data or the agents change, re-run the sequence and update the numbers. Lines in quotes are what the presenter says.*
 
 ## Before you start
 
-- Start the backend with `make api` (or `uvicorn tealink.api.main:app --port 8000`) and the frontend with `make web`. Open http://localhost:5173.
-- Press **Reset demo** on Discover. Every run must start from the seeded state.
+- **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the timeline header says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
+- Start every run from the seeded state. ⚠️ **Until Track A fixes the reset bug (see `PROGRESS.md`), don't press Reset demo in AGNTCY mode**, because every agent drops out about 30 seconds later. Restart the API instead. In local mode (`TRANSPORT=local`), Reset demo is fine.
 - Have a second tab on `/evidence`.
 - Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" on the timeline. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
 
@@ -17,7 +17,7 @@
 
 On Discover, point at the **At the counter** timeline, top to bottom:
 
-1. **Team selected:** "The concierge picks agents by capability, and you can open this to see why each one was chosen. Note that Lantern Leaf has no agent yet."
+1. **Team selected:** "The concierge picks agents by capability, and you can open this to see why each one was chosen. Each agent is its own process. The badge up here shows all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
 2. **Andrew's priorities:** "From his last 4 orders, the Preference agent thinks price matters most to him (42%), then taste (39%)."
 3. **Each agent proposes:** "Taste wants Brown Sugar Oolong, a 96% match. Budget wants the cheapest drinks that still fit. Explorer wants drinks he's never had."
 4. **They argue:** "Then every agent scores *every* candidate on its own objective. Explorer pushes back on drinks he's already had; Budget pushes back on the $6.50-and-up ones. Only the shop agents know inventory."
@@ -65,7 +65,7 @@ Switch to the **Evidence** tab.
 
 > "Agents with competing objectives, real-time adaptation when shops sell out, join, or go offline, a human in the loop when it's close, and a team that learns who you are. That's TeaLink."
 
-*If Track A's AGNTCY go/no-go passed, add: "Every agent is a separate service talking A2A over NATS on Cisco's AGNTCY." Otherwise leave it out.*
+AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every agent is a separate service talking A2A over NATS on Cisco's AGNTCY, and if the bus goes down, the same agents answer in-process, so the demo never breaks."
 
 ## Likely judge questions
 
