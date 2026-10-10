@@ -56,13 +56,23 @@ export interface AgentSelection {
   reason: string;
 }
 
+/** A shop's close-call discount. `percent` is whole, so 10 means 10% off. */
+export interface Offer {
+  shop_id: string;
+  percent: number;
+  price_after: number;
+  reason: string;
+}
+
 export interface RankedDrink {
   drink_id: string;
   drink_name: string;
   score: number;
   shop_id?: string;
+  /** Already `price_after` when an offer is set. */
   price?: number;
   dimension_scores?: DimensionScores;
+  offer?: Offer | null;
 }
 
 export interface DroppedDrink {
@@ -106,7 +116,8 @@ export type LensEventType =
   | "objection"
   | "decision"
   | "status"
-  | "preference";
+  | "preference"
+  | "offer";
 
 export interface LensEvent {
   type: LensEventType;
@@ -206,6 +217,8 @@ export interface UserProfile {
   taste_match: number | null;
   /** Other viewers only receive the visible stats. */
   stats: Partial<BobaStats>;
+  /** Reserved for uploads; always null for now. */
+  cover_url?: string | null;
 }
 
 export type ProfilePatch = Partial<
@@ -266,6 +279,8 @@ export interface FeedItem {
   likes: number;
   liked_by_me: boolean;
   comments: FeedComment[];
+  /** Reserved for uploads; always null for now. */
+  photo_url?: string | null;
 }
 
 export interface RecommendRequest {

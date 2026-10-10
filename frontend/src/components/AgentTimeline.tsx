@@ -13,6 +13,7 @@ interface Phases {
   candidates: LensEvent | null;
   debate: LensEvent[];
   dropped: LensEvent[];
+  offers: LensEvent[];
   notes: LensEvent[];
   decision: LensEvent | null;
 }
@@ -26,6 +27,7 @@ function split(events: LensEvent[]): Phases {
     candidates: null,
     debate: [],
     dropped: [],
+    offers: [],
     notes: [],
     decision: null,
   };
@@ -44,6 +46,9 @@ function split(events: LensEvent[]): Phases {
       }
       case "objection":
         phases.debate.push(event);
+        break;
+      case "offer":
+        phases.offers.push(event);
         break;
       case "decision":
         phases.decision = event;
@@ -126,6 +131,7 @@ export function AgentTimeline({
     proposals: phases.proposals.size > 0,
     debate: phases.debate.length > 0,
     dropped: phases.dropped.length > 0,
+    offers: phases.offers.length > 0,
     decision: phases.decision !== null,
   };
   const shown = (Object.keys(present) as (keyof typeof present)[]).filter((key) => present[key]);
@@ -241,6 +247,21 @@ export function AgentTimeline({
               <ul className="space-y-1.5 rounded-2xl border border-[#b4533c]/40 bg-cream px-4 py-3 text-sm">
                 {phases.dropped.map((event) => (
                   <li key={event.seq}>{readableShops(event.message.replace(/^Dropped /, ""))}</li>
+                ))}
+              </ul>
+            </Phase>
+          ) : null}
+
+          {phases.offers.length > 0 ? (
+            <Phase step={stepOf("offers")} title="A shop makes an offer">
+              <ul className="space-y-2">
+                {phases.offers.map((event) => (
+                  <li key={event.seq} className="rounded-2xl border border-[#3f7d58]/50 bg-[#eef6ef] px-4 py-3 text-sm">
+                    <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-[#3f7d58] uppercase">
+                      {typeof event.payload.percent === "number" ? `${event.payload.percent}% off` : "Offer"}
+                    </span>
+                    {readableShops(event.message)}
+                  </li>
                 ))}
               </ul>
             </Phase>

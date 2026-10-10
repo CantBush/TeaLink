@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import type { Decision, Dimension, RankedDrink } from "../api/types.ts";
 import { topOptions } from "../lib/diff.ts";
-import { DIMENSIONS, dimensionLabel, matchPercent, price, shopLabel } from "../lib/format.ts";
+import { drinkInfo } from "../lib/catalog.ts";
+import { DIMENSIONS, dimensionLabel, matchPercent, price, readableShops, shopLabel } from "../lib/format.ts";
 
 /** Score gaps below this aren't worth calling out as a trade-off. */
 const EDGE_MIN = 0.05;
@@ -168,7 +169,18 @@ export function TopChoices({
             <p className="mt-1 text-sm text-mute">
               {shopLabel(option.shop_id ?? decision.shop_id)}
               {price(option.price) ? ` · ${price(option.price)}` : ""}
+              {option.offer && drinkInfo(option.drink_id) ? (
+                <span className="ml-1 line-through">{price(drinkInfo(option.drink_id)!.price)}</span>
+              ) : null}
             </p>
+            {option.offer ? (
+              <p
+                className="mt-2 self-start rounded-full bg-[#3f7d58] px-3 py-1 text-xs font-semibold text-foam"
+                title={readableShops(option.offer.reason)}
+              >
+                {option.offer.percent}% off from {shopLabel(option.offer.shop_id)}
+              </p>
+            ) : null}
             <ScoreRow option={option} />
             <button
               type="button"
