@@ -64,7 +64,13 @@ export function Discover() {
         <ControlPanel decision={session.decision} running={session.running} />
       </div>
 
-      <AgentTimeline events={session.events} usingMock={session.usingMock} started={session.started} />
+      <AgentTimeline
+        events={session.events}
+        usingMock={session.usingMock}
+        started={session.started}
+        health={session.health}
+        busAgents={session.busAgents}
+      />
     </main>
   );
 }

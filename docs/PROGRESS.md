@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 1:45 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 2:00 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -82,12 +82,19 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Evidence page at `/evidence`. It uses `mocks/eval.json` with a "preview" label and switches to `GET /eval` automatically when A ships it.
 - ✅ Ask-the-human prompt: names both drinks, shows what each wins on with scores, and has a button to pick each
 - ✅ Timeline grouped into numbered steps: team selected (collapsible), priorities, proposals by agent, the argument, ruled out, decision
-- 🟡 `docs/demo-script.md`: a 3-minute script with real numbers from a verified run. Dry runs are still needed.
+- 🟡 `docs/demo-script.md`: a 3-minute script with real numbers from a verified run, re-checked over AGNTCY (identical results), plus AGNTCY setup. Dry runs are still needed.
+- ✅ AGNTCY badge on the timeline ("AGNTCY · N agents over NATS", or "In-process fallback"), read from `/health`, with a dot on each agent that answered over the bus
+- ✅ An empty result now shows a clear "Nothing survived" card instead of a blank #1 card
+- ✅ README covers AGNTCY mode (the `bus` extra, running NATS without Docker)
+- 🟡 `docs/writeup.md` drafted: overview, Level 2 mapping, results, lessons. Track A's architecture and implementation sections and the popularity numbers are still to come.
 - ⬜ Offer badge (if A builds offers)
 - ⬜ Stretch: ElevenLabs voices
 - ⬜ Write-up and backup video
 
 ## Known issues and decisions to revisit
+
+- **Track A, demo-blocking in AGNTCY mode: Reset demo drops every agent about 30 seconds later.** In `_prepare` (`api/main.py`, around line 329), `transport.listen(lambda agent_id: _on_remote_heartbeat(runtime, agent_id))` captures the runtime that existed at first connect. `/events/reset` swaps in a fresh runtime, but bus heartbeats keep refreshing the old registry. The new registry is marked online once during the reset and then hits the 30-second timeout, so `/recommend` selects no agents and returns "Nothing survived." To reproduce: run with `TRANSPORT=agntcy`, `POST /events/reset`, wait 35 seconds, then `POST /recommend`. Suggested fix: `lambda agent_id: _on_remote_heartbeat(get_runtime(), agent_id)`. Local mode is not affected.
+- **Setup note:** AGNTCY mode needs `pip install -e ".[dev,bus]"`. Without the `bus` extra, `make agents` exits with "agntcy-app-sdk is not installed", and the API quietly runs in-process.
 
 - **Sarah isn't Andrew's top match anymore.** The real similarity math ranks Hana, Leo, and Rina first, and Sarah fifth. Either tune Sarah's seeded reviews or update the demo story.
 - **The candidate pool is small** (about 11 drinks per round), so sold-out drinks eventually run the pool dry. The evaluation stops at 8 rounds for this reason.

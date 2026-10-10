@@ -124,8 +124,15 @@ export function TopChoices({
   if (options.length === 0) {
     return (
       <article className="rounded-[28px] border border-amber bg-foam p-6 sm:p-8">
-        <h2 className="font-display text-3xl">Nothing survived</h2>
-        <p className="mt-2 text-mute">{decision.question ?? decision.explanation}</p>
+        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">Your top 3</p>
+        <h2 className="mt-3 font-display text-3xl">Nothing survived</h2>
+        <p className="mt-2 text-mute">{decision.explanation}</p>
+        {decision.question ? (
+          <p className="mt-4 rounded-2xl border border-amber/60 bg-[#f8efe2] px-4 py-3 text-sm">{decision.question}</p>
+        ) : null}
+        <p className="mt-4 text-sm text-mute">
+          Rather than recommend something nobody can confirm, the team is asking you. Reset demo brings the shops back.
+        </p>
       </article>
     );
   }

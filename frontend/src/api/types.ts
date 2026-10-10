@@ -142,6 +142,15 @@ export interface EvalResult {
   personas: EvalPersona[];
 }
 
+/** GET /health. `effective` is what is actually answering: "pending" means AGNTCY is configured but not connected. */
+export interface Health {
+  status: string;
+  transport: "local" | "agntcy";
+  effective: "local" | "agntcy" | "pending";
+  /** Replies received over the bus so far, per agent id. */
+  remote_replies: Record<string, number>;
+}
+
 export interface RecommendRequest {
   user_id: string;
   query: string;
