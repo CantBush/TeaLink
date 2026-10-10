@@ -1,19 +1,12 @@
-import type { Decision, LensEvent, Proposal, TasteProfile } from "../api/types.ts";
+import type { Decision, EvalResult, LensEvent, Proposal, TasteProfile } from "../api/types.ts";
+import evalRaw from "./eval.json";
 import raw from "./sample_session.json";
 
-export interface ScriptedDrink {
-  drink_id: string;
-  drink_name: string;
-  score: number;
-}
-
+/** A recorded before/after pair, shown on Counterfactual until a live round has run. */
 export interface CounterfactualScript {
-  preference_label: string;
-  from: number;
-  to: number;
-  before: ScriptedDrink;
+  change: string;
+  before: Decision;
   after: Decision;
-  why: string;
 }
 
 export interface SampleSession {
@@ -24,6 +17,8 @@ export interface SampleSession {
 }
 
 export const sampleSession = raw as unknown as SampleSession;
+
+export const sampleEval = evalRaw as unknown as EvalResult;
 
 export function sampleDecision(): Decision {
   const event = sampleSession.events.find((item) => item.type === "decision");

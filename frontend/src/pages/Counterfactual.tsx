@@ -1,70 +1,170 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { matchPercent } from "../lib/format.ts";
+import type { Decision } from "../api/types.ts";
+import { ControlPanel } from "../components/ControlPanel.tsx";
+import { type Movement, diffDecisions, topOptions } from "../lib/diff.ts";
+import { dimensionLabel, matchPercent, price, shopLabel } from "../lib/format.ts";
 import { sampleSession } from "../mocks/sample.ts";
+import { startRecommendation, useSession } from "../state/session.ts";
+
+function MovementChip({ movement }: { movement: Movement }) {
+  const base = "rounded-full px-2 py-0.5 text-xs font-semibold";
+  switch (movement.kind) {
+    case "new":
+      return <span className={`${base} bg-amber text-cream`}>New</span>;
+    case "up":
+      return <span className={`${base} bg-[#f0e2d0] text-amber`}>Up {movement.by}</span>;
+    case "down":
+      return <span className={`${base} bg-[#eadfce] text-mute`}>Down {movement.by}</span>;
+    case "same":
+      return <span className={`${base} text-mute`}>Same</span>;
+  }
+}
+
+function Column({
+  title,
+  decision,
+  highlight,
+  movements,
+}: {
+  title: string;
+  decision: Decision;
+  highlight: boolean;
+  movements?: Map<string, Movement>;
+}) {
+  return (
+    <article
+      className={`rounded-[28px] border p-6 ${highlight ? "border-amber bg-foam" : "border-line bg-cream"}`}
+    >
+      <p
+        className={`text-xs font-semibold tracking-[0.14em] uppercase ${highlight ? "text-amber" : "text-mute"}`}
+      >
+        {title}
+      </p>
+      <ol className="mt-4 space-y-3">
+        {topOptions(decision).map((option, index) => {
+          const movement = movements?.get(option.drink_id);
+          return (
+            <li key={option.drink_id} className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-display text-xl leading-tight">
+                  <span className="mr-2 text-sm text-mute">#{index + 1}</span>
+                  {option.drink_name}
+                </p>
+                <p className="text-sm text-mute">
+                  {shopLabel(option.shop_id ?? decision.shop_id)}
+                  {price(option.price) ? ` · ${price(option.price)}` : ""}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                <span className={`font-display text-xl ${highlight ? "text-amber" : "text-ink"}`}>
+                  {matchPercent(option.score)}
+                </span>
+                {movement ? <MovementChip movement={movement} /> : null}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </article>
+  );
+}
 
 export function Counterfactual() {
+  const session = useSession();
+
+  useEffect(() => {
+    startRecommendation();
+  }, []);
+
+  const live = session.previousDecision !== null && session.decision !== null;
+  const replanning = session.previousDecision !== null && session.decision === null;
   const script = sampleSession.counterfactual;
-  const fromPct = matchPercent(script.from);
-  const toPct = matchPercent(script.to);
+  const before = live ? session.previousDecision! : script.before;
+  const after = live ? session.decision! : script.after;
+  const change = live ? session.change : script.change;
+  const diff = diffDecisions(before, after);
+  const movements = new Map(diff.after.map((move) => [move.option.drink_id, move.movement]));
 
   return (
-    <main className="mx-auto max-w-3xl space-y-6 px-5 py-8">
+    <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
       <Link to="/why" className="text-sm font-semibold text-mute hover:text-ink">
         Back to Why this
       </Link>
       <header>
-        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">
-          Counterfactual
-        </p>
-        <h1 className="mt-2 font-display text-4xl">If that preference moved</h1>
+        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">What changed</p>
+        <h1 className="mt-2 font-display text-4xl leading-tight">
+          {change ?? "The agents re-planned"}
+        </h1>
+        {!live ? (
+          <p className="mt-3 rounded-2xl border border-line bg-foam px-4 py-3 text-sm text-mute">
+            {replanning
+              ? "The agents are re-planning. The before/after appears when they finish."
+              : "This is a recorded example. Pick a drink or press a what-if button below to see your own before and after."}
+          </p>
+        ) : null}
       </header>
 
-      <section className="rounded-[28px] border border-line bg-foam p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-2xl">{script.preference_label}</h2>
-          <p className="text-sm text-mute">
-            {fromPct}% → {toPct}%
-          </p>
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-          <div>
-            <p className="mb-1 text-sm font-semibold">High</p>
-            <div className="h-3 overflow-hidden rounded-full bg-[#eadfce]">
-              <div className="h-full rounded-full bg-amber" style={{ width: `${fromPct}%` }} />
-            </div>
-          </div>
-          <span className="hidden text-mute sm:block" aria-hidden="true">
-            →
-          </span>
-          <div>
-            <p className="mb-1 text-sm font-semibold">Zero</p>
-            <div className="h-3 overflow-hidden rounded-full bg-[#eadfce]">
-              <div className="h-full rounded-full bg-[#b7a89a]" style={{ width: `${Math.max(toPct, 0)}%` }} />
-            </div>
-          </div>
-        </div>
+      <section className="grid gap-4 md:grid-cols-2">
+        <Column title="Before" decision={before} highlight={false} />
+        <Column title="After" decision={after} highlight movements={movements} />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <article className="rounded-[28px] border border-line bg-cream p-6">
-          <p className="text-xs font-semibold tracking-[0.14em] text-mute uppercase">Before</p>
-          <h2 className="mt-3 font-display text-3xl leading-tight">{script.before.drink_name}</h2>
-          <p className="mt-3 font-display text-4xl text-ink">
-            {matchPercent(script.before.score)}%
-          </p>
+      <section className="grid gap-4 md:grid-cols-2">
+        <article className="rounded-[28px] border border-line bg-foam p-6">
+          <h2 className="font-display text-2xl">Left the top 3</h2>
+          {diff.left.length === 0 ? (
+            <p className="mt-3 text-sm text-mute">
+              {diff.sameOrder ? "Nothing moved. The same three drinks, in the same order." : "Nothing left. The same drinks were reordered."}
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-3 text-sm">
+              {diff.left.map((item) => (
+                <li key={item.option.drink_id}>
+                  <span className="font-semibold">{item.option.drink_name}</span>
+                  <span className="text-mute"> (was #{item.rank})</span>
+                  <p className="text-mute">
+                    {item.reason ?? "Outranked: other drinks scored higher after the change."}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
         </article>
-        <article className="rounded-[28px] border border-amber bg-foam p-6">
-          <p className="text-xs font-semibold tracking-[0.14em] text-amber uppercase">After</p>
-          <h2 className="mt-3 font-display text-3xl leading-tight">{script.after.drink_name}</h2>
-          <p className="mt-3 font-display text-4xl text-amber">
-            {matchPercent(script.after.score)}%
-          </p>
+
+        <article className="rounded-[28px] border border-line bg-foam p-6">
+          <h2 className="font-display text-2xl">Andrew's priorities</h2>
+          {diff.weights.length === 0 ? (
+            <p className="mt-3 text-sm text-mute">
+              Unchanged. The world changed, not what Andrew cares about.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2 text-sm">
+              {diff.weights.map((shift) => {
+                const delta = matchPercent(shift.after) - matchPercent(shift.before);
+                return (
+                  <li key={shift.dimension} className="flex items-baseline justify-between">
+                    <span className="font-semibold">{dimensionLabel(shift.dimension)}</span>
+                    <span className="text-mute">
+                      {matchPercent(shift.before)}% → {matchPercent(shift.after)}%
+                      <span className={delta > 0 ? "ml-1 text-amber" : "ml-1"}>
+                        ({delta > 0 ? "+" : ""}
+                        {delta})
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </article>
       </section>
 
       <p className="rounded-[28px] border border-line bg-foam px-6 py-5 text-lg leading-relaxed">
-        {script.why}
+        {after.explanation}
       </p>
+
+      <ControlPanel decision={session.decision} running={session.running} />
     </main>
   );
 }

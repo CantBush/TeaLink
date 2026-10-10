@@ -1,14 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Decision, RankedDrink } from "../api/types.ts";
+import { topOptions } from "../lib/diff.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent, price, shopLabel } from "../lib/format.ts";
-
-function optionsOf(decision: Decision): RankedDrink[] {
-  if (decision.options && decision.options.length > 0) return decision.options;
-  return [
-    { drink_id: decision.drink_id, drink_name: decision.drink_name, score: decision.score, shop_id: decision.shop_id },
-    ...decision.alternatives,
-  ].slice(0, 3);
-}
 
 function ScoreRow({ option }: { option: RankedDrink }) {
   const scores = option.dimension_scores;
@@ -54,7 +47,7 @@ export function TopChoices({
     );
   }
 
-  const options = optionsOf(decision);
+  const options = topOptions(decision);
   if (options.length === 0) {
     return (
       <article className="rounded-[28px] border border-amber bg-foam p-6 sm:p-8">

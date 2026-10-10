@@ -1,4 +1,6 @@
-import type { Dimension } from "../api/types.ts";
+import type { Dimension, TasteAttribute } from "../api/types.ts";
+
+export const TASTE_ORDER: TasteAttribute[] = ["sweetness", "milkiness", "tea_intensity", "fruitiness", "toppings"];
 
 const SHOPS: Record<string, string> = {
   kungfu: "Kung Fu Tea",

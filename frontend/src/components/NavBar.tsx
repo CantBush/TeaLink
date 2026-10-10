@@ -19,8 +19,14 @@ export function NavBar() {
           <NavLink to="/" end className={({ isActive }) => itemClass(isActive)}>
             Discover
           </NavLink>
+          <NavLink to="/counterfactual" className={({ isActive }) => itemClass(isActive)}>
+            What changed
+          </NavLink>
           <NavLink to="/friends" className={({ isActive }) => itemClass(isActive)}>
             Friends
+          </NavLink>
+          <NavLink to="/evidence" className={({ isActive }) => itemClass(isActive)}>
+            Evidence
           </NavLink>
           <a href="/#taste" className="text-ink/75 hover:text-ink">
             My Taste

@@ -1,18 +1,10 @@
 import type { TasteProfile } from "../api/types.ts";
-import { attributeLabel, matchPercent } from "../lib/format.ts";
-
-const ORDER: (keyof TasteProfile)[] = [
-  "sweetness",
-  "milkiness",
-  "tea_intensity",
-  "fruitiness",
-  "toppings",
-];
+import { TASTE_ORDER, attributeLabel, matchPercent } from "../lib/format.ts";
 
 export function TasteBars({ profile }: { profile: TasteProfile }) {
   return (
     <ul className="space-y-3">
-      {ORDER.map((key) => {
+      {TASTE_ORDER.map((key) => {
         const pct = matchPercent(profile[key] ?? 0);
         return (
           <li key={key}>

@@ -1,4 +1,5 @@
 import type {
+  EvalResult,
   LensEvent,
   PreferenceReport,
   RecommendRequest,
@@ -148,6 +149,14 @@ export async function getSimilar(userId: string): Promise<SimilarUser[]> {
   return body.users;
 }
 
+export async function getEval(): Promise<EvalResult> {
+  const response = await fetch(`${apiBase()}/eval`);
+  if (!response.ok) {
+    throw new Error(`eval failed (${response.status})`);
+  }
+  return response.json() as Promise<EvalResult>;
+}
+
 export function shopJoin(shopId: string): Promise<unknown> {
   return post("/events/shop-join", { shop_id: shopId });
 }
@@ -168,6 +177,7 @@ export const client = {
   choose,
   getPreferences,
   getSimilar,
+  getEval,
   shopJoin,
   shopOffline,
   resetDemo,

@@ -116,6 +116,32 @@ export interface LensEvent {
   seq: number;
 }
 
+export type EvalMethodName = "popularity" | "fixed_weights" | "learning";
+
+/** One recommender's results over the simulated users (GET /eval). */
+export interface EvalMethod {
+  method: EvalMethodName;
+  /** Share of rounds where the team's #1 was the drink the user picked. */
+  hit_rate: number;
+  /** Share of rounds where the pick was anywhere in the top 3. */
+  top3_rate: number;
+  sold_out_recs: number;
+  /** Share of recommendations the user had already tried. */
+  repeat_rate: number;
+}
+
+export interface EvalPersona {
+  name: string;
+  hidden_weights: DimensionScores;
+  learned_weights: DimensionScores;
+}
+
+export interface EvalResult {
+  rounds: number;
+  methods: EvalMethod[];
+  personas: EvalPersona[];
+}
+
 export interface RecommendRequest {
   user_id: string;
   query: string;

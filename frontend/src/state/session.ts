@@ -20,6 +20,8 @@ export interface SessionState {
   decision: Decision | null;
   /** Decision from the previous round, for before/after comparisons. */
   previousDecision: Decision | null;
+  /** What changed in the world to start the current round, e.g. "Thai Tea just sold out." */
+  change: string | null;
   weights: DimensionScores | null;
   preferenceSummary: string | null;
   /** What the last pick taught the Preference agent. */
@@ -37,6 +39,7 @@ let state: SessionState = {
   proposals: [],
   decision: null,
   previousDecision: null,
+  change: null,
   weights: null,
   preferenceSummary: null,
   learned: null,
@@ -117,6 +120,7 @@ function run(note?: string) {
     events: [],
     proposals: [],
     previousDecision: state.decision ?? state.previousDecision,
+    change: note ?? null,
     decision: null,
     running: true,
   });
@@ -161,7 +165,7 @@ export async function pick(drinkId: string, drinkName: string) {
 
 export async function resetAll() {
   await client.resetDemo().catch(() => {});
-  set({ learned: null, previousDecision: null, decision: null });
+  set({ learned: null, previousDecision: null, decision: null, change: null });
   rerun("Demo reset to the seeded state.");
 }
 

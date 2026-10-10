@@ -1,245 +1,1755 @@
 {
   "user_id": "andrew",
   "profile": {
-    "sweetness": 0.82,
-    "milkiness": 0.91,
-    "tea_intensity": 0.61,
-    "fruitiness": 0.29,
-    "toppings": 0.73
+    "sweetness": 0.8244736842105262,
+    "milkiness": 0.7636842105263159,
+    "tea_intensity": 0.4144736842105264,
+    "fruitiness": 0.125,
+    "toppings": 0.6513157894736844
   },
   "events": [
     {
       "type": "status",
       "agent_id": null,
-      "message": "Deliberation started",
+      "message": "Starting deliberation.",
       "payload": {},
       "seq": 1
     },
     {
       "type": "selection",
       "agent_id": "taste",
-      "message": "Taste joined the counter",
+      "message": "Selected Taste: it ranks drinks by fit to this user's own reviews to answer 'What should I get next?'.",
       "payload": {
         "agent_id": "taste",
-        "capabilities": ["taste_profile", "review_evidence"],
-        "reason": "Andrew orders sweet, very milky drinks and usually adds a topping."
+        "capabilities": [
+          "taste_profile",
+          "personal_history"
+        ],
+        "reason": "Selected Taste: it ranks drinks by fit to this user's own reviews to answer 'What should I get next?'."
       },
       "seq": 2
     },
     {
       "type": "selection",
       "agent_id": "social",
-      "message": "Social joined the counter",
+      "message": "Selected Social: it knows what this user's most similar people loved to answer 'What should I get next?'.",
       "payload": {
         "agent_id": "social",
-        "capabilities": ["friend_graph", "order_overlap"],
-        "reason": "Sarah and Mike share this creamy, low-fruit corner of the menu."
+        "capabilities": [
+          "similar_users"
+        ],
+        "reason": "Selected Social: it knows what this user's most similar people loved to answer 'What should I get next?'."
       },
       "seq": 3
     },
     {
       "type": "selection",
       "agent_id": "explorer",
-      "message": "Explorer joined the counter",
+      "message": "Selected Explorer: it argues for drinks this user hasn't tried to answer 'What should I get next?'.",
       "payload": {
         "agent_id": "explorer",
-        "capabilities": ["novelty", "untried_drinks"],
-        "reason": "Leave one seat for a drink Andrew has not logged yet."
+        "capabilities": [
+          "novelty"
+        ],
+        "reason": "Selected Explorer: it argues for drinks this user hasn't tried to answer 'What should I get next?'."
       },
       "seq": 4
     },
     {
       "type": "selection",
-      "agent_id": "shop:kungfu",
-      "message": "Kung Fu Tea joined the counter",
+      "agent_id": "budget",
+      "message": "Selected Budget: it argues for cheaper drinks that still fit to answer 'What should I get next?'.",
       "payload": {
-        "agent_id": "shop:kungfu",
-        "capabilities": ["menu", "stock"],
-        "reason": "Kung Fu Tea can make the short list from what is on the board right now."
+        "agent_id": "budget",
+        "capabilities": [
+          "cost"
+        ],
+        "reason": "Selected Budget: it argues for cheaper drinks that still fit to answer 'What should I get next?'."
       },
       "seq": 5
     },
     {
-      "type": "proposal",
-      "agent_id": "taste",
-      "message": "Taste proposes Brown Sugar Oolong Milk Tea",
+      "type": "selection",
+      "agent_id": "preference",
+      "message": "Selected Preference: it knows how much this user weighs taste, friends, novelty, and price.",
       "payload": {
-        "agent_id": "taste",
-        "drink_id": "brown-sugar-oolong",
-        "drink_name": "Brown Sugar Oolong Milk Tea",
-        "shop_id": "kungfu",
-        "score": 0.93,
-        "factors": [
-          { "factor": "milkiness", "weight": 0.28 },
-          { "factor": "brown_sugar", "weight": 0.24 },
-          { "factor": "tea_intensity", "weight": 0.16 },
-          { "factor": "toppings", "weight": 0.14 },
-          { "factor": "fruitiness", "weight": -0.03 }
+        "agent_id": "preference",
+        "capabilities": [
+          "preference_learning"
         ],
-        "evidence": [
-          {
-            "review_id": "rev-bs-1",
-            "drink_name": "Brown Sugar Oolong Milk Tea",
-            "rating": 5,
-            "text": "Caramel all the way through, and the oolong still shows up under the milk.",
-            "relevance": "You rated this 5/5; same drink."
-          },
-          {
-            "review_id": "rev-bs-2",
-            "drink_name": "Brown Sugar Oolong Milk Tea",
-            "rating": 5,
-            "text": "Pearls were warm and the drink was sweet without turning into syrup.",
-            "relevance": "You rated this 5/5; same drink."
-          },
-          {
-            "review_id": "rev-peach-1",
-            "drink_name": "Peach Green Tea",
-            "rating": 2,
-            "text": "Too much peach syrup. I wanted tea, not a fruit cooler.",
-            "relevance": "You rated this 2/5; similar fruitiness."
-          }
-        ],
-        "rationale": "Milkiness, brown sugar, and a topping habit line up, and the fruit signal stays quiet."
+        "reason": "Selected Preference: it knows how much this user weighs taste, friends, novelty, and price."
       },
       "seq": 6
     },
     {
-      "type": "proposal",
-      "agent_id": "social",
-      "message": "Social proposes Hojicha Cream Tea",
+      "type": "selection",
+      "agent_id": "shop_boba_guys",
+      "message": "Selected Boba Guys agent: it is online and can confirm what is in stock.",
       "payload": {
-        "agent_id": "social",
-        "drink_id": "hojicha-cream",
-        "drink_name": "Hojicha Cream Tea",
-        "shop_id": "kungfu",
-        "score": 0.91,
-        "factors": [
-          { "factor": "friend_overlap", "weight": 0.31 },
-          { "factor": "milkiness", "weight": 0.22 },
-          { "factor": "tea_intensity", "weight": 0.18 },
-          { "factor": "sweetness", "weight": 0.08 },
-          { "factor": "fruitiness", "weight": -0.06 }
+        "agent_id": "shop_boba_guys",
+        "capabilities": [
+          "availability",
+          "menu"
         ],
-        "evidence": [
-          {
-            "review_id": "rev-hj-1",
-            "drink_name": "Hojicha Cream Tea",
-            "rating": 5,
-            "text": "Roasted tea, soft cream, no candy fruit. I would order it again tomorrow.",
-            "relevance": "You rated this 5/5; same drink."
-          },
-          {
-            "review_id": "rev-hj-2",
-            "drink_name": "Hojicha Cream Tea",
-            "rating": 4,
-            "text": "Less sweet than brown sugar milk tea, still cozy.",
-            "relevance": "You rated this 4/5; same drink."
-          }
-        ],
-        "rationale": "Sarah is 94% similar and keeps coming back to Hojicha Cream Tea."
+        "reason": "Selected Boba Guys agent: it is online and can confirm what is in stock."
       },
       "seq": 7
     },
     {
-      "type": "proposal",
-      "agent_id": "explorer",
-      "message": "Explorer proposes Osmanthus Mountain Tea",
+      "type": "selection",
+      "agent_id": "shop_kungfu",
+      "message": "Selected Kung Fu Tea Co. agent: it is online and can confirm what is in stock.",
       "payload": {
-        "agent_id": "explorer",
-        "drink_id": "osmanthus-mountain",
-        "drink_name": "Osmanthus Mountain Tea",
-        "shop_id": "kungfu",
-        "score": 0.81,
-        "factors": [
-          { "factor": "novelty", "weight": 0.22 },
-          { "factor": "tea_intensity", "weight": 0.15 },
-          { "factor": "sweetness", "weight": 0.06 },
-          { "factor": "milkiness", "weight": -0.08 },
-          { "factor": "fruitiness", "weight": -0.04 }
+        "agent_id": "shop_kungfu",
+        "capabilities": [
+          "availability",
+          "menu"
         ],
-        "evidence": [
-          {
-            "review_id": "rev-os-1",
-            "drink_name": "Osmanthus Mountain Tea",
-            "rating": 5,
-            "text": "Floral, light, and nothing like the milk teas on the usual ticket.",
-            "relevance": "You rated this 5/5; same drink."
-          }
-        ],
-        "rationale": "Andrew has not tried this one. It keeps the tea and drops the milk, so the score sits a step behind the usual order."
+        "reason": "Selected Kung Fu Tea Co. agent: it is online and can confirm what is in stock."
       },
       "seq": 8
     },
     {
-      "type": "objection",
-      "agent_id": "shop:kungfu",
-      "message": "Kung Fu Tea raises a stock concern",
+      "type": "selection",
+      "agent_id": "shop_sharetea",
+      "message": "Selected Sharetea Lounge agent: it is online and can confirm what is in stock.",
       "payload": {
-        "agent_id": "shop:kungfu",
-        "target_drink_id": "brown-sugar-oolong",
-        "kind": "concern",
-        "reason": "Brown sugar pearls are running low, though the milk tea itself is still on the board."
+        "agent_id": "shop_sharetea",
+        "capabilities": [
+          "availability",
+          "menu"
+        ],
+        "reason": "Selected Sharetea Lounge agent: it is online and can confirm what is in stock."
       },
       "seq": 9
     },
     {
-      "type": "decision",
-      "agent_id": null,
-      "message": "Decision: Brown Sugar Oolong Milk Tea",
+      "type": "selection",
+      "agent_id": "shop_sunright",
+      "message": "Selected Sunright Tea Studio agent: it is online and can confirm what is in stock.",
       "payload": {
-        "drink_id": "brown-sugar-oolong",
-        "drink_name": "Brown Sugar Oolong Milk Tea",
-        "shop_id": "kungfu",
-        "score": 0.93,
-        "ask_human": false,
-        "question": null,
-        "alternatives": [
-          {
-            "drink_id": "hojicha-cream",
-            "drink_name": "Hojicha Cream Tea",
-            "score": 0.91
-          },
-          {
-            "drink_id": "osmanthus-mountain",
-            "drink_name": "Osmanthus Mountain Tea",
-            "score": 0.81
-          }
+        "agent_id": "shop_sunright",
+        "capabilities": [
+          "availability",
+          "menu"
         ],
-        "explanation": "Milkiness, brown sugar, and a topping habit outweigh a weak fruit signal. The shop only flagged pearl stock, not the drink."
+        "reason": "Selected Sunright Tea Studio agent: it is online and can confirm what is in stock."
       },
       "seq": 10
+    },
+    {
+      "type": "selection",
+      "agent_id": "shop_tigersugar",
+      "message": "Selected Tiger Sugar Lab agent: it is online and can confirm what is in stock.",
+      "payload": {
+        "agent_id": "shop_tigersugar",
+        "capabilities": [
+          "availability",
+          "menu"
+        ],
+        "reason": "Selected Tiger Sugar Lab agent: it is online and can confirm what is in stock."
+      },
+      "seq": 11
+    },
+    {
+      "type": "preference",
+      "agent_id": "preference",
+      "message": "From 4 past picks: price matters most (42%), then taste match (39%).",
+      "payload": {
+        "user_id": "andrew",
+        "weights": {
+          "taste": 0.3896468881150146,
+          "social": 0.1364890117054092,
+          "novelty": 0.05,
+          "cost": 0.42386410017957615
+        },
+        "previous_weights": null,
+        "choices_seen": 4,
+        "summary": "From 4 past picks: price matters most (42%), then taste match (39%)."
+      },
+      "seq": 12
+    },
+    {
+      "type": "proposal",
+      "agent_id": "taste",
+      "message": "Taste proposes Brown Sugar Oolong Milk Tea.",
+      "payload": {
+        "agent_id": "taste",
+        "drink_id": "kf_brown_sugar_oolong",
+        "drink_name": "Brown Sugar Oolong Milk Tea",
+        "shop_id": "kungfu",
+        "score": 0.9637894736842105,
+        "factors": [
+          {
+            "factor": "sweetness",
+            "weight": 0.19689473684210526
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.19289473684210529
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.19273684210526315
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.191
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.19026315789473688
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_01",
+            "drink_name": "Brown Sugar Oolong Milk Tea",
+            "rating": 5,
+            "text": "Brown sugar and oolong, exactly my order.",
+            "relevance": "You rated this 5/5; same drink."
+          },
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar milkiness."
+          }
+        ],
+        "rationale": "96% taste match, strongest on sweetness, tea intensity.",
+        "price": 6.5,
+        "dimension": "taste"
+      },
+      "seq": 13
+    },
+    {
+      "type": "proposal",
+      "agent_id": "taste",
+      "message": "Taste proposes Pearl Milk Tea.",
+      "payload": {
+        "agent_id": "taste",
+        "drink_id": "sr_pearl_milk",
+        "drink_name": "Pearl Milk Tea",
+        "shop_id": "sunright",
+        "score": 0.9262105263157895,
+        "factors": [
+          {
+            "factor": "tea_intensity",
+            "weight": 0.19710526315789473
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.18873684210526318
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.18510526315789474
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.185
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.17026315789473687
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_01",
+            "drink_name": "Brown Sugar Oolong Milk Tea",
+            "rating": 5,
+            "text": "Brown sugar and oolong, exactly my order.",
+            "relevance": "You rated this 5/5; similar milkiness."
+          },
+          {
+            "review_id": "rev_andrew_04",
+            "drink_name": "Brown Sugar Pearl Milk",
+            "rating": 4,
+            "text": "Really sweet, in a good way.",
+            "relevance": "You rated this 4/5; similar milkiness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          }
+        ],
+        "rationale": "93% taste match, strongest on tea intensity, milkiness.",
+        "price": 5.75,
+        "dimension": "taste"
+      },
+      "seq": 14
+    },
+    {
+      "type": "proposal",
+      "agent_id": "taste",
+      "message": "Taste proposes Thai Milk Tea.",
+      "payload": {
+        "agent_id": "taste",
+        "drink_id": "st_thai",
+        "drink_name": "Thai Milk Tea",
+        "shop_id": "sharetea",
+        "score": 0.9257894736842105,
+        "factors": [
+          {
+            "factor": "milkiness",
+            "weight": 0.19726315789473683
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.19489473684210526
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.191
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.18289473684210528
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.15973684210526312
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; same drink."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar tea intensity."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          }
+        ],
+        "rationale": "93% taste match, strongest on milkiness, sweetness.",
+        "price": 5.75,
+        "dimension": "taste"
+      },
+      "seq": 15
+    },
+    {
+      "type": "proposal",
+      "agent_id": "social",
+      "message": "Social proposes Horchata Milk Tea.",
+      "payload": {
+        "agent_id": "social",
+        "drink_id": "bg_horchata",
+        "drink_name": "Horchata Milk Tea",
+        "shop_id": "boba_guys",
+        "score": 0.7500000000000001,
+        "factors": [
+          {
+            "factor": "fruitiness",
+            "weight": 0.195
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.19273684210526315
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.1771052631578947
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.17510526315789474
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.15973684210526312
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_07",
+            "drink_name": "Taro Milk Tea",
+            "rating": 4,
+            "text": "Creamy taro with the right sugar.",
+            "relevance": "You rated this 4/5; similar milkiness."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          }
+        ],
+        "rationale": "Leo (96% similar) rated it 4/5.",
+        "price": 6.5,
+        "dimension": "social"
+      },
+      "seq": 16
+    },
+    {
+      "type": "proposal",
+      "agent_id": "social",
+      "message": "Social proposes Passion Fruit Green Tea.",
+      "payload": {
+        "agent_id": "social",
+        "drink_id": "kf_passion_fruit",
+        "drink_name": "Passion Fruit Green Tea",
+        "shop_id": "kungfu",
+        "score": 0.7500000000000001,
+        "factors": [
+          {
+            "factor": "tea_intensity",
+            "weight": 0.18710526315789472
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.14510526315789476
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.09973684210526312
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.057263157894736835
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.03500000000000001
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_09",
+            "drink_name": "Mango Green Tea",
+            "rating": 2,
+            "text": "Too fruity, not enough milk.",
+            "relevance": "You rated this 2/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_10",
+            "drink_name": "QQ Passion Fruit Tea",
+            "rating": 1,
+            "text": "Way too much passion fruit for me.",
+            "relevance": "You rated this 1/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          }
+        ],
+        "rationale": "Leo (96% similar) rated it 4/5.",
+        "price": 5.5,
+        "dimension": "social"
+      },
+      "seq": 17
+    },
+    {
+      "type": "proposal",
+      "agent_id": "social",
+      "message": "Social proposes Thai Tea.",
+      "payload": {
+        "agent_id": "social",
+        "drink_id": "kf_thai",
+        "drink_name": "Thai Tea",
+        "shop_id": "kungfu",
+        "score": 0.7500000000000001,
+        "factors": [
+          {
+            "factor": "fruitiness",
+            "weight": 0.195
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.19489473684210526
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.18726315789473683
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.18289473684210528
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.1397368421052631
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar tea intensity."
+          }
+        ],
+        "rationale": "Leo (96% similar) rated it 4/5.",
+        "price": 5.25,
+        "dimension": "social"
+      },
+      "seq": 18
+    },
+    {
+      "type": "proposal",
+      "agent_id": "explorer",
+      "message": "Explorer proposes Osmanthus Oolong.",
+      "payload": {
+        "agent_id": "explorer",
+        "drink_id": "sr_osmanthus_oolong",
+        "drink_name": "Osmanthus Oolong",
+        "shop_id": "sunright",
+        "score": 1,
+        "factors": [
+          {
+            "factor": "fruitiness",
+            "weight": 0.195
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.13289473684210526
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.11510526315789475
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.08973684210526311
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.07726315789473684
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_09",
+            "drink_name": "Mango Green Tea",
+            "rating": 2,
+            "text": "Too fruity, not enough milk.",
+            "relevance": "You rated this 2/5; similar milkiness."
+          },
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          }
+        ],
+        "rationale": "New to you. Closest past order: Classic Milk Tea.",
+        "price": 5,
+        "dimension": "novelty"
+      },
+      "seq": 19
+    },
+    {
+      "type": "proposal",
+      "agent_id": "explorer",
+      "message": "Explorer proposes Wintermelon Tea.",
+      "payload": {
+        "agent_id": "explorer",
+        "drink_id": "sr_wintermelon",
+        "drink_name": "Wintermelon Tea",
+        "shop_id": "sunright",
+        "score": 0.8666666666666667,
+        "factors": [
+          {
+            "factor": "fruitiness",
+            "weight": 0.195
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.18710526315789472
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.13510526315789476
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.08973684210526311
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.08726315789473685
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_09",
+            "drink_name": "Mango Green Tea",
+            "rating": 2,
+            "text": "Too fruity, not enough milk.",
+            "relevance": "You rated this 2/5; similar tea intensity."
+          },
+          {
+            "review_id": "rev_andrew_10",
+            "drink_name": "QQ Passion Fruit Tea",
+            "rating": 1,
+            "text": "Way too much passion fruit for me.",
+            "relevance": "You rated this 1/5; similar tea intensity."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          }
+        ],
+        "rationale": "New to you. Closest past order: Mango Green Tea.",
+        "price": 4.75,
+        "dimension": "novelty"
+      },
+      "seq": 20
+    },
+    {
+      "type": "proposal",
+      "agent_id": "explorer",
+      "message": "Explorer proposes Strawberry Matcha Latte.",
+      "payload": {
+        "agent_id": "explorer",
+        "drink_id": "bg_strawberry_matcha",
+        "drink_name": "Strawberry Matcha Latte",
+        "shop_id": "boba_guys",
+        "score": 0.75,
+        "factors": [
+          {
+            "factor": "tea_intensity",
+            "weight": 0.19710526315789473
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.17726315789473684
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.15510526315789475
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.11973684210526311
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.075
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_09",
+            "drink_name": "Mango Green Tea",
+            "rating": 2,
+            "text": "Too fruity, not enough milk.",
+            "relevance": "You rated this 2/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_10",
+            "drink_name": "QQ Passion Fruit Tea",
+            "rating": 1,
+            "text": "Way too much passion fruit for me.",
+            "relevance": "You rated this 1/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          }
+        ],
+        "rationale": "New to you. Closest past order: Mango Green Tea.",
+        "price": 6.75,
+        "dimension": "novelty"
+      },
+      "seq": 21
+    },
+    {
+      "type": "proposal",
+      "agent_id": "budget",
+      "message": "Budget proposes Brown Sugar Hojicha Milk.",
+      "payload": {
+        "agent_id": "budget",
+        "drink_id": "ll_brown_sugar_hojicha",
+        "drink_name": "Brown Sugar Hojicha Milk",
+        "shop_id": "lantern_leaf",
+        "score": 0.82,
+        "factors": [
+          {
+            "factor": "sweetness",
+            "weight": 0.19910526315789473
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.185
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.18273684210526317
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.18026315789473688
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.17289473684210527
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_01",
+            "drink_name": "Brown Sugar Oolong Milk Tea",
+            "rating": 5,
+            "text": "Brown sugar and oolong, exactly my order.",
+            "relevance": "You rated this 5/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_03",
+            "drink_name": "Brown Sugar Black Milk",
+            "rating": 5,
+            "text": "Could drink this every day.",
+            "relevance": "You rated this 5/5; similar fruitiness."
+          }
+        ],
+        "rationale": "$4.95, cheaper than 91% of drinks.",
+        "price": 4.95,
+        "dimension": "cost"
+      },
+      "seq": 22
+    },
+    {
+      "type": "proposal",
+      "agent_id": "budget",
+      "message": "Budget proposes Thai Tea.",
+      "payload": {
+        "agent_id": "budget",
+        "drink_id": "kf_thai",
+        "drink_name": "Thai Tea",
+        "shop_id": "kungfu",
+        "score": 0.7,
+        "factors": [
+          {
+            "factor": "fruitiness",
+            "weight": 0.195
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.19489473684210526
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.18726315789473683
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.18289473684210528
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.1397368421052631
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar tea intensity."
+          }
+        ],
+        "rationale": "$5.25, cheaper than 77% of drinks.",
+        "price": 5.25,
+        "dimension": "cost"
+      },
+      "seq": 23
+    },
+    {
+      "type": "proposal",
+      "agent_id": "budget",
+      "message": "Budget proposes Osmanthus Milk Tea.",
+      "payload": {
+        "agent_id": "budget",
+        "drink_id": "ll_osmanthus_milk",
+        "drink_name": "Osmanthus Milk Tea",
+        "shop_id": "lantern_leaf",
+        "score": 0.7,
+        "factors": [
+          {
+            "factor": "milkiness",
+            "weight": 0.19726315789473683
+          },
+          {
+            "factor": "fruitiness",
+            "weight": 0.195
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.18289473684210528
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.16510526315789475
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.1497368421052631
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar toppings."
+          },
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; similar milkiness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar tea intensity."
+          }
+        ],
+        "rationale": "$5.25, cheaper than 77% of drinks.",
+        "price": 5.25,
+        "dimension": "cost"
+      },
+      "seq": 24
+    },
+    {
+      "type": "status",
+      "agent_id": null,
+      "message": "11 candidates. Every agent now scores each one by its own objective.",
+      "payload": {
+        "candidate_drink_ids": [
+          "kf_brown_sugar_oolong",
+          "sr_pearl_milk",
+          "st_thai",
+          "bg_horchata",
+          "kf_passion_fruit",
+          "kf_thai",
+          "sr_osmanthus_oolong",
+          "sr_wintermelon",
+          "bg_strawberry_matcha",
+          "ll_brown_sugar_hojicha",
+          "ll_osmanthus_milk"
+        ]
+      },
+      "seq": 25
+    },
+    {
+      "type": "objection",
+      "agent_id": "taste",
+      "message": "Taste backs Brown Sugar Oolong Milk Tea, Pearl Milk Tea (+8 more).",
+      "payload": {
+        "agent_id": "taste",
+        "kind": "support",
+        "reason": "Taste backs Brown Sugar Oolong Milk Tea, Pearl Milk Tea (+8 more).",
+        "objections": [
+          {
+            "agent_id": "taste",
+            "target_drink_id": "kf_brown_sugar_oolong",
+            "kind": "support",
+            "reason": "Brown Sugar Oolong Milk Tea: 96% taste match, strongest on sweetness, tea intensity.",
+            "score": 0.9637894736842105,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "sr_pearl_milk",
+            "kind": "support",
+            "reason": "Pearl Milk Tea: 93% taste match, strongest on tea intensity, milkiness.",
+            "score": 0.9262105263157895,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "st_thai",
+            "kind": "support",
+            "reason": "Thai Milk Tea: 93% taste match, strongest on milkiness, sweetness.",
+            "score": 0.9257894736842105,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "bg_horchata",
+            "kind": "support",
+            "reason": "Horchata Milk Tea: 90% taste match, strongest on fruitiness, milkiness.",
+            "score": 0.8996842105263158,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "kf_passion_fruit",
+            "kind": "neutral",
+            "reason": "Passion Fruit Green Tea: 52% taste match, strongest on tea intensity, sweetness.",
+            "score": 0.5242105263157895,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: 90% taste match, strongest on fruitiness, sweetness.",
+            "score": 0.8997894736842105,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "sr_osmanthus_oolong",
+            "kind": "support",
+            "reason": "Osmanthus Oolong: 61% taste match, strongest on fruitiness, tea intensity.",
+            "score": 0.61,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "sr_wintermelon",
+            "kind": "support",
+            "reason": "Wintermelon Tea: 69% taste match, strongest on fruitiness, tea intensity.",
+            "score": 0.6942105263157894,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "bg_strawberry_matcha",
+            "kind": "support",
+            "reason": "Strawberry Matcha Latte: 72% taste match, strongest on tea intensity, milkiness.",
+            "score": 0.7242105263157894,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "ll_brown_sugar_hojicha",
+            "kind": "support",
+            "reason": "Brown Sugar Hojicha Milk: 92% taste match, strongest on sweetness, fruitiness.",
+            "score": 0.92,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
+            "target_drink_id": "ll_osmanthus_milk",
+            "kind": "support",
+            "reason": "Osmanthus Milk Tea: 89% taste match, strongest on milkiness, fruitiness.",
+            "score": 0.89,
+            "dimension": "taste"
+          }
+        ]
+      },
+      "seq": 26
+    },
+    {
+      "type": "objection",
+      "agent_id": "social",
+      "message": "Social backs Horchata Milk Tea, Passion Fruit Green Tea (+3 more).",
+      "payload": {
+        "agent_id": "social",
+        "kind": "support",
+        "reason": "Social backs Horchata Milk Tea, Passion Fruit Green Tea (+3 more).",
+        "objections": [
+          {
+            "agent_id": "social",
+            "target_drink_id": "kf_brown_sugar_oolong",
+            "kind": "neutral",
+            "reason": "Brown Sugar Oolong Milk Tea: Leo (96% similar) rated it 3/5.",
+            "score": 0.5,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "sr_pearl_milk",
+            "kind": "support",
+            "reason": "Pearl Milk Tea: Hana (99% similar) rated it 4/5.",
+            "score": 0.75,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "st_thai",
+            "kind": "support",
+            "reason": "Thai Milk Tea: Leo (96% similar) rated it 4/5.",
+            "score": 0.7500000000000001,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "bg_horchata",
+            "kind": "support",
+            "reason": "Horchata Milk Tea: Leo (96% similar) rated it 4/5.",
+            "score": 0.7500000000000001,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "kf_passion_fruit",
+            "kind": "support",
+            "reason": "Passion Fruit Green Tea: Leo (96% similar) rated it 4/5.",
+            "score": 0.7500000000000001,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: Leo (96% similar) rated it 4/5.",
+            "score": 0.7500000000000001,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "sr_osmanthus_oolong",
+            "kind": "neutral",
+            "reason": "Osmanthus Oolong: No one with similar taste has rated it yet.",
+            "score": 0.5,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "sr_wintermelon",
+            "kind": "neutral",
+            "reason": "Wintermelon Tea: Rina (96% similar) rated it 3/5.",
+            "score": 0.5,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "bg_strawberry_matcha",
+            "kind": "neutral",
+            "reason": "Strawberry Matcha Latte: No one with similar taste has rated it yet.",
+            "score": 0.5,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "ll_brown_sugar_hojicha",
+            "kind": "neutral",
+            "reason": "Brown Sugar Hojicha Milk: No one with similar taste has rated it yet.",
+            "score": 0.5,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "ll_osmanthus_milk",
+            "kind": "neutral",
+            "reason": "Osmanthus Milk Tea: No one with similar taste has rated it yet.",
+            "score": 0.5,
+            "dimension": "social"
+          }
+        ]
+      },
+      "seq": 27
+    },
+    {
+      "type": "objection",
+      "agent_id": "explorer",
+      "message": "Explorer backs Osmanthus Oolong, Wintermelon Tea (+7 more); pushes back on Thai Milk Tea, Brown Sugar Oolong Milk Tea.",
+      "payload": {
+        "agent_id": "explorer",
+        "kind": "concern",
+        "reason": "Explorer backs Osmanthus Oolong, Wintermelon Tea (+7 more); pushes back on Thai Milk Tea, Brown Sugar Oolong Milk Tea.",
+        "objections": [
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "kf_brown_sugar_oolong",
+            "kind": "concern",
+            "reason": "Brown Sugar Oolong Milk Tea: Already reviewed it (5/5).",
+            "score": 0,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "sr_pearl_milk",
+            "kind": "support",
+            "reason": "Pearl Milk Tea: New to you. Closest past order: Brown Sugar Oolong Milk Tea.",
+            "score": 0.5966666666666667,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "st_thai",
+            "kind": "concern",
+            "reason": "Thai Milk Tea: Already reviewed it (4/5).",
+            "score": 0,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "bg_horchata",
+            "kind": "support",
+            "reason": "Horchata Milk Tea: New to you. Closest past order: Taro Milk Tea.",
+            "score": 0.6166666666666667,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "kf_passion_fruit",
+            "kind": "support",
+            "reason": "Passion Fruit Green Tea: New to you. Closest past order: Mango Green Tea.",
+            "score": 0.5833333333333333,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: New to you. Closest past order: Thai Milk Tea.",
+            "score": 0.5566666666666666,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "sr_osmanthus_oolong",
+            "kind": "support",
+            "reason": "Osmanthus Oolong: New to you. Closest past order: Classic Milk Tea.",
+            "score": 1,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "sr_wintermelon",
+            "kind": "support",
+            "reason": "Wintermelon Tea: New to you. Closest past order: Mango Green Tea.",
+            "score": 0.8666666666666667,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "bg_strawberry_matcha",
+            "kind": "support",
+            "reason": "Strawberry Matcha Latte: New to you. Closest past order: Mango Green Tea.",
+            "score": 0.75,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "ll_brown_sugar_hojicha",
+            "kind": "support",
+            "reason": "Brown Sugar Hojicha Milk: New to you. Closest past order: Brown Sugar Oolong Milk Tea.",
+            "score": 0.5833333333333334,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
+            "target_drink_id": "ll_osmanthus_milk",
+            "kind": "support",
+            "reason": "Osmanthus Milk Tea: New to you. Closest past order: Classic Milk Tea.",
+            "score": 0.5833333333333334,
+            "dimension": "novelty"
+          }
+        ]
+      },
+      "seq": 28
+    },
+    {
+      "type": "objection",
+      "agent_id": "budget",
+      "message": "Budget backs Wintermelon Tea, Brown Sugar Hojicha Milk (+4 more); pushes back on Strawberry Matcha Latte, Brown Sugar Oolong Milk Tea (+1 more).",
+      "payload": {
+        "agent_id": "budget",
+        "kind": "concern",
+        "reason": "Budget backs Wintermelon Tea, Brown Sugar Hojicha Milk (+4 more); pushes back on Strawberry Matcha Latte, Brown Sugar Oolong Milk Tea (+1 more).",
+        "objections": [
+          {
+            "agent_id": "budget",
+            "target_drink_id": "kf_brown_sugar_oolong",
+            "kind": "concern",
+            "reason": "Brown Sugar Oolong Milk Tea: $6.50, cheaper than 14% of drinks.",
+            "score": 0.19999999999999996,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "sr_pearl_milk",
+            "kind": "neutral",
+            "reason": "Pearl Milk Tea: $5.75, cheaper than 51% of drinks.",
+            "score": 0.5,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "st_thai",
+            "kind": "neutral",
+            "reason": "Thai Milk Tea: $5.75, cheaper than 51% of drinks.",
+            "score": 0.5,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "bg_horchata",
+            "kind": "concern",
+            "reason": "Horchata Milk Tea: $6.50, cheaper than 14% of drinks.",
+            "score": 0.19999999999999996,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "kf_passion_fruit",
+            "kind": "support",
+            "reason": "Passion Fruit Green Tea: $5.50, cheaper than 67% of drinks.",
+            "score": 0.6,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: $5.25, cheaper than 77% of drinks.",
+            "score": 0.7,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "sr_osmanthus_oolong",
+            "kind": "support",
+            "reason": "Osmanthus Oolong: $5.00, cheaper than 86% of drinks.",
+            "score": 0.8,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "sr_wintermelon",
+            "kind": "support",
+            "reason": "Wintermelon Tea: $4.75, cheaper than 93% of drinks.",
+            "score": 0.9,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "bg_strawberry_matcha",
+            "kind": "concern",
+            "reason": "Strawberry Matcha Latte: $6.75, cheaper than 2% of drinks.",
+            "score": 0.09999999999999998,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "ll_brown_sugar_hojicha",
+            "kind": "support",
+            "reason": "Brown Sugar Hojicha Milk: $4.95, cheaper than 91% of drinks.",
+            "score": 0.82,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "ll_osmanthus_milk",
+            "kind": "support",
+            "reason": "Osmanthus Milk Tea: $5.25, cheaper than 77% of drinks.",
+            "score": 0.7,
+            "dimension": "cost"
+          }
+        ]
+      },
+      "seq": 29
+    },
+    {
+      "type": "objection",
+      "agent_id": "shop_boba_guys",
+      "message": "Boba Guys confirms in stock: Horchata Milk Tea, Strawberry Matcha Latte.",
+      "payload": {
+        "agent_id": "shop_boba_guys",
+        "kind": "support",
+        "reason": "Boba Guys confirms in stock: Horchata Milk Tea, Strawberry Matcha Latte.",
+        "objections": [
+          {
+            "agent_id": "shop_boba_guys",
+            "target_drink_id": "bg_horchata",
+            "kind": "support",
+            "reason": "Horchata Milk Tea is in stock at Boba Guys ($6.50).",
+            "score": null,
+            "dimension": null
+          },
+          {
+            "agent_id": "shop_boba_guys",
+            "target_drink_id": "bg_strawberry_matcha",
+            "kind": "support",
+            "reason": "Strawberry Matcha Latte is in stock at Boba Guys ($6.75).",
+            "score": null,
+            "dimension": null
+          }
+        ]
+      },
+      "seq": 30
+    },
+    {
+      "type": "objection",
+      "agent_id": "shop_kungfu",
+      "message": "Kung Fu Tea Co. confirms in stock: Brown Sugar Oolong Milk Tea, Passion Fruit Green Tea (+1 more).",
+      "payload": {
+        "agent_id": "shop_kungfu",
+        "kind": "support",
+        "reason": "Kung Fu Tea Co. confirms in stock: Brown Sugar Oolong Milk Tea, Passion Fruit Green Tea (+1 more).",
+        "objections": [
+          {
+            "agent_id": "shop_kungfu",
+            "target_drink_id": "kf_brown_sugar_oolong",
+            "kind": "support",
+            "reason": "Brown Sugar Oolong Milk Tea is in stock at Kung Fu Tea Co ($6.50).",
+            "score": null,
+            "dimension": null
+          },
+          {
+            "agent_id": "shop_kungfu",
+            "target_drink_id": "kf_passion_fruit",
+            "kind": "support",
+            "reason": "Passion Fruit Green Tea is in stock at Kung Fu Tea Co ($5.50).",
+            "score": null,
+            "dimension": null
+          },
+          {
+            "agent_id": "shop_kungfu",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea is in stock at Kung Fu Tea Co ($5.25).",
+            "score": null,
+            "dimension": null
+          }
+        ]
+      },
+      "seq": 31
+    },
+    {
+      "type": "objection",
+      "agent_id": "shop_sharetea",
+      "message": "Sharetea Lounge confirms in stock: Thai Milk Tea.",
+      "payload": {
+        "agent_id": "shop_sharetea",
+        "kind": "support",
+        "reason": "Sharetea Lounge confirms in stock: Thai Milk Tea.",
+        "objections": [
+          {
+            "agent_id": "shop_sharetea",
+            "target_drink_id": "st_thai",
+            "kind": "support",
+            "reason": "Thai Milk Tea is in stock at Sharetea Lounge ($5.75).",
+            "score": null,
+            "dimension": null
+          }
+        ]
+      },
+      "seq": 32
+    },
+    {
+      "type": "objection",
+      "agent_id": "shop_sunright",
+      "message": "Sunright Tea Studio confirms in stock: Osmanthus Oolong, Pearl Milk Tea (+1 more).",
+      "payload": {
+        "agent_id": "shop_sunright",
+        "kind": "support",
+        "reason": "Sunright Tea Studio confirms in stock: Osmanthus Oolong, Pearl Milk Tea (+1 more).",
+        "objections": [
+          {
+            "agent_id": "shop_sunright",
+            "target_drink_id": "sr_pearl_milk",
+            "kind": "support",
+            "reason": "Pearl Milk Tea is in stock at Sunright Tea Studio ($5.75).",
+            "score": null,
+            "dimension": null
+          },
+          {
+            "agent_id": "shop_sunright",
+            "target_drink_id": "sr_osmanthus_oolong",
+            "kind": "support",
+            "reason": "Osmanthus Oolong is in stock at Sunright Tea Studio ($5.00).",
+            "score": null,
+            "dimension": null
+          },
+          {
+            "agent_id": "shop_sunright",
+            "target_drink_id": "sr_wintermelon",
+            "kind": "support",
+            "reason": "Wintermelon Tea is in stock at Sunright Tea Studio ($4.75).",
+            "score": null,
+            "dimension": null
+          }
+        ]
+      },
+      "seq": 33
+    },
+    {
+      "type": "status",
+      "agent_id": null,
+      "message": "Dropped Brown Sugar Hojicha Milk: No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+      "payload": {
+        "drink_id": "ll_brown_sugar_hojicha",
+        "drink_name": "Brown Sugar Hojicha Milk",
+        "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+        "by": "registry"
+      },
+      "seq": 34
+    },
+    {
+      "type": "status",
+      "agent_id": null,
+      "message": "Dropped Osmanthus Milk Tea: No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+      "payload": {
+        "drink_id": "ll_osmanthus_milk",
+        "drink_name": "Osmanthus Milk Tea",
+        "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+        "by": "registry"
+      },
+      "seq": 35
+    },
+    {
+      "type": "decision",
+      "agent_id": null,
+      "message": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 39% for you. It beats Wintermelon Tea mainly on taste match. Ruled out: Brown Sugar Hojicha Milk, Osmanthus Milk Tea.",
+      "payload": {
+        "drink_id": "kf_thai",
+        "drink_name": "Thai Tea",
+        "shop_id": "kungfu",
+        "score": 0.7775051306177931,
+        "ask_human": true,
+        "question": "Thai Tea and Wintermelon Tea are nearly tied (0.78 vs 0.76). Your pick will teach us which matters more.",
+        "alternatives": [
+          {
+            "drink_id": "sr_wintermelon",
+            "drink_name": "Wintermelon Tea",
+            "score": 0.7635525006232904,
+            "shop_id": "sunright",
+            "price": 4.75,
+            "dimension_scores": {
+              "taste": 0.6942105263157894,
+              "social": 0.5,
+              "novelty": 0.8666666666666667,
+              "cost": 0.9
+            }
+          },
+          {
+            "drink_id": "sr_pearl_milk",
+            "drink_name": "Pearl Milk Tea",
+            "score": 0.7050271915204956,
+            "shop_id": "sunright",
+            "price": 5.75,
+            "dimension_scores": {
+              "taste": 0.9262105263157895,
+              "social": 0.75,
+              "novelty": 0.5966666666666667,
+              "cost": 0.5
+            }
+          }
+        ],
+        "explanation": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 39% for you. It beats Wintermelon Tea mainly on taste match. Ruled out: Brown Sugar Hojicha Milk, Osmanthus Milk Tea.",
+        "options": [
+          {
+            "drink_id": "kf_thai",
+            "drink_name": "Thai Tea",
+            "score": 0.7775051306177931,
+            "shop_id": "kungfu",
+            "price": 5.25,
+            "dimension_scores": {
+              "taste": 0.8997894736842105,
+              "social": 0.7500000000000001,
+              "novelty": 0.5566666666666666,
+              "cost": 0.7
+            }
+          },
+          {
+            "drink_id": "sr_wintermelon",
+            "drink_name": "Wintermelon Tea",
+            "score": 0.7635525006232904,
+            "shop_id": "sunright",
+            "price": 4.75,
+            "dimension_scores": {
+              "taste": 0.6942105263157894,
+              "social": 0.5,
+              "novelty": 0.8666666666666667,
+              "cost": 0.9
+            }
+          },
+          {
+            "drink_id": "sr_pearl_milk",
+            "drink_name": "Pearl Milk Tea",
+            "score": 0.7050271915204956,
+            "shop_id": "sunright",
+            "price": 5.75,
+            "dimension_scores": {
+              "taste": 0.9262105263157895,
+              "social": 0.75,
+              "novelty": 0.5966666666666667,
+              "cost": 0.5
+            }
+          }
+        ],
+        "weights": {
+          "taste": 0.38964688811501463,
+          "social": 0.13648901170540922,
+          "novelty": 0.05000000000000001,
+          "cost": 0.4238641001795762
+        },
+        "dropped": [
+          {
+            "drink_id": "ll_brown_sugar_hojicha",
+            "drink_name": "Brown Sugar Hojicha Milk",
+            "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+            "by": "registry"
+          },
+          {
+            "drink_id": "ll_osmanthus_milk",
+            "drink_name": "Osmanthus Milk Tea",
+            "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+            "by": "registry"
+          }
+        ]
+      },
+      "seq": 36
     }
   ],
   "counterfactual": {
-    "preference_label": "Brown sugar",
-    "from": 0.84,
-    "to": 0,
+    "change": "Andrew says he doesn't like brown sugar.",
     "before": {
-      "drink_id": "brown-sugar-oolong",
-      "drink_name": "Brown Sugar Oolong Milk Tea",
-      "score": 0.93
-    },
-    "after": {
-      "drink_id": "jasmine-milk",
-      "drink_name": "Jasmine Milk Tea",
-      "shop_id": "kungfu",
-      "score": 0.89,
+      "drink_id": "ll_brown_sugar_hojicha",
+      "drink_name": "Brown Sugar Hojicha Milk",
+      "shop_id": "lantern_leaf",
+      "score": 0.8034548717324372,
       "ask_human": false,
       "question": null,
       "alternatives": [
         {
-          "drink_id": "hojicha-cream",
-          "drink_name": "Hojicha Cream Tea",
-          "score": 0.86
+          "drink_id": "kf_thai",
+          "drink_name": "Thai Tea",
+          "score": 0.7775051306177931,
+          "shop_id": "kungfu",
+          "price": 5.25,
+          "dimension_scores": {
+            "taste": 0.8997894736842105,
+            "social": 0.7500000000000001,
+            "novelty": 0.5566666666666666,
+            "cost": 0.7
+          }
         },
         {
-          "drink_id": "brown-sugar-oolong",
-          "drink_name": "Brown Sugar Oolong Milk Tea",
-          "score": 0.71
+          "drink_id": "sr_wintermelon",
+          "drink_name": "Wintermelon Tea",
+          "score": 0.7635525006232904,
+          "shop_id": "sunright",
+          "price": 4.75,
+          "dimension_scores": {
+            "taste": 0.6942105263157894,
+            "social": 0.5,
+            "novelty": 0.8666666666666667,
+            "cost": 0.9
+          }
         }
       ],
-      "explanation": "Without the brown sugar pull, the milky profile points to Jasmine Milk Tea and the caramel note drops out."
+      "explanation": "Brown Sugar Hojicha Milk ranks first (0.80). Its biggest boost is taste match, which counts for 39% for you. It beats Thai Tea mainly on price.",
+      "options": [
+        {
+          "drink_id": "ll_brown_sugar_hojicha",
+          "drink_name": "Brown Sugar Hojicha Milk",
+          "score": 0.8034548717324372,
+          "shop_id": "lantern_leaf",
+          "price": 4.95,
+          "dimension_scores": {
+            "taste": 0.92,
+            "social": 0.5,
+            "novelty": 0.5833333333333334,
+            "cost": 0.82
+          }
+        },
+        {
+          "drink_id": "kf_thai",
+          "drink_name": "Thai Tea",
+          "score": 0.7775051306177931,
+          "shop_id": "kungfu",
+          "price": 5.25,
+          "dimension_scores": {
+            "taste": 0.8997894736842105,
+            "social": 0.7500000000000001,
+            "novelty": 0.5566666666666666,
+            "cost": 0.7
+          }
+        },
+        {
+          "drink_id": "sr_wintermelon",
+          "drink_name": "Wintermelon Tea",
+          "score": 0.7635525006232904,
+          "shop_id": "sunright",
+          "price": 4.75,
+          "dimension_scores": {
+            "taste": 0.6942105263157894,
+            "social": 0.5,
+            "novelty": 0.8666666666666667,
+            "cost": 0.9
+          }
+        }
+      ],
+      "weights": {
+        "taste": 0.38964688811501463,
+        "social": 0.13648901170540922,
+        "novelty": 0.05000000000000001,
+        "cost": 0.4238641001795762
+      },
+      "dropped": []
     },
-    "why": "Without the brown sugar pull, the milky profile points to Jasmine Milk Tea and the caramel note drops out."
+    "after": {
+      "drink_id": "kf_thai",
+      "drink_name": "Thai Tea",
+      "shop_id": "kungfu",
+      "score": 0.7775051306177931,
+      "ask_human": true,
+      "question": "Thai Tea and Wintermelon Tea are nearly tied (0.78 vs 0.76). Your pick will teach us which matters more.",
+      "alternatives": [
+        {
+          "drink_id": "sr_wintermelon",
+          "drink_name": "Wintermelon Tea",
+          "score": 0.7635525006232904,
+          "shop_id": "sunright",
+          "price": 4.75,
+          "dimension_scores": {
+            "taste": 0.6942105263157894,
+            "social": 0.5,
+            "novelty": 0.8666666666666667,
+            "cost": 0.9
+          }
+        },
+        {
+          "drink_id": "ll_osmanthus_milk",
+          "drink_name": "Osmanthus Milk Tea",
+          "score": 0.7409017730674377,
+          "shop_id": "lantern_leaf",
+          "price": 5.25,
+          "dimension_scores": {
+            "taste": 0.89,
+            "social": 0.5,
+            "novelty": 0.5833333333333334,
+            "cost": 0.7
+          }
+        }
+      ],
+      "explanation": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 39% for you. It beats Wintermelon Tea mainly on taste match.",
+      "options": [
+        {
+          "drink_id": "kf_thai",
+          "drink_name": "Thai Tea",
+          "score": 0.7775051306177931,
+          "shop_id": "kungfu",
+          "price": 5.25,
+          "dimension_scores": {
+            "taste": 0.8997894736842105,
+            "social": 0.7500000000000001,
+            "novelty": 0.5566666666666666,
+            "cost": 0.7
+          }
+        },
+        {
+          "drink_id": "sr_wintermelon",
+          "drink_name": "Wintermelon Tea",
+          "score": 0.7635525006232904,
+          "shop_id": "sunright",
+          "price": 4.75,
+          "dimension_scores": {
+            "taste": 0.6942105263157894,
+            "social": 0.5,
+            "novelty": 0.8666666666666667,
+            "cost": 0.9
+          }
+        },
+        {
+          "drink_id": "ll_osmanthus_milk",
+          "drink_name": "Osmanthus Milk Tea",
+          "score": 0.7409017730674377,
+          "shop_id": "lantern_leaf",
+          "price": 5.25,
+          "dimension_scores": {
+            "taste": 0.89,
+            "social": 0.5,
+            "novelty": 0.5833333333333334,
+            "cost": 0.7
+          }
+        }
+      ],
+      "weights": {
+        "taste": 0.38964688811501463,
+        "social": 0.13648901170540922,
+        "novelty": 0.05000000000000001,
+        "cost": 0.4238641001795762
+      },
+      "dropped": []
+    }
   }
 }

@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 1:15 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 1:30 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -77,9 +77,9 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ⬜ `docs/architecture.md`
 
 **Track B (frontend, demo, write-ups):**
-- ⬜ Live Counterfactual diff
-- ⬜ Mocks refresh, remove `RecommendationCard`, Friends on `/users/similar`
-- ⬜ Evidence page (against `mocks/eval.json`)
+- ✅ Live Counterfactual diff. The page is now "What changed" in the nav and has its own what-if buttons.
+- ✅ Mocks refreshed from a real run (`node frontend/scripts/capture-mock.mjs` re-records them), `RecommendationCard` removed, Friends on `/users/similar` with a taste comparison
+- ✅ Evidence page at `/evidence`. It uses `mocks/eval.json` with a "preview" label and switches to `GET /eval` automatically when A ships it.
 - ⬜ Ask-the-human and timeline polish
 - ⬜ `docs/demo-script.md`
 - ⬜ Offer badge (if A builds offers)

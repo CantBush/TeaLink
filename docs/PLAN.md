@@ -153,9 +153,9 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 
 | When | Task | Done when |
 |---|---|---|
-| 1:30 to 3:00 | ⬜ **Counterfactual page on live data.** Show a before/after of the top 3 using `previousDecision` and `decision` from the session store: what moved, what was ruled out, which event caused it, and the weight shifts | Clicking any control button, then opening Counterfactual, shows the real diff |
-| 3:00 to 4:00 | ⬜ Clean-up: update `sample_session.json` so the offline fallback shows the top 3 and priorities; delete `RecommendationCard.tsx`; point Friends at `/users/similar` (or hide the tab) | `npm run build` and lint pass; the app still works with the API stopped |
-| 4:00 to 6:00 | ⬜ **Evidence page** (`/evidence`) built against `mocks/eval.json`: a methods table, hit-rate bars, and hidden vs learned weights per persona | Renders from the mock, then switches to `GET /eval` after A merges |
+| 1:30 to 3:00 | ✅ **Counterfactual page on live data.** Show a before/after of the top 3 using `previousDecision` and `decision` from the session store: what moved, what was ruled out, which event caused it, and the weight shifts | Clicking any control button, then opening Counterfactual, shows the real diff |
+| 3:00 to 4:00 | ✅ Clean-up: update `sample_session.json` so the offline fallback shows the top 3 and priorities; delete `RecommendationCard.tsx`; point Friends at `/users/similar` (or hide the tab) | `npm run build` and lint pass; the app still works with the API stopped |
+| 4:00 to 6:00 | ✅ **Evidence page** (`/evidence`) built against `mocks/eval.json`: a methods table, hit-rate bars, and hidden vs learned weights per persona | Renders from the mock, then switches to `GET /eval` after A merges |
 | **6:00** | **Sync:** merge, then run the full demo together | |
 | 6:30 to 7:30 | ⬜ Ask-the-human polish: when `ask_human` is set, the prompt names both options and what separates them, and the pick resolves it. Timeline readability (group by round, collapse selection events) | A judge can follow one run without explanation |
 | 7:30 to 9:00 | ⬜ `docs/demo-script.md` (exact clicks and lines, 3 minutes). If A builds offers, add an offer badge on cards and an `offer` timeline style. Stretch: ElevenLabs voice for each agent's line | Two dry runs from a reset |
@@ -203,6 +203,7 @@ If one track finishes early, take the other track's next unstarted task, but say
 
 ## Plan change log
 
+- **1:30 PM:** Track B finished its first three blocks early (Counterfactual, clean-up, Evidence page). Next up for B: ask-the-human and timeline polish, then the demo script.
 - **1:15 PM:** Split the remaining work into Track A (backend, agents, evidence) and Track B (frontend, demo, write-ups), with separate file ownership, agreed contracts for `/eval` and offers, and shared sync points. Added an Evidence page, and an AGNTCY-plus-baseline block for A.
 
 - **1:10 PM:** The plan moved into this file (`docs/PLAN.md`) so the team can edit it on GitHub.
