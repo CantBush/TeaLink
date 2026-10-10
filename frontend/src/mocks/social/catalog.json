@@ -1,0 +1,395 @@
+[
+  {
+    "id": "kf_brown_sugar_oolong",
+    "name": "Brown Sugar Oolong Milk Tea",
+    "shop_id": "kungfu",
+    "price": 6.5,
+    "flavor_tags": [
+      "brown_sugar",
+      "oolong"
+    ]
+  },
+  {
+    "id": "kf_classic_milk",
+    "name": "Classic Milk Tea",
+    "shop_id": "kungfu",
+    "price": 5.5,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "kf_jasmine_milk",
+    "name": "Jasmine Milk Tea",
+    "shop_id": "kungfu",
+    "price": 5.75,
+    "flavor_tags": [
+      "jasmine"
+    ]
+  },
+  {
+    "id": "kf_taro",
+    "name": "Taro Milk Tea",
+    "shop_id": "kungfu",
+    "price": 6,
+    "flavor_tags": [
+      "taro"
+    ]
+  },
+  {
+    "id": "kf_mango_green",
+    "name": "Mango Green Tea",
+    "shop_id": "kungfu",
+    "price": 5.75,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "kf_passion_fruit",
+    "name": "Passion Fruit Green Tea",
+    "shop_id": "kungfu",
+    "price": 5.5,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "kf_matcha_latte",
+    "name": "Matcha Latte",
+    "shop_id": "kungfu",
+    "price": 6.25,
+    "flavor_tags": [
+      "matcha"
+    ]
+  },
+  {
+    "id": "kf_thai",
+    "name": "Thai Tea",
+    "shop_id": "kungfu",
+    "price": 5.25,
+    "flavor_tags": [
+      "thai_tea"
+    ]
+  },
+  {
+    "id": "sr_hojicha_cream",
+    "name": "Hojicha Cream Tea",
+    "shop_id": "sunright",
+    "price": 6.75,
+    "flavor_tags": [
+      "hojicha"
+    ]
+  },
+  {
+    "id": "sr_hojicha_latte",
+    "name": "Hojicha Latte",
+    "shop_id": "sunright",
+    "price": 6.5,
+    "flavor_tags": [
+      "hojicha"
+    ]
+  },
+  {
+    "id": "sr_brown_sugar_black",
+    "name": "Brown Sugar Black Milk",
+    "shop_id": "sunright",
+    "price": 6.5,
+    "flavor_tags": [
+      "brown_sugar"
+    ]
+  },
+  {
+    "id": "sr_osmanthus_oolong",
+    "name": "Osmanthus Oolong",
+    "shop_id": "sunright",
+    "price": 5,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "sr_strawberry_matcha",
+    "name": "Strawberry Matcha",
+    "shop_id": "sunright",
+    "price": 6.25,
+    "flavor_tags": [
+      "matcha",
+      "fruit"
+    ]
+  },
+  {
+    "id": "sr_pearl_milk",
+    "name": "Pearl Milk Tea",
+    "shop_id": "sunright",
+    "price": 5.75,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "sr_wintermelon",
+    "name": "Wintermelon Tea",
+    "shop_id": "sunright",
+    "price": 4.75,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "sr_grapefruit",
+    "name": "Grapefruit Green Tea",
+    "shop_id": "sunright",
+    "price": 5.25,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "ts_tiger_brown",
+    "name": "Tiger Brown Sugar Boba",
+    "shop_id": "tigersugar",
+    "price": 7,
+    "flavor_tags": [
+      "brown_sugar"
+    ]
+  },
+  {
+    "id": "ts_brown_cream",
+    "name": "Brown Sugar Cream Foam",
+    "shop_id": "tigersugar",
+    "price": 6.75,
+    "flavor_tags": [
+      "brown_sugar"
+    ]
+  },
+  {
+    "id": "ts_oolong_milk",
+    "name": "Roasted Oolong Milk Tea",
+    "shop_id": "tigersugar",
+    "price": 6.25,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "ts_black_sugar_fresh",
+    "name": "Fresh Milk Black Sugar",
+    "shop_id": "tigersugar",
+    "price": 6.5,
+    "flavor_tags": [
+      "brown_sugar"
+    ]
+  },
+  {
+    "id": "ts_matcha_brown",
+    "name": "Matcha Brown Sugar",
+    "shop_id": "tigersugar",
+    "price": 6.75,
+    "flavor_tags": [
+      "matcha",
+      "brown_sugar"
+    ]
+  },
+  {
+    "id": "ts_lychee",
+    "name": "Lychee Oolong",
+    "shop_id": "tigersugar",
+    "price": 5.75,
+    "flavor_tags": [
+      "fruit",
+      "oolong"
+    ]
+  },
+  {
+    "id": "ts_peach",
+    "name": "Peach Black Tea",
+    "shop_id": "tigersugar",
+    "price": 5.5,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "ts_sesame",
+    "name": "Black Sesame Latte",
+    "shop_id": "tigersugar",
+    "price": 6.25,
+    "flavor_tags": [
+      "taro"
+    ]
+  },
+  {
+    "id": "bg_horchata",
+    "name": "Horchata Milk Tea",
+    "shop_id": "boba_guys",
+    "price": 6.5,
+    "flavor_tags": [
+      "thai_tea"
+    ]
+  },
+  {
+    "id": "bg_strawberry_matcha",
+    "name": "Strawberry Matcha Latte",
+    "shop_id": "boba_guys",
+    "price": 6.75,
+    "flavor_tags": [
+      "fruit",
+      "matcha"
+    ]
+  },
+  {
+    "id": "bg_classic",
+    "name": "House Milk Tea",
+    "shop_id": "boba_guys",
+    "price": 5.75,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "bg_jasmine",
+    "name": "Jasmine Green Milk",
+    "shop_id": "boba_guys",
+    "price": 5.5,
+    "flavor_tags": [
+      "jasmine"
+    ]
+  },
+  {
+    "id": "bg_ube",
+    "name": "Ube Milk Tea",
+    "shop_id": "boba_guys",
+    "price": 6.5,
+    "flavor_tags": [
+      "taro"
+    ]
+  },
+  {
+    "id": "bg_pineapple",
+    "name": "Pineapple Green Tea",
+    "shop_id": "boba_guys",
+    "price": 5.25,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "bg_dirty_horchata",
+    "name": "Dirty Horchata",
+    "shop_id": "boba_guys",
+    "price": 6.75,
+    "flavor_tags": [
+      "thai_tea"
+    ]
+  },
+  {
+    "id": "bg_banana_milk",
+    "name": "Banana Milk",
+    "shop_id": "boba_guys",
+    "price": 5.75,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "st_qq",
+    "name": "QQ Passion Fruit Tea",
+    "shop_id": "sharetea",
+    "price": 6,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "st_thai",
+    "name": "Thai Milk Tea",
+    "shop_id": "sharetea",
+    "price": 5.75,
+    "flavor_tags": [
+      "thai_tea"
+    ]
+  },
+  {
+    "id": "st_taro",
+    "name": "Taro Smoothie",
+    "shop_id": "sharetea",
+    "price": 6.25,
+    "flavor_tags": [
+      "taro"
+    ]
+  },
+  {
+    "id": "st_oolong",
+    "name": "High Mountain Oolong",
+    "shop_id": "sharetea",
+    "price": 4.5,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "st_brown_sugar",
+    "name": "Brown Sugar Pearl Milk",
+    "shop_id": "sharetea",
+    "price": 6.5,
+    "flavor_tags": [
+      "brown_sugar"
+    ]
+  },
+  {
+    "id": "st_honey_lemon",
+    "name": "Honey Lemon Tea",
+    "shop_id": "sharetea",
+    "price": 4.75,
+    "flavor_tags": [
+      "fruit"
+    ]
+  },
+  {
+    "id": "st_matcha",
+    "name": "Matcha Milk Tea",
+    "shop_id": "sharetea",
+    "price": 6,
+    "flavor_tags": [
+      "matcha"
+    ]
+  },
+  {
+    "id": "st_coffee_milk",
+    "name": "Coffee Milk Tea",
+    "shop_id": "sharetea",
+    "price": 6.25,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "ll_brown_sugar_hojicha",
+    "name": "Brown Sugar Hojicha Milk",
+    "shop_id": "lantern_leaf",
+    "price": 4.95,
+    "flavor_tags": [
+      "brown_sugar",
+      "hojicha"
+    ]
+  },
+  {
+    "id": "ll_osmanthus_milk",
+    "name": "Osmanthus Milk Tea",
+    "shop_id": "lantern_leaf",
+    "price": 5.25,
+    "flavor_tags": [
+      "oolong"
+    ]
+  },
+  {
+    "id": "ll_yuzu_green",
+    "name": "Yuzu Green Tea",
+    "shop_id": "lantern_leaf",
+    "price": 5,
+    "flavor_tags": [
+      "fruit"
+    ]
+  }
+]

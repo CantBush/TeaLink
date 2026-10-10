@@ -100,7 +100,17 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 **Social layer (new, 2:55 PM; full spec and contracts in [`PLAN.md`](PLAN.md#social-layer-added-255-pm)):**
 - Track A: ⬜ social schemas and seed · ⬜ boba stats and quiz mapping (seeds the Preference agent) · ⬜ profile, follow, feed, like, comment, and rec endpoints · ⬜ optional follow boost in the Social agent
-- Track B: ⬜ types, mocks, and app shell with bottom tabs · ⬜ onboarding quiz and Boba card · ⬜ profile page and edit sheet with stat toggles · ⬜ home feed with likes, comments, and recs
+- Track B:
+  - ✅ Types, sample data built from the seed (`node frontend/scripts/build-social-mocks.mjs`), and client calls that fall back to an in-browser mock until A's routes exist.
+  - ✅ App shell: bottom tabs on phones, top nav on desktop.
+  - ✅ Profile page (`/u/:handle`): header, personality, taste match, go-to order, stats grid, reviews, and follow. The edit sheet covers name, bio, emoji avatar, colors, pinned order, and show/hide and reorder stats.
+  - 🟡 Home feed (`/home`): suggestions, likes, and comments are in; "send a rec" and folding in Friends are left.
+  - ⬜ Onboarding quiz and Boba card.
+- For Track A, three contract additions (logged in `PLAN.md`):
+  - `GET /users?viewer=`, `DELETE /feed/{id}/like`, and `&author=` on `GET /feed`.
+  - Feed items and comments carry an `author`.
+  - `toppings` is a number and `top_notes` holds flavor tags.
+  - Missing users should return 404 with a specific `detail`, not "Not Found".
 
 ## Known issues and decisions to revisit
 

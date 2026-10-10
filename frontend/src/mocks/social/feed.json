@@ -1,0 +1,2571 @@
+[
+  {
+    "id": "f_rev_andrew_01",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 5,
+    "text": "Brown sugar and oolong, exactly my order.",
+    "created_at": "2026-10-10T19:00:00.000Z",
+    "liked_by": [
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_andrew_01",
+        "user_id": "hana",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-10T19:20:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_sarah_02",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 5,
+    "text": "Brown sugar and oolong, just how I like it.",
+    "created_at": "2026-10-10T18:13:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_03",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "bg_jasmine",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-10T17:26:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "leo",
+      "nora",
+      "owen",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_04",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-10T16:39:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "nora",
+      "owen"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_05",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-10T15:52:00.000Z",
+    "liked_by": [
+      "jordan",
+      "nora",
+      "owen",
+      "chris",
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_priya_05",
+        "user_id": "owen",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-10T16:12:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_leo_06",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "sr_hojicha_cream",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-10T15:05:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_07",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-10T14:18:00.000Z",
+    "liked_by": [
+      "maya"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_08",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-10T13:31:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_09",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "ts_tiger_brown",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-10T12:44:00.000Z",
+    "liked_by": [],
+    "comments": [
+      {
+        "id": "c_rev_rina_09",
+        "user_id": "yuki",
+        "text": "Need to try this",
+        "created_at": "2026-10-10T13:04:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_chris_02",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-10T11:57:00.000Z",
+    "liked_by": [
+      "nora",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_hana_01",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "bg_pineapple",
+    "rating": 2,
+    "text": "The flavors missed for me.",
+    "created_at": "2026-10-10T11:10:00.000Z",
+    "liked_by": [
+      "sarah",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_02",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "bg_classic",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-10T10:23:00.000Z",
+    "liked_by": [
+      "andrew",
+      "leo",
+      "rina",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_01",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "bg_classic",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-10T09:36:00.000Z",
+    "liked_by": [
+      "priya",
+      "chris",
+      "sam"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_elena_01",
+        "user_id": "jordan",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-10T09:56:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_sam_06",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "ts_oolong_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-10T08:49:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_05",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "kf_matcha_latte",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-10T08:02:00.000Z",
+    "liked_by": [
+      "maya",
+      "rina",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_andrew_02",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "ts_tiger_brown",
+    "rating": 5,
+    "text": "Sweet, milky, and plenty of boba.",
+    "created_at": "2026-10-10T07:15:00.000Z",
+    "liked_by": [
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_03",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "ts_tiger_brown",
+    "rating": 5,
+    "text": "Sweet, milky, and plenty of boba.",
+    "created_at": "2026-10-10T06:28:00.000Z",
+    "liked_by": [
+      "andrew"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_sarah_03",
+        "user_id": "andrew",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-10T06:48:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_maya_04",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "bg_pineapple",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-10T05:41:00.000Z",
+    "liked_by": [
+      "priya",
+      "leo",
+      "nora",
+      "chris"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_05",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "kf_matcha_latte",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-10T04:54:00.000Z",
+    "liked_by": [
+      "priya",
+      "nora",
+      "owen"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_06",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-10T04:07:00.000Z",
+    "liked_by": [
+      "jordan",
+      "nora",
+      "owen",
+      "chris",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_07",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "st_coffee_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-10T03:20:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "marco",
+      "yuki"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_leo_07",
+        "user_id": "marco",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-10T03:40:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_nora_08",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "sr_strawberry_matcha",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-10T02:33:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_09",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-10T01:46:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_01",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "bg_classic",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-10T00:59:00.000Z",
+    "liked_by": [
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_chris_03",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "sr_grapefruit",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-10T00:12:00.000Z",
+    "liked_by": [
+      "nora",
+      "elena",
+      "sam"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_chris_03",
+        "user_id": "nora",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-10T00:32:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_hana_02",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "bg_ube",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T23:25:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_03",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T22:38:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_02",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "bg_pineapple",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-09T21:51:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "chris"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sam_07",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "ts_peach",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T21:04:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_06",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "kf_taro",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-09T20:17:00.000Z",
+    "liked_by": [
+      "maya",
+      "rina",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_andrew_03",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 5,
+    "text": "Could drink this every day.",
+    "created_at": "2026-10-09T19:30:00.000Z",
+    "liked_by": [
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_04",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 5,
+    "text": "I would order this every week.",
+    "created_at": "2026-10-09T18:43:00.000Z",
+    "liked_by": [
+      "andrew"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_05",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "bg_ube",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T17:56:00.000Z",
+    "liked_by": [
+      "jordan",
+      "leo",
+      "rina",
+      "chris"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_maya_05",
+        "user_id": "owen",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-09T18:16:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_jordan_06",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "kf_thai",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-09T17:09:00.000Z",
+    "liked_by": [
+      "priya",
+      "nora",
+      "owen",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_07",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "sr_pearl_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T16:22:00.000Z",
+    "liked_by": [
+      "nora",
+      "owen",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_08",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T15:35:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_09",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T14:48:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "yuki"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_nora_09",
+        "user_id": "yuki",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-09T15:08:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_owen_10",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "st_brown_sugar",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T14:01:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_02",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "bg_pineapple",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T13:14:00.000Z",
+    "liked_by": [
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_chris_04",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "sr_strawberry_matcha",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-09T12:27:00.000Z",
+    "liked_by": [
+      "nora",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_hana_03",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 2,
+    "text": "The flavors missed for me.",
+    "created_at": "2026-10-09T11:40:00.000Z",
+    "liked_by": [
+      "andrew",
+      "marco"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_hana_03",
+        "user_id": "marco",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-09T12:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_marco_04",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-09T10:53:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "leo",
+      "rina",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_03",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T10:06:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "owen",
+      "chris",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sam_08",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "ts_tiger_brown",
+    "rating": 2,
+    "text": "Not really my thing.",
+    "created_at": "2026-10-09T09:19:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_07",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-09T08:32:00.000Z",
+    "liked_by": [
+      "maya",
+      "leo",
+      "rina",
+      "marco"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_yuki_07",
+        "user_id": "maya",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-09T08:52:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_andrew_04",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "st_brown_sugar",
+    "rating": 4,
+    "text": "Really sweet, in a good way.",
+    "created_at": "2026-10-09T07:45:00.000Z",
+    "liked_by": [
+      "sarah",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_05",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "st_brown_sugar",
+    "rating": 4,
+    "text": "Really sweet, in a good way.",
+    "created_at": "2026-10-09T06:58:00.000Z",
+    "liked_by": [
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_06",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "kf_passion_fruit",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T06:11:00.000Z",
+    "liked_by": [
+      "rina"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_07",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T05:24:00.000Z",
+    "liked_by": [
+      "priya",
+      "nora",
+      "owen",
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_jordan_07",
+        "user_id": "elena",
+        "text": "Need to try this",
+        "created_at": "2026-10-09T05:44:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_priya_08",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "sr_strawberry_matcha",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-09T04:37:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "nora",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_09",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "st_qq",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T03:50:00.000Z",
+    "liked_by": [
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_10",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "st_honey_lemon",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-09T03:03:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_11",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "ts_lychee",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-09T02:16:00.000Z",
+    "liked_by": [
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_owen_11",
+        "user_id": "sam",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-09T02:36:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_rina_03",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T01:29:00.000Z",
+    "liked_by": [
+      "leo",
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_chris_05",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-09T00:42:00.000Z",
+    "liked_by": [
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_hana_04",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "kf_matcha_latte",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T23:55:00.000Z",
+    "liked_by": [
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_05",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-08T23:08:00.000Z",
+    "liked_by": [
+      "sarah",
+      "leo",
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_marco_05",
+        "user_id": "leo",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-08T23:28:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_elena_04",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-08T22:21:00.000Z",
+    "liked_by": [
+      "priya",
+      "owen",
+      "chris",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sam_01",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "kf_matcha_latte",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-08T21:34:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_08",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-08T20:47:00.000Z",
+    "liked_by": [
+      "maya",
+      "leo",
+      "rina"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_andrew_05",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "Solid milk tea, not too fruity.",
+    "created_at": "2026-10-08T20:00:00.000Z",
+    "liked_by": [
+      "sarah",
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_andrew_05",
+        "user_id": "hana",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-08T20:20:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_sarah_06",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "Solid milk tea, not too fruity.",
+    "created_at": "2026-10-08T19:13:00.000Z",
+    "liked_by": [
+      "andrew",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_07",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "st_honey_lemon",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-08T18:26:00.000Z",
+    "liked_by": [
+      "jordan",
+      "leo",
+      "owen",
+      "rina"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_08",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T17:39:00.000Z",
+    "liked_by": [
+      "priya",
+      "nora",
+      "owen",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_09",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "st_honey_lemon",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-08T16:52:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "nora",
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_priya_09",
+        "user_id": "maya",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-08T17:12:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_leo_10",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-08T16:05:00.000Z",
+    "liked_by": [
+      "sarah"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_11",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "st_matcha",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-08T15:18:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_12",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "ts_tiger_brown",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-08T14:31:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_04",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T13:44:00.000Z",
+    "liked_by": [
+      "leo",
+      "marco",
+      "yuki"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_rina_04",
+        "user_id": "leo",
+        "text": "Need to try this",
+        "created_at": "2026-10-08T14:04:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_chris_06",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "st_oolong",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T12:57:00.000Z",
+    "liked_by": [
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_hana_05",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "sr_pearl_milk",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T12:10:00.000Z",
+    "liked_by": [
+      "andrew",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_06",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "st_matcha",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-08T11:23:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_05",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-08T10:36:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "owen",
+      "chris",
+      "sam"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_elena_05",
+        "user_id": "sam",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-08T10:56:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_sam_02",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "sr_grapefruit",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T09:49:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_09",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "st_qq",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-08T09:02:00.000Z",
+    "liked_by": [
+      "rina"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_andrew_06",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "bg_classic",
+    "rating": 4,
+    "text": "House milk tea hits the spot.",
+    "created_at": "2026-10-08T08:15:00.000Z",
+    "liked_by": [
+      "sarah"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_07",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "bg_classic",
+    "rating": 4,
+    "text": "House milk tea hits the spot.",
+    "created_at": "2026-10-08T07:28:00.000Z",
+    "liked_by": [
+      "andrew",
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_sarah_07",
+        "user_id": "andrew",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-08T07:48:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_maya_08",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T06:41:00.000Z",
+    "liked_by": [
+      "jordan",
+      "leo",
+      "owen",
+      "rina",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_09",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "ts_brown_cream",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-08T05:54:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "nora",
+      "owen",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_10",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-08T05:07:00.000Z",
+    "liked_by": [
+      "maya",
+      "chris",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_11",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-08T04:20:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_leo_11",
+        "user_id": "yuki",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-08T04:40:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_nora_12",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "ts_sesame",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T03:33:00.000Z",
+    "liked_by": [
+      "jordan",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_01",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "bg_classic",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-08T02:46:00.000Z",
+    "liked_by": [
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_05",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-08T01:59:00.000Z",
+    "liked_by": [
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_chris_07",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "st_taro",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-08T01:12:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_chris_07",
+        "user_id": "elena",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-08T01:32:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_hana_06",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "st_brown_sugar",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-08T00:25:00.000Z",
+    "liked_by": [
+      "andrew",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_07",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "st_thai",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T23:38:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_06",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "st_brown_sugar",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T22:51:00.000Z",
+    "liked_by": [
+      "priya",
+      "owen",
+      "chris"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sam_03",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-07T22:04:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_10",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "ts_sesame",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T21:17:00.000Z",
+    "liked_by": [
+      "leo",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_andrew_07",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "kf_taro",
+    "rating": 4,
+    "text": "Creamy taro with the right sugar.",
+    "created_at": "2026-10-07T20:30:00.000Z",
+    "liked_by": [
+      "sarah"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_08",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "kf_taro",
+    "rating": 4,
+    "text": "Creamy taro with the right sugar.",
+    "created_at": "2026-10-07T19:43:00.000Z",
+    "liked_by": [
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_09",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T18:56:00.000Z",
+    "liked_by": [
+      "leo",
+      "nora",
+      "owen",
+      "rina",
+      "yuki"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_maya_09",
+        "user_id": "jordan",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-07T19:16:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_jordan_10",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "ts_oolong_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T18:09:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "nora"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_11",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "ts_sesame",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T17:22:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "chris",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_12",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "ts_brown_cream",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T16:35:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_01",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "bg_banana_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T15:48:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "chris",
+      "yuki"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_nora_01",
+        "user_id": "jordan",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-07T16:08:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_owen_02",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "bg_jasmine",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T15:01:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_06",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "sr_wintermelon",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T14:14:00.000Z",
+    "liked_by": [
+      "marco",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_chris_08",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "ts_matcha_brown",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T13:27:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_hana_07",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "st_coffee_milk",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T12:40:00.000Z",
+    "liked_by": [
+      "marco"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_hana_07",
+        "user_id": "andrew",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-07T13:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_marco_08",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "ts_matcha_brown",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T11:53:00.000Z",
+    "liked_by": [
+      "sarah",
+      "leo"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_07",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "st_honey_lemon",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T11:06:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "owen",
+      "chris",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sam_04",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "st_oolong",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T10:19:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_01",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-07T09:32:00.000Z",
+    "liked_by": [
+      "marco"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_yuki_01",
+        "user_id": "rina",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-07T09:52:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_andrew_08",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "Milky Thai tea, good sugar level.",
+    "created_at": "2026-10-07T08:45:00.000Z",
+    "liked_by": [
+      "sarah"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_09",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "Milky Thai tea, good sugar level.",
+    "created_at": "2026-10-07T07:58:00.000Z",
+    "liked_by": [
+      "andrew",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_10",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "ts_peach",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-07T07:11:00.000Z",
+    "liked_by": [
+      "priya",
+      "leo",
+      "nora",
+      "owen",
+      "rina",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_11",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "ts_peach",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-07T06:24:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_jordan_11",
+        "user_id": "elena",
+        "text": "Need to try this",
+        "created_at": "2026-10-07T06:44:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_priya_01",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "bg_dirty_horchata",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T05:37:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "owen",
+      "chris",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_01",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "bg_horchata",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T04:50:00.000Z",
+    "liked_by": [
+      "sarah",
+      "rina",
+      "hana",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_02",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T04:03:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_03",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T03:16:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_owen_03",
+        "user_id": "elena",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-07T03:36:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_rina_07",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "ts_brown_cream",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T02:29:00.000Z",
+    "liked_by": [
+      "leo"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_chris_01",
+    "user_id": "chris",
+    "kind": "review",
+    "drink_id": "kf_matcha_latte",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T01:42:00.000Z",
+    "liked_by": [
+      "nora",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_hana_08",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-07T00:55:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_09",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "ts_oolong_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-07T00:08:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "leo",
+      "rina",
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_marco_09",
+        "user_id": "sarah",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-07T00:28:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_elena_08",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "st_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T23:21:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "owen",
+      "chris",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sam_05",
+    "user_id": "sam",
+    "kind": "review",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 2,
+    "text": "The flavors missed for me.",
+    "created_at": "2026-10-06T22:34:00.000Z",
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_02",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "bg_ube",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T21:47:00.000Z",
+    "liked_by": [
+      "maya",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_andrew_09",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 2,
+    "text": "Too fruity, not enough milk.",
+    "created_at": "2026-10-06T21:00:00.000Z",
+    "liked_by": [
+      "sarah",
+      "hana"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_andrew_09",
+        "user_id": "hana",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-06T21:20:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_sarah_10",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 2,
+    "text": "Too fruity, not enough milk.",
+    "created_at": "2026-10-06T20:13:00.000Z",
+    "liked_by": [
+      "andrew",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_01",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "bg_dirty_horchata",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-06T19:26:00.000Z",
+    "liked_by": [
+      "priya",
+      "leo",
+      "nora",
+      "owen",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_12",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "ts_sesame",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T18:39:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_02",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "bg_jasmine",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T17:52:00.000Z",
+    "liked_by": [
+      "maya",
+      "owen",
+      "chris",
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_priya_02",
+        "user_id": "maya",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-06T18:12:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_leo_02",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "bg_ube",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-06T17:05:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_03",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T16:18:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_04",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T15:31:00.000Z",
+    "liked_by": [
+      "elena"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_rina_08",
+    "user_id": "rina",
+    "kind": "review",
+    "drink_id": "ts_lychee",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-06T14:44:00.000Z",
+    "liked_by": [
+      "leo"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_rina_08",
+        "user_id": "marco",
+        "text": "Need to try this",
+        "created_at": "2026-10-06T15:04:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_hana_09",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "st_taro",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T13:57:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_10",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "ts_sesame",
+    "rating": 2,
+    "text": "The flavors missed for me.",
+    "created_at": "2026-10-06T13:10:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "leo",
+      "rina",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_09",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T12:23:00.000Z",
+    "liked_by": [
+      "owen"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_03",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T11:36:00.000Z",
+    "liked_by": [
+      "maya",
+      "leo",
+      "rina",
+      "marco"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_yuki_03",
+        "user_id": "maya",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-06T11:56:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_andrew_10",
+    "user_id": "andrew",
+    "kind": "review",
+    "drink_id": "st_qq",
+    "rating": 1,
+    "text": "Way too much passion fruit for me.",
+    "created_at": "2026-10-06T10:49:00.000Z",
+    "liked_by": [
+      "sarah",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_sarah_11",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "st_qq",
+    "rating": 1,
+    "text": "Way too much passion fruit for me.",
+    "created_at": "2026-10-06T10:02:00.000Z",
+    "liked_by": [
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_maya_02",
+    "user_id": "maya",
+    "kind": "review",
+    "drink_id": "bg_horchata",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-06T09:15:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "nora",
+      "owen",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_01",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "bg_horchata",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-06T08:28:00.000Z",
+    "liked_by": [
+      "maya",
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_jordan_01",
+        "user_id": "owen",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-06T08:48:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_priya_03",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T07:41:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "nora",
+      "owen",
+      "chris",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_03",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T06:54:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_04",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T06:07:00.000Z",
+    "liked_by": [
+      "maya",
+      "priya",
+      "chris",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_05",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-06T05:20:00.000Z",
+    "liked_by": [
+      "elena"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_owen_05",
+        "user_id": "elena",
+        "text": "Adding this to my list!",
+        "created_at": "2026-10-06T05:40:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_hana_10",
+    "user_id": "hana",
+    "kind": "review",
+    "drink_id": "ts_tiger_brown",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-06T04:33:00.000Z",
+    "liked_by": [
+      "marco"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_marco_01",
+    "user_id": "marco",
+    "kind": "review",
+    "drink_id": "bg_banana_milk",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T03:46:00.000Z",
+    "liked_by": [
+      "andrew",
+      "leo",
+      "rina",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_10",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "ts_brown_cream",
+    "rating": 3,
+    "text": "It was okay.",
+    "created_at": "2026-10-06T02:59:00.000Z",
+    "liked_by": [
+      "priya",
+      "chris",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_yuki_04",
+    "user_id": "yuki",
+    "kind": "review",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-06T02:12:00.000Z",
+    "liked_by": [
+      "maya",
+      "leo",
+      "rina",
+      "marco"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_yuki_04",
+        "user_id": "leo",
+        "text": "Agreed, so good",
+        "created_at": "2026-10-06T02:32:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_sarah_01",
+    "user_id": "sarah",
+    "kind": "review",
+    "drink_id": "sr_hojicha_cream",
+    "rating": 5,
+    "text": "The hojicha cream tea is perfect.",
+    "created_at": "2026-10-06T01:25:00.000Z",
+    "liked_by": [
+      "andrew",
+      "hana"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_02",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "bg_jasmine",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-06T00:38:00.000Z",
+    "liked_by": [
+      "maya",
+      "owen"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_priya_04",
+    "user_id": "priya",
+    "kind": "review",
+    "drink_id": "kf_jasmine_milk",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-05T23:51:00.000Z",
+    "liked_by": [
+      "nora",
+      "owen",
+      "chris",
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_leo_04",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "kf_passion_fruit",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-05T23:04:00.000Z",
+    "liked_by": [
+      "sarah",
+      "rina",
+      "hana",
+      "yuki"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_leo_04",
+        "user_id": "sarah",
+        "text": "Need to try this",
+        "created_at": "2026-10-05T23:24:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_nora_05",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-05T22:17:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "priya",
+      "chris"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_06",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "kf_mango_green",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-05T21:30:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_11",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "ts_lychee",
+    "rating": 4,
+    "text": "Really enjoyable.",
+    "created_at": "2026-10-05T20:43:00.000Z",
+    "liked_by": [
+      "jordan",
+      "priya",
+      "chris",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_jordan_03",
+    "user_id": "jordan",
+    "kind": "review",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-05T19:56:00.000Z",
+    "liked_by": [
+      "maya",
+      "owen"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_jordan_03",
+        "user_id": "maya",
+        "text": "Same order every time 😄",
+        "created_at": "2026-10-05T20:16:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "f_rev_leo_05",
+    "user_id": "leo",
+    "kind": "review",
+    "drink_id": "kf_thai",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-05T19:09:00.000Z",
+    "liked_by": [
+      "andrew",
+      "sarah",
+      "rina",
+      "hana",
+      "yuki"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_nora_06",
+    "user_id": "nora",
+    "kind": "review",
+    "drink_id": "sr_hojicha_cream",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out.",
+    "created_at": "2026-10-05T18:22:00.000Z",
+    "liked_by": [
+      "maya",
+      "jordan",
+      "priya",
+      "chris"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_owen_07",
+    "user_id": "owen",
+    "kind": "review",
+    "drink_id": "kf_passion_fruit",
+    "rating": 4,
+    "text": "I would get this again.",
+    "created_at": "2026-10-05T17:35:00.000Z",
+    "liked_by": [
+      "elena",
+      "sam"
+    ],
+    "comments": []
+  },
+  {
+    "id": "f_rev_elena_12",
+    "user_id": "elena",
+    "kind": "review",
+    "drink_id": "ts_sesame",
+    "rating": 2,
+    "text": "Not really my thing.",
+    "created_at": "2026-10-05T16:48:00.000Z",
+    "liked_by": [
+      "priya",
+      "chris"
+    ],
+    "comments": [
+      {
+        "id": "c_rev_elena_12",
+        "user_id": "owen",
+        "text": "Was it too sweet?",
+        "created_at": "2026-10-05T17:08:00.000Z"
+      }
+    ]
+  }
+]

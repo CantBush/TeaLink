@@ -8,7 +8,7 @@ import type {
   TasteProfile,
 } from "./types.ts";
 
-function apiBase(): string {
+export function apiBase(): string {
   const configured = import.meta.env.VITE_API_URL;
   if (typeof configured === "string" && configured.trim()) {
     return configured.replace(/\/$/, "");

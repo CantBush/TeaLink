@@ -11,6 +11,9 @@ import type {
   TasteProfile,
 } from "../api/types.ts";
 import { sampleSession } from "../mocks/sample.ts";
+import { resetSocialMock } from "../mocks/socialStore.ts";
+import { DEMO_USER, setMe } from "./me.ts";
+import { profilesChanged } from "./social.ts";
 
 export const USER_ID = "andrew";
 
@@ -188,6 +191,9 @@ export async function pick(drinkId: string, drinkName: string) {
 
 export async function resetAll() {
   await client.resetDemo().catch(() => {});
+  resetSocialMock();
+  setMe(DEMO_USER);
+  profilesChanged();
   set({ learned: null, previousDecision: null, decision: null, change: null });
   rerun("Demo reset to the seeded state.");
 }

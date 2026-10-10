@@ -1,0 +1,159 @@
+[
+  {
+    "id": "sweetness",
+    "prompt": "How sweet do you like it?",
+    "options": [
+      {
+        "id": "0",
+        "label": "Not sweet",
+        "emoji": "🍃"
+      },
+      {
+        "id": "25",
+        "label": "A little",
+        "emoji": "🌱"
+      },
+      {
+        "id": "50",
+        "label": "Half sweet",
+        "emoji": "🧋"
+      },
+      {
+        "id": "100",
+        "label": "Full sugar",
+        "emoji": "🍯"
+      }
+    ]
+  },
+  {
+    "id": "base",
+    "prompt": "Pick your base",
+    "options": [
+      {
+        "id": "milk",
+        "label": "Creamy milk tea",
+        "emoji": "🥛"
+      },
+      {
+        "id": "fruit",
+        "label": "Fresh fruit tea",
+        "emoji": "🍓"
+      },
+      {
+        "id": "tea",
+        "label": "Strong, pure tea",
+        "emoji": "🍵"
+      }
+    ]
+  },
+  {
+    "id": "toppings",
+    "prompt": "Toppings?",
+    "options": [
+      {
+        "id": "none",
+        "label": "None, just the drink",
+        "emoji": "🚫"
+      },
+      {
+        "id": "some",
+        "label": "Boba, always",
+        "emoji": "⚫"
+      },
+      {
+        "id": "loaded",
+        "label": "Load it up",
+        "emoji": "🍮"
+      }
+    ]
+  },
+  {
+    "id": "flavors",
+    "prompt": "Which flavors sound good? Pick any",
+    "multi": true,
+    "options": [
+      {
+        "id": "brown_sugar",
+        "label": "Brown sugar",
+        "emoji": "🍯"
+      },
+      {
+        "id": "oolong",
+        "label": "Oolong",
+        "emoji": "🫖"
+      },
+      {
+        "id": "matcha",
+        "label": "Matcha",
+        "emoji": "🍵"
+      },
+      {
+        "id": "taro",
+        "label": "Taro",
+        "emoji": "💜"
+      },
+      {
+        "id": "thai_tea",
+        "label": "Thai tea",
+        "emoji": "🧡"
+      },
+      {
+        "id": "hojicha",
+        "label": "Roasted hojicha",
+        "emoji": "🔥"
+      },
+      {
+        "id": "jasmine",
+        "label": "Floral",
+        "emoji": "🌸"
+      },
+      {
+        "id": "fruit",
+        "label": "Fruity",
+        "emoji": "🥭"
+      }
+    ]
+  },
+  {
+    "id": "budget",
+    "prompt": "What's your usual budget?",
+    "options": [
+      {
+        "id": "low",
+        "label": "Under $5",
+        "emoji": "🪙"
+      },
+      {
+        "id": "mid",
+        "label": "$5 to $6.50",
+        "emoji": "💵"
+      },
+      {
+        "id": "high",
+        "label": "Whatever it takes",
+        "emoji": "💎"
+      }
+    ]
+  },
+  {
+    "id": "adventure",
+    "prompt": "When you order, you…",
+    "options": [
+      {
+        "id": "same",
+        "label": "Get my usual",
+        "emoji": "🔁"
+      },
+      {
+        "id": "sometimes",
+        "label": "Mix it up sometimes",
+        "emoji": "🎲"
+      },
+      {
+        "id": "always",
+        "label": "Always try something new",
+        "emoji": "🧭"
+      }
+    ]
+  }
+]

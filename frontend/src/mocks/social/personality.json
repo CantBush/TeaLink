@@ -1,0 +1,26 @@
+{
+  "means": {
+    "sweetness": 0.66,
+    "milkiness": 0.59,
+    "tea_intensity": 0.45,
+    "fruitiness": 0.25,
+    "toppings": 0.4
+  },
+  "notes": {
+    "brown_sugar": "Brown Sugar",
+    "oolong": "Oolong",
+    "matcha": "Matcha",
+    "taro": "Taro",
+    "thai_tea": "Thai Tea",
+    "hojicha": "Roasted",
+    "jasmine": "Floral",
+    "fruit": "Tropical"
+  },
+  "traits": {
+    "sweetness": "Sweet Tooth",
+    "milkiness": "Cream Dreamer",
+    "tea_intensity": "Tea Purist",
+    "fruitiness": "Fruit Chaser",
+    "toppings": "Topping Lover"
+  }
+}

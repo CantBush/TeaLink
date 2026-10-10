@@ -174,7 +174,7 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 
 **Features:**
 1. **Onboarding quiz** (6 questions, under a minute) for new users:
-   - **Questions:** sweetness level, milk vs fruit vs tea-forward, favorite toppings, typical budget, how adventurous you are, and one shop you already like.
+   - **Questions:** sweetness level, milk vs fruit vs tea-forward, toppings, flavors you like (multi-select over the `drinks.json` flavor tags), typical budget, and how adventurous you are. The exact questions and option ids are in `frontend/src/mocks/social/quiz.json`; A can serve that file from `GET /quiz` as is.
    - **Results:** your starting taste profile, your starting priority weights for the Preference agent, and a boba personality, such as "Floral Explorer" or "Brown Sugar Loyalist."
    - **Rule:** like every other number in TeaLink, the backend computes the mapping from answers to profile and weights in code.
 2. **Boba stats:**
@@ -216,9 +216,11 @@ type StatKey = "fav_drink" | "fav_shop" | "sweetness" | "toppings" | "milk_vs_fr
 type BobaStats = {
   fav_drink_id: string | null; fav_shop_id: string | null;
   sweetness: number;                  // 0 = not sweet, 1 = very sweet
-  toppings: string[]; milk_vs_fruit: number;  // 0 = fruit, 1 = milk
+  toppings: number;                   // 0 = no toppings, 1 = loaded (the drinks' `toppings` attribute)
+  milk_vs_fruit: number;              // 0 = fruit, 1 = milk
   tried_count: number; shops_visited: number; streak_weeks: number;
-  top_notes: Dimension[]; priorities: Record<Dimension, number>;
+  top_notes: string[];                // flavor tags from drinks.json, e.g. ["brown_sugar", "oolong"]
+  priorities: Record<Dimension, number>;
   personality: string;                // "Floral Explorer"
 };
 
@@ -235,11 +237,14 @@ type UserProfile = {
 type QuizQuestion = { id: string; prompt: string; options: { id: string; label: string; emoji?: string }[]; multi?: boolean };
 type QuizResult = { user_id: string; personality: string; stats: BobaStats; weights: Record<Dimension, number> };
 
+type Author = { handle: string; display_name: string; avatar: { emoji: string; color: string } };
+
 type FeedItem = {
-  id: string; user_id: string; kind: "review" | "pick" | "rec" | "joined";
-  drink_id: string | null; rating: number | null; text: string | null; to_user_id?: string;
+  id: string; user_id: string; author: Author; kind: "review" | "pick" | "rec" | "joined";
+  drink_id: string | null; rating: number | null; text: string | null;
+  to_user_id?: string; to_author?: Author;   // recs only
   created_at: string; likes: number; liked_by_me: boolean;
-  comments: { id: string; user_id: string; text: string; created_at: string }[];
+  comments: { id: string; user_id: string; author: Author; text: string; created_at: string }[];
 };
 ```
 
@@ -247,15 +252,17 @@ type FeedItem = {
 - **Quiz and sign-up:**
   - `GET /quiz` returns the questions.
   - `POST /users` takes `{handle, display_name}`, creates a user, and returns the profile.
-  - `POST /quiz` takes `{user_id, answers}` and returns a `QuizResult`. It also seeds the Preference agent.
+  - `POST /quiz` takes `{user_id, answers}` (question id → chosen option ids) and returns a `QuizResult`. It also seeds the Preference agent.
 - **Profiles:**
-  - `GET /users/{id}?viewer=` returns a `UserProfile`.
+  - `GET /users?viewer=` returns `UserProfile[]` of everyone else, best taste match first (for "Suggested for you").
+  - `GET /users/{id}?viewer=` returns a `UserProfile`. `{id}` may be a user id or a handle.
   - `PATCH /users/{id}` saves profile edits.
   - `POST /users/{id}/follow` and `DELETE /users/{id}/follow` take `{viewer}`.
 - **Feed:**
-  - `GET /feed?user_id=` returns the feed.
-  - `POST /feed/{id}/like` likes an item.
-  - `POST /feed/{id}/comments` adds a comment.
+  - `GET /feed?user_id=` returns the viewer's feed: their own posts, people they follow, and recs sent to them, newest first. Adding `&author=` returns only that author's posts (for profile pages).
+  - A missing user or item returns 404 with a specific `detail`, not FastAPI's default "Not Found". The frontend treats "Not Found" as "route not shipped yet" and falls back to mocks.
+  - `POST /feed/{id}/like` likes an item and `DELETE /feed/{id}/like` unlikes it. Both take `{viewer}` and return the updated `FeedItem`.
+  - `POST /feed/{id}/comments` takes `{viewer, text}` and returns the updated `FeedItem`.
   - `POST /recs` takes `{from, to, drink_id, text}` to send a recommendation.
 
 The existing `GET /profile/{id}` (taste profile) stays as it is.
@@ -273,11 +280,11 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 
 | When | Task | Done when |
 |---|---|---|
-| 3:00 to 4:00 | ⬜ Mirror the contracts in `types.ts`, mocks in `frontend/src/mocks/social/`, client calls with mock fallback. App shell: bottom tab bar on phones (Home, Discover, Profile), top nav on desktop | Every new screen renders from mocks with the API stopped |
+| 3:00 to 4:00 | ✅ Mirror the contracts in `types.ts`, mocks in `frontend/src/mocks/social/`, client calls with mock fallback. App shell: bottom tab bar on phones (Home, Discover, Profile), top nav on desktop | Every new screen renders from mocks with the API stopped |
 | 4:00 to 5:00 | ⬜ **Onboarding quiz** at `/welcome`: one question per screen, big tappable option cards, progress bar, then a personality reveal and a "Boba card" (Wrapped-style). New visitors without a user id land here | Finishing the quiz creates a user and opens Discover with their own weights |
-| 5:00 to 6:00 | ⬜ **Profile page** at `/u/:handle`: Instagram-style header, stats grid, pinned drink and store, drinks-tried grid, taste match, follow button. **Edit profile** sheet: name, bio, emoji avatar and color, accent, show/hide and reorder stats | Edits and hidden stats persist after a reload |
+| 5:00 to 6:00 | ✅ (done early) **Profile page** at `/u/:handle`: Instagram-style header, stats grid, pinned drink and store, drinks-tried grid, taste match, follow button. **Edit profile** sheet: name, bio, emoji avatar and color, accent, show/hide and reorder stats | Edits and hidden stats persist after a reload |
 | **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
-| 6:30 to 8:00 | ⬜ **Home feed**: friend activity cards, likes, comments, "send a rec," and "Try this" that opens Discover. Fold the current Friends page into profiles and follow lists | Liking and commenting work on two users in two tabs |
+| 6:30 to 8:00 | 🟡 (started early; likes, comments, and suggestions are done; "send a rec," "Try this," and folding in Friends are left) **Home feed**: friend activity cards, likes, comments, "send a rec," and "Try this" that opens Discover. Fold the current Friends page into profiles and follow lists | Liking and commenting work on two users in two tabs |
 | 8:00 to 9:00 | ⬜ Offer badge if A built offers (from the earlier block); demo script gains an optional 20-second "social" beat (quiz → profile → feed) | Main demo still fits in 3 minutes without the social beat |
 
 **If time runs short, cut in this order:** comments and recs, then the feed, then stat reordering. **Keep:** the quiz and the profile with stats toggles.
@@ -317,6 +324,13 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **3:10 PM:** Contract fixes before anyone builds on them:
+  - `BobaStats.toppings` is a 0–1 number and `top_notes` is a list of flavor tags, matching what `drinks.json` actually stores.
+  - Added `GET /users?viewer=` (suggestions) and `DELETE /feed/{id}/like`.
+  - Like and comment calls return the updated item.
+  - The quiz's sixth question is flavors rather than a favorite shop, with its questions in `mocks/social/quiz.json`.
+  - Feed items and comments carry an `author` (handle, name, avatar), so the feed doesn't need one request per post.
+  - `GET /feed` takes `&author=` for profile pages.
 - **2:55 PM:** Added the social layer: onboarding quiz, boba stats with show/hide, customizable profiles, follows, a friends feed, likes, comments, and recs. Inspired by Instagram, Letterboxd, Spotify Wrapped, and Strava. Split into Track A (schemas, stats and quiz mapping, social endpoints) and Track B (app shell, quiz, profile, feed), with contracts in the plan. Social extras go first on the cut list; the 3-minute demo doesn't depend on them.
 - **2:36 PM:** Dropped the ElevenLabs voices stretch goal.
 - **2:10 PM:** Track A shipped `GET /eval` (popularity 2/24, fixed weights 5/24, learning 7/24 over 8 rounds) and made Sarah Andrew's closest match. No schema change. Demo top 3 is still Thai Tea, Wintermelon, Pearl Milk Tea; the priority percents and Wintermelon's score moved by a point, so the demo script needs a refresh.
