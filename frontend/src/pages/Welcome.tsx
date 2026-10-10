@@ -73,7 +73,7 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
 
   return (
     <Shell>
-      <div className="flex items-center gap-2 font-logo text-2xl tracking-[0.2em] uppercase">
+      <div className="flex items-center gap-2 font-display text-2xl tracking-[0.14em]">
         <BobaMark /> TeaLink
       </div>
       <h1 className="mt-6 font-display text-4xl leading-tight sm:text-5xl">Find your next favorite boba.</h1>

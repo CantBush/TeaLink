@@ -4,11 +4,9 @@
  * Look: a quiet tea house. Lowercase, light geometric type with wide tracking,
  * lots of air, thin line-drawn leaves and tea things, and a tea-garden palette:
  * rice-paper background, deep tea-green ink, moss accent, and sage surfaces.
- * Only the logo keeps the flared uppercase wordmark.
  */
 @theme {
   --font-display: "Jost", "Futura", "Avenir Next", ui-sans-serif, sans-serif;
-  --font-logo: "Marcellus SC", "Optima", serif;
   --font-sans: "Jost", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
   --font-weight-semibold: 500;
   --font-weight-bold: 500;

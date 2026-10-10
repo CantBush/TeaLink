@@ -82,7 +82,7 @@ export function BobaCard({
         </div>
       ) : null}
 
-      <p className="relative mt-8 flex items-center gap-2 font-logo text-lg tracking-[0.2em] uppercase">
+      <p className="relative mt-8 flex items-center gap-2 font-display text-lg tracking-[0.14em]">
         <BobaMark />
         TeaLink
       </p>
