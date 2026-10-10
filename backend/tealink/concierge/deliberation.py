@@ -11,6 +11,7 @@ from collections.abc import AsyncIterator
 
 from tealink.concierge.registry import Registry
 from tealink.concierge.transport import AgentTransport
+from tealink.core.offers import apply_offer
 from tealink.core.preferences import PRIOR, describe_weights
 from tealink.core.resolution import resolve
 from tealink.lens.recorder import LensRecorder
@@ -38,6 +39,8 @@ async def deliberate(
     sold_out_drink_ids: list[str] | None = None,
     recorder: LensRecorder | None = None,
     prior_weights: dict[str, float] | None = None,
+    price_low: float | None = None,
+    price_high: float | None = None,
 ) -> AsyncIterator[LensEvent]:
     log = recorder or LensRecorder()
     seq = 1
@@ -151,6 +154,17 @@ async def deliberate(
             yield emit(LensEventType.objection, summary["reason"], summary, reply.agent_id)
 
     decision = resolve(proposals, objections, weights=weights, confirmed_shop_ids=confirmed_shops)
+    if price_low is not None and price_high is not None:
+        offered = await _ask_for_offer(decision, registry, transport, user_id, query)
+        if offered is not None:
+            reply, runner = offered
+            yield emit(
+                LensEventType.offer,
+                reply.offer.reason,
+                reply.offer.model_dump(mode="json"),
+                reply.agent_id,
+            )
+            decision = apply_offer(decision, runner.drink_id, reply.offer, price_low, price_high)
     for item in decision.dropped:
         if item.by == "registry":
             yield emit(
@@ -199,6 +213,34 @@ def _listing(items: list[str]) -> str:
     shown = ", ".join(items[:LISTED])
     extra = len(items) - LISTED
     return shown + (f" (+{extra} more)" if extra > 0 else "")
+
+
+async def _ask_for_offer(decision, registry, transport, user_id: str, query: str):
+    """In a near-tie between two shops, ask the trailing shop for a discount."""
+    options = decision.options
+    if not decision.ask_human or len(options) < 2 or options[0].shop_id == options[1].shop_id:
+        return None
+    leader, runner = options[0], options[1]
+    # A discount only helps a shop that is behind on price. One that already
+    # wins on cost is trailing for another reason, and paying to overturn that
+    # would buy the ranking.
+    if runner.dimension_scores.get("cost", 0.0) >= leader.dimension_scores.get("cost", 0.0):
+        return None
+    card = registry.get(f"shop_{runner.shop_id}")
+    if card is None:
+        return None
+    reply = await transport.send(
+        card,
+        DeliberationRequest(
+            round="offer",
+            user_id=user_id,
+            query=query,
+            candidate_drink_ids=[runner.drink_id],
+        ),
+    )
+    if reply.offer is None:
+        return None
+    return reply, runner
 
 
 def _preference(replies: list[AgentReply]) -> PreferenceReport | None:

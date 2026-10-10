@@ -119,7 +119,11 @@ def boba_stats(
         ranked = sorted(catalog.drinks, key=lambda drink: (-match_score(profile, drink.attributes), drink.id))
         liked = [(drink, 5) for drink in ranked[:QUIZ_MATCHES]]
 
-    notes = top_notes(liked) or list(quiz_flavors or [])
+    if not rated and quiz_flavors:
+        # The quiz named these. Inferred notes from matching drinks would hide them.
+        notes = list(dict.fromkeys(quiz_flavors))[:TOP_N]
+    else:
+        notes = top_notes(liked)
     toppings = quiz_toppings if quiz_toppings is not None and not rated else topping_level(liked)
     milk = profile.get("milkiness", 0.5)
     fruit = profile.get("fruitiness", 0.5)

@@ -187,7 +187,22 @@ def test_new_users_first_recommendation_uses_quiz_weights(client: TestClient):
 
     sweet = _sign_up(client, "sugar", BROWN_SUGAR)
     assert sweet["personality"] == "Brown Sugar Loyalist"
-    assert sweet["stats"]["top_notes"][0] == "brown_sugar"
+    assert sweet["stats"]["top_notes"] == ["brown_sugar"]
+
+    picked = _sign_up(
+        client,
+        "floral",
+        {
+            "sweetness": "25",
+            "base": "tea",
+            "toppings": "none",
+            "flavors": ["fruit", "jasmine", "matcha"],
+            "budget": "mid",
+            "adventure": "sometimes",
+        },
+    )
+    assert picked["stats"]["top_notes"] == ["fruit", "jasmine", "matcha"]
+    assert picked["personality"].startswith("Fruity")
 
 
 def test_new_users_do_not_change_the_demo(client: TestClient):

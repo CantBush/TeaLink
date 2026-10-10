@@ -50,6 +50,7 @@ class StoredFeedItem(BaseModel):
     created_at: str
     liked_by: list[str] = Field(default_factory=list)
     comments: list[FeedComment] = Field(default_factory=list)
+    photo_url: str | None = None
 
     def view(self, viewer: str | None, author_for) -> FeedItem:
         """``author_for`` turns a user id into an Author, so the feed can render without extra requests."""
@@ -68,6 +69,7 @@ class StoredFeedItem(BaseModel):
             comments=comments,
             author=author_for(self.user_id),
             to_author=author_for(self.to_user_id) if self.to_user_id else None,
+            photo_url=self.photo_url,
         )
 
 

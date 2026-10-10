@@ -46,6 +46,8 @@ class Shop(BaseModel):
     name: str
     neighborhood: str
     online: bool = True
+    # Dollars the shop can put toward a close-call discount. Default covers 10% of any drink.
+    promo_budget: float = 1.0
 
 
 class Review(BaseModel):
@@ -110,6 +112,15 @@ class AgentSelection(BaseModel):
     reason: str
 
 
+class Offer(BaseModel):
+    """A shop's discount on one drink. percent is a whole number, so 10 means 10% off."""
+
+    shop_id: str
+    percent: int
+    price_after: float
+    reason: str
+
+
 class RankedDrink(BaseModel):
     drink_id: str
     drink_name: str
@@ -117,6 +128,7 @@ class RankedDrink(BaseModel):
     shop_id: str = ""
     price: float = 0.0
     dimension_scores: dict[str, float] = Field(default_factory=dict)
+    offer: Offer | None = None
 
 
 class DroppedDrink(BaseModel):
@@ -164,6 +176,7 @@ class LensEventType(str, Enum):
     decision = "decision"
     status = "status"
     preference = "preference"
+    offer = "offer"
 
 
 class LensEvent(BaseModel):
@@ -175,7 +188,7 @@ class LensEvent(BaseModel):
 
 
 class DeliberationRequest(BaseModel):
-    round: Literal["propose", "object", "learn"]
+    round: Literal["propose", "object", "learn", "offer"]
     user_id: str
     query: str
     preference_overrides: dict[str, float] = Field(default_factory=dict)
@@ -191,6 +204,7 @@ class AgentReply(BaseModel):
     proposals: list[Proposal] = Field(default_factory=list)
     objections: list[Objection] = Field(default_factory=list)
     preference: PreferenceReport | None = None
+    offer: Offer | None = None
 
 
 # Social layer. Mirrored in frontend/src/api/types.ts.
@@ -270,6 +284,8 @@ class UserProfile(BaseModel):
     followed_by_me: bool
     taste_match: float | None
     stats: dict
+    # Reserved for a chosen cover. Null until photo uploads exist.
+    cover_url: str | None = None
 
 
 class QuizOption(BaseModel):
@@ -320,3 +336,5 @@ class FeedItem(BaseModel):
     comments: list[FeedComment] = Field(default_factory=list)
     author: Author | None = None
     to_author: Author | None = None
+    # Reserved for a review photo. Null until photo uploads exist.
+    photo_url: str | None = None

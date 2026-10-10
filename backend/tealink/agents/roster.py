@@ -29,7 +29,7 @@ def default_agents(catalog: Catalog, history: list[ChoiceRecord] | None = None) 
     ]
     for shop in catalog.shops:
         if shop.online:
-            agents.append(ShopAgent(shop.id, shop.name))
+            agents.append(ShopAgent(shop.id, shop.name, shop.promo_budget))
     return agents
 
 

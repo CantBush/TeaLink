@@ -145,7 +145,7 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 | 3:30 to 5:00 | ✅ `core/baseline.py` (most-reviewed untried in-stock drink). Extend `eval/run_eval.py` to popularity vs fixed weights vs learning, write `eval_results.json`, and add `GET /eval` | `GET /eval` matches the contract, with a test |
 | 5:00 to 6:00 | ✅ Story data fixes: tune Sarah's seed reviews so she's Andrew's top match, re-seed, and update the tests | `/users/similar?user_id=andrew` returns Sarah first |
 | **6:00** | **Sync:** merge, then run the full demo together | |
-| 6:30 to 8:00 | ⬜ Stretch: **shop offers.** In a near-tie, the trailing shop's agent offers up to 10% off from its budget. The resolver re-scores the cost dimension, and an `offer` event is emitted | The offer appears in the timeline and can flip the #1 |
+| 6:30 to 8:00 | ✅ Stretch: **shop offers.** In a near-tie, the trailing shop's agent offers up to 10% off from its budget, but only when it is behind on price. The resolver re-scores the cost dimension, and an `offer` event is emitted | The offer can flip the #1. The scripted demo does not hit that case, so its numbers are unchanged |
 | 8:00 to 9:00 | ⬜ Optional LLM wording for rationales (template fallback stays the default). Edge-case tests: all vetoed, no reviews, every shop offline | Tests pass with no API key set |
 | **9:00** | **Merge.** Feature freeze at 9:30 | |
 | Overnight | ⬜ `docs/architecture.md`: mermaid diagram, protocol, Level 2 mapping | |
@@ -351,6 +351,7 @@ flowchart LR
 FeedItem.photo_url?: string | null;      // a review photo, for future uploads
 UserProfile.cover_url?: string | null;   // a chosen placeholder id, or an uploaded image URL later
 // GET /drinks -> { id, name, shop_id, price, flavor_tags, photo_url }[]  (replaces the frontend's copied catalog)
+// GET /shops  -> { id, name, neighborhood, photo_url }[]                  // 6 shops, including Lantern Leaf
 ```
 
 Search runs in the browser over `GET /drinks`, the shop list, and `GET /users`. The data is small (43 drinks, 6 shops, 15 users), so no search endpoint is needed.
@@ -359,7 +360,7 @@ Search runs in the browser over `GET /drinks`, the shop list, and `GET /users`. 
 
 | When | Task | Done when |
 |---|---|---|
-| 5:00 to 6:00 (or earlier, since the social endpoints are done) | ⬜ `GET /drinks`, plus the reserved `photo_url` on feed items and `cover_url` on profiles | `GET /drinks` returns all 43 drinks, and the new fields come back as `null` |
+| 5:00 to 6:00 (or earlier, since the social endpoints are done) | ✅ `GET /drinks` and `GET /shops`, plus the reserved `photo_url` on feed items and `cover_url` on profiles | `GET /drinks` returns all 43 drinks, `GET /shops` returns all 6, and the new fields come back as `null` |
 | After the freeze | ⬜ Stretch: a photo upload endpoint for review and profile photos | An uploaded photo's URL comes back in `photo_url` / `cover_url` |
 
 #### Track B: UI cleanup
@@ -412,6 +413,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **3:45 PM:** Track A shipped `GET /drinks`, `GET /shops`, null `photo_url` / `cover_url`, and shop offers. A near-tie discount is up to 10% and only when the runner-up is losing on price, so it can flip #1 without changing the scripted demo. Track B: mirror `offer` on `LensEventType` and `RankedDrink`, and call the two new lists. Shapes are in `PROGRESS.md`.
 - **3:35 PM:** Merged Track A's social backend into main with Track B's social frontend. The API now matches the 3:10 contract: bare lists, `{viewer}` on likes and comments, `author` on feed items, `&author=` on the feed, toppings as a 0–1 number, and the quiz questions from `mocks/social/quiz.json`.
 - **3:30 PM:** Added "UI cleanup and five tabs":
   - Five tabs: Home, Discover/search, TeaLink (today's picks, at `/`), Stats, and Profile.

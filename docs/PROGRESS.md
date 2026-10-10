@@ -77,7 +77,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Serve all agents over NATS, shop heartbeats, `make agents`, startup fallback to local. Demo flow (pick, sold out, Lantern Leaf join, shop offline, reset) passes on the bus.
 - ✅ Popularity baseline, three-way eval, `GET /eval`. Learning 7/24, fixed weights 5/24, popularity 2/24. No schema change; the Evidence page picks this up on its own.
 - ✅ Sarah seed fix. `/users/similar?user_id=andrew` returns Sarah first (about 100% similar).
-- ⬜ Stretch: shop offers
+- ✅ Shop offers. In a near-tie between two shops, the trailing shop offers up to 10% off, and only when its drink is losing on price. The cost score is recomputed and can move that drink to #1. An `offer` Lens event is emitted. The scripted demo never hits this case (the runner-up is already the cheaper drink, or both drinks are from the same shop), so Thai Tea 78, Wintermelon 77, Pearl 71, and the Lantern Leaf join are unchanged.
 - ⬜ Stretch: LLM wording and edge-case tests
 - ⬜ `docs/architecture.md`
 
@@ -95,7 +95,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Evidence page on live `GET /eval`: hits shown as counts (7/24, 5/24, 2/24), wording matches the stricter "user's favorite" definition, and the offline copy is the real results
 - ✅ Technical click-through of the full demo over AGNTCY after Track A's reset fix: every step matches the script. Fixes from it: shop names instead of raw ids in ruled-out reasons, a truthful "now ranks below the top 3" for drinks that weren't ruled out, and two close-call lines in the script.
 - ✅ Demo script and recorded mocks refreshed after Track A's re-seed (Sarah's 5/5 Hojicha Cream Tea is now a Social proposal in the script)
-- ⬜ Offer badge (if A builds offers)
+- ⬜ Offer badge. The backend now emits it; see the seam notes below. The scripted 3-minute demo does not produce an offer, so the script numbers stay as they are.
 - ⬜ Write-up and backup video
 
 **Social layer (new, 2:55 PM; full spec and contracts in [`PLAN.md`](PLAN.md#social-layer-added-255-pm)):**
@@ -115,7 +115,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
   - ✅ Reset demo switches back to Andrew. The demo numbers are unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71.
 
 **UI cleanup and five tabs (new, 3:30 PM; spec in [`PLAN.md`](PLAN.md#ui-cleanup-and-five-tabs-added-330-pm)):**
-- Track A: ⬜ `GET /drinks` (all 43 drinks, with `photo_url`) · ⬜ reserved `photo_url` on feed items and `cover_url` on profiles (both `null` for now) · ⬜ stretch, after the freeze: photo uploads
+- Track A: ✅ `GET /drinks` (all 43 drinks, `photo_url: null`) · ✅ `GET /shops` (all 6, including Lantern Leaf, `photo_url: null`) · ✅ reserved `photo_url` on feed items and `cover_url` on profiles (both `null`) · ✅ shop offers · ⬜ stretch, after the freeze: photo uploads
 - Track B: ⬜ five tabs and routes (Home, Discover, TeaLink at `/`, Stats, Profile), with Friends folded in · ⬜ Discover with search, filters, and the drink detail sheet · ⬜ Stats tab · ⬜ placeholder images for drinks, shops, and covers · ⬜ readability pass across every tab
 
 **Track A social backend (branch `a/social-backend`, 3:35 PM).** All Track A blocks from 3:00 to 6:00 are done, and 36 backend tests pass. The demo is unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71, with the close-call prompt, and `eval_results.json` is byte-identical.
@@ -123,6 +123,15 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - **Quiz (`core/quiz.py`):** the six questions from the frontend mock. Sweetness, base, and toppings set the taste profile. Budget and adventurousness nudge the default priorities, then the usual 5% floor is applied. Chosen flavors become the starting top notes. The quiz profile counts as three five-star reviews, and the weights are the Preference agent's prior. Picks are learned on top.
 - **Stats (`core/stats.py`):** favorite drink and shop, sweetness, milk vs fruit, toppings as a 0–1 level, drinks tried and shops visited, weekly streak, top flavor notes, current learned priorities, and a personality ("Brown Sugar Deal Hunter" for Andrew, "Brown Sugar Loyalist" for Sarah).
 - **Demo safety:** the Social agent only takes neighbors who have rated something, so a new user never pushes Sarah out of Andrew's top 3 neighbors (tested). In AGNTCY mode, requests for users created or re-profiled at runtime are answered in-process, because the agent processes loaded the catalog at startup.
+
+**Seam for Track B (3:45 PM).** Backend only. Mirror these in `types.ts`; the screens stay yours.
+
+- `GET /drinks` returns a bare list of `{id, name, shop_id, price, flavor_tags, photo_url}`. All 43 drinks, Lantern Leaf included. `photo_url` is always `null`.
+- `GET /shops` returns a bare list of `{id, name, neighborhood, photo_url}`. All 6 shops, including offline Lantern Leaf. `photo_url` is always `null`.
+- `UserProfile.cover_url` and `FeedItem.photo_url` are always `null`. `PATCH /users` does not accept a cover yet.
+- `LensEventType` adds `"offer"`. The payload is `{shop_id, percent, price_after, reason}`. `percent` is a whole number, so 10 means 10% off. The timeline message is the `reason`.
+- `RankedDrink.offer` is that same object, or `null`. When a discount wins, that drink is #1 and its `price` is `price_after`.
+- A shop only discounts when it is the runner-up, the top two are within 0.02, the shops differ, and its drink is losing on price. The 3-minute script does not produce an offer, so `docs/demo-script.md` does not need new numbers. The badge should still render whenever `offer` is set.
 
 **The social API matches the frontend contract.** `GET /quiz`, `GET /users?viewer=`, and `GET /feed` return bare lists. Likes and comments take `{viewer}`. Every feed item and comment carries an `author`, and `GET /feed?author=` is one person's posts. `toppings` is a 0–1 number. A missing user returns 404 with `detail: "user not found"`, so the frontend does not treat it as a route that has not shipped. After Reset demo, users created through `/users` are gone.
 

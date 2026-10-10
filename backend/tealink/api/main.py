@@ -135,6 +135,38 @@ def _require_user(runtime: Runtime, user_id: str) -> None:
         raise HTTPException(status_code=404, detail="user not found")
 
 
+@app.get("/drinks")
+def drinks() -> list[dict]:
+    """The menu Discover searches. photo_url stays null until real photos exist."""
+    runtime = get_runtime()
+    return [
+        {
+            "id": drink.id,
+            "name": drink.name,
+            "shop_id": drink.shop_id,
+            "price": drink.price,
+            "flavor_tags": drink.flavor_tags,
+            "photo_url": None,
+        }
+        for drink in runtime.catalog.drinks
+    ]
+
+
+@app.get("/shops")
+def shops() -> list[dict]:
+    """Shops for Discover. Includes shops that have not joined yet. photo_url stays null."""
+    runtime = get_runtime()
+    return [
+        {
+            "id": shop.id,
+            "name": shop.name,
+            "neighborhood": shop.neighborhood,
+            "photo_url": None,
+        }
+        for shop in runtime.catalog.shops
+    ]
+
+
 @app.get("/eval")
 def eval_results() -> dict:
     """Precomputed popularity vs fixed weights vs learning. See eval/run_eval.py."""
@@ -205,6 +237,8 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
             sold_out_drink_ids=sorted(runtime.sold_out),
             recorder=LensRecorder(),
             prior_weights=social.prior_weights(runtime, body.user_id),
+            price_low=min(drink.price for drink in runtime.catalog.drinks),
+            price_high=max(drink.price for drink in runtime.catalog.drinks),
         ):
             if event.type == LensEventType.decision:
                 runtime.last_decision[body.user_id] = Decision.model_validate(event.payload)
