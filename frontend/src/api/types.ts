@@ -13,7 +13,7 @@ export interface Evidence {
   drink_name: string;
   rating: number;
   text: string;
-  relevance: number;
+  relevance: string;
 }
 
 export interface FactorContribution {

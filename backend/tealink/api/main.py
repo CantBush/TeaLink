@@ -45,7 +45,7 @@ class ShopJoinEvent(BaseModel):
 
 class PreferenceEvent(BaseModel):
     user_id: str
-    overrides: dict[str, float] = Field(default_factory=dict)
+    preference_overrides: dict[str, float] = Field(default_factory=dict)
 
 
 @dataclass
@@ -160,6 +160,6 @@ def shop_join(body: ShopJoinEvent) -> dict:
 def preference(body: PreferenceEvent) -> dict:
     runtime = get_runtime()
     stored = dict(runtime.preferences.get(body.user_id, {}))
-    stored.update(body.overrides)
+    stored.update(body.preference_overrides)
     runtime.preferences[body.user_id] = stored
     return {"ok": True, "user_id": body.user_id, "overrides": stored}

@@ -82,21 +82,21 @@
             "drink_name": "Brown Sugar Oolong Milk Tea",
             "rating": 5,
             "text": "Caramel all the way through, and the oolong still shows up under the milk.",
-            "relevance": 0.96
+            "relevance": "You rated this 5/5; same drink."
           },
           {
             "review_id": "rev-bs-2",
             "drink_name": "Brown Sugar Oolong Milk Tea",
             "rating": 5,
             "text": "Pearls were warm and the drink was sweet without turning into syrup.",
-            "relevance": 0.91
+            "relevance": "You rated this 5/5; same drink."
           },
           {
             "review_id": "rev-peach-1",
             "drink_name": "Peach Green Tea",
             "rating": 2,
             "text": "Too much peach syrup. I wanted tea, not a fruit cooler.",
-            "relevance": 0.62
+            "relevance": "You rated this 2/5; similar fruitiness."
           }
         ],
         "rationale": "Milkiness, brown sugar, and a topping habit line up, and the fruit signal stays quiet."
@@ -126,14 +126,14 @@
             "drink_name": "Hojicha Cream Tea",
             "rating": 5,
             "text": "Roasted tea, soft cream, no candy fruit. I would order it again tomorrow.",
-            "relevance": 0.88
+            "relevance": "You rated this 5/5; same drink."
           },
           {
             "review_id": "rev-hj-2",
             "drink_name": "Hojicha Cream Tea",
             "rating": 4,
             "text": "Less sweet than brown sugar milk tea, still cozy.",
-            "relevance": 0.8
+            "relevance": "You rated this 4/5; same drink."
           }
         ],
         "rationale": "Sarah is 94% similar and keeps coming back to Hojicha Cream Tea."
@@ -163,7 +163,7 @@
             "drink_name": "Osmanthus Mountain Tea",
             "rating": 5,
             "text": "Floral, light, and nothing like the milk teas on the usual ticket.",
-            "relevance": 0.7
+            "relevance": "You rated this 5/5; same drink."
           }
         ],
         "rationale": "Andrew has not tried this one. It keeps the tea and drops the milk, so the score sits a step behind the usual order."
