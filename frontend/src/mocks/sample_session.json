@@ -154,18 +154,18 @@
     {
       "type": "preference",
       "agent_id": "preference",
-      "message": "From 4 past picks: price matters most (42%), then taste match (39%).",
+      "message": "From 4 past picks: price matters most (43%), then taste match (41%).",
       "payload": {
         "user_id": "andrew",
         "weights": {
-          "taste": 0.3896468881150146,
-          "social": 0.1364890117054092,
+          "taste": 0.40742995723252545,
+          "social": 0.11174454363249801,
           "novelty": 0.05,
-          "cost": 0.42386410017957615
+          "cost": 0.43082549913497653
         },
         "previous_weights": null,
         "choices_seen": 4,
-        "summary": "From 4 past picks: price matters most (42%), then taste match (39%)."
+        "summary": "From 4 past picks: price matters most (43%), then taste match (41%)."
       },
       "seq": 12
     },
@@ -355,6 +355,67 @@
     {
       "type": "proposal",
       "agent_id": "social",
+      "message": "Social proposes Hojicha Cream Tea.",
+      "payload": {
+        "agent_id": "social",
+        "drink_id": "sr_hojicha_cream",
+        "drink_name": "Hojicha Cream Tea",
+        "shop_id": "sunright",
+        "score": 0.8773299316320626,
+        "factors": [
+          {
+            "factor": "fruitiness",
+            "weight": 0.185
+          },
+          {
+            "factor": "milkiness",
+            "weight": 0.18273684210526317
+          },
+          {
+            "factor": "sweetness",
+            "weight": 0.17510526315789474
+          },
+          {
+            "factor": "tea_intensity",
+            "weight": 0.17289473684210527
+          },
+          {
+            "factor": "toppings",
+            "weight": 0.11973684210526311
+          }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev_andrew_05",
+            "drink_name": "Classic Milk Tea",
+            "rating": 4,
+            "text": "Solid milk tea, not too fruity.",
+            "relevance": "You rated this 4/5; similar sweetness."
+          },
+          {
+            "review_id": "rev_andrew_06",
+            "drink_name": "House Milk Tea",
+            "rating": 4,
+            "text": "House milk tea hits the spot.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          },
+          {
+            "review_id": "rev_andrew_08",
+            "drink_name": "Thai Milk Tea",
+            "rating": 4,
+            "text": "Milky Thai tea, good sugar level.",
+            "relevance": "You rated this 4/5; similar fruitiness."
+          }
+        ],
+        "rationale": "Sarah (100% similar) rated it 5/5.",
+        "price": 6.75,
+        "dimension": "social"
+      },
+      "seq": 16
+    },
+    {
+      "type": "proposal",
+      "agent_id": "social",
       "message": "Social proposes Horchata Milk Tea.",
       "payload": {
         "agent_id": "social",
@@ -411,7 +472,7 @@
         "price": 6.5,
         "dimension": "social"
       },
-      "seq": 16
+      "seq": 17
     },
     {
       "type": "proposal",
@@ -470,67 +531,6 @@
         ],
         "rationale": "Leo (96% similar) rated it 4/5.",
         "price": 5.5,
-        "dimension": "social"
-      },
-      "seq": 17
-    },
-    {
-      "type": "proposal",
-      "agent_id": "social",
-      "message": "Social proposes Thai Tea.",
-      "payload": {
-        "agent_id": "social",
-        "drink_id": "kf_thai",
-        "drink_name": "Thai Tea",
-        "shop_id": "kungfu",
-        "score": 0.7500000000000001,
-        "factors": [
-          {
-            "factor": "fruitiness",
-            "weight": 0.195
-          },
-          {
-            "factor": "sweetness",
-            "weight": 0.19489473684210526
-          },
-          {
-            "factor": "milkiness",
-            "weight": 0.18726315789473683
-          },
-          {
-            "factor": "tea_intensity",
-            "weight": 0.18289473684210528
-          },
-          {
-            "factor": "toppings",
-            "weight": 0.1397368421052631
-          }
-        ],
-        "evidence": [
-          {
-            "review_id": "rev_andrew_08",
-            "drink_name": "Thai Milk Tea",
-            "rating": 4,
-            "text": "Milky Thai tea, good sugar level.",
-            "relevance": "You rated this 4/5; similar sweetness."
-          },
-          {
-            "review_id": "rev_andrew_05",
-            "drink_name": "Classic Milk Tea",
-            "rating": 4,
-            "text": "Solid milk tea, not too fruity.",
-            "relevance": "You rated this 4/5; similar fruitiness."
-          },
-          {
-            "review_id": "rev_andrew_06",
-            "drink_name": "House Milk Tea",
-            "rating": 4,
-            "text": "House milk tea hits the spot.",
-            "relevance": "You rated this 4/5; similar tea intensity."
-          }
-        ],
-        "rationale": "Leo (96% similar) rated it 4/5.",
-        "price": 5.25,
         "dimension": "social"
       },
       "seq": 18
@@ -904,19 +904,20 @@
     {
       "type": "status",
       "agent_id": null,
-      "message": "11 candidates. Every agent now scores each one by its own objective.",
+      "message": "12 candidates. Every agent now scores each one by its own objective.",
       "payload": {
         "candidate_drink_ids": [
           "kf_brown_sugar_oolong",
           "sr_pearl_milk",
           "st_thai",
+          "sr_hojicha_cream",
           "bg_horchata",
           "kf_passion_fruit",
-          "kf_thai",
           "sr_osmanthus_oolong",
           "sr_wintermelon",
           "bg_strawberry_matcha",
           "ll_brown_sugar_hojicha",
+          "kf_thai",
           "ll_osmanthus_milk"
         ]
       },
@@ -925,11 +926,11 @@
     {
       "type": "objection",
       "agent_id": "taste",
-      "message": "Taste backs Brown Sugar Oolong Milk Tea, Pearl Milk Tea (+8 more).",
+      "message": "Taste backs Brown Sugar Oolong Milk Tea, Pearl Milk Tea (+9 more).",
       "payload": {
         "agent_id": "taste",
         "kind": "support",
-        "reason": "Taste backs Brown Sugar Oolong Milk Tea, Pearl Milk Tea (+8 more).",
+        "reason": "Taste backs Brown Sugar Oolong Milk Tea, Pearl Milk Tea (+9 more).",
         "objections": [
           {
             "agent_id": "taste",
@@ -957,6 +958,14 @@
           },
           {
             "agent_id": "taste",
+            "target_drink_id": "sr_hojicha_cream",
+            "kind": "support",
+            "reason": "Hojicha Cream Tea: 84% taste match, strongest on fruitiness, milkiness.",
+            "score": 0.8354736842105264,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
             "target_drink_id": "bg_horchata",
             "kind": "support",
             "reason": "Horchata Milk Tea: 90% taste match, strongest on fruitiness, milkiness.",
@@ -969,14 +978,6 @@
             "kind": "neutral",
             "reason": "Passion Fruit Green Tea: 52% taste match, strongest on tea intensity, sweetness.",
             "score": 0.5242105263157895,
-            "dimension": "taste"
-          },
-          {
-            "agent_id": "taste",
-            "target_drink_id": "kf_thai",
-            "kind": "support",
-            "reason": "Thai Tea: 90% taste match, strongest on fruitiness, sweetness.",
-            "score": 0.8997894736842105,
             "dimension": "taste"
           },
           {
@@ -1013,6 +1014,14 @@
           },
           {
             "agent_id": "taste",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: 90% taste match, strongest on fruitiness, sweetness.",
+            "score": 0.8997894736842105,
+            "dimension": "taste"
+          },
+          {
+            "agent_id": "taste",
             "target_drink_id": "ll_osmanthus_milk",
             "kind": "support",
             "reason": "Osmanthus Milk Tea: 89% taste match, strongest on milkiness, fruitiness.",
@@ -1026,18 +1035,18 @@
     {
       "type": "objection",
       "agent_id": "social",
-      "message": "Social backs Horchata Milk Tea, Passion Fruit Green Tea (+3 more).",
+      "message": "Social backs Hojicha Cream Tea, Brown Sugar Oolong Milk Tea (+5 more).",
       "payload": {
         "agent_id": "social",
         "kind": "support",
-        "reason": "Social backs Horchata Milk Tea, Passion Fruit Green Tea (+3 more).",
+        "reason": "Social backs Hojicha Cream Tea, Brown Sugar Oolong Milk Tea (+5 more).",
         "objections": [
           {
             "agent_id": "social",
             "target_drink_id": "kf_brown_sugar_oolong",
-            "kind": "neutral",
-            "reason": "Brown Sugar Oolong Milk Tea: Leo (96% similar) rated it 3/5.",
-            "score": 0.5,
+            "kind": "support",
+            "reason": "Brown Sugar Oolong Milk Tea: Sarah (100% similar) rated it 5/5.",
+            "score": 0.7546598632641252,
             "dimension": "social"
           },
           {
@@ -1052,8 +1061,16 @@
             "agent_id": "social",
             "target_drink_id": "st_thai",
             "kind": "support",
-            "reason": "Thai Milk Tea: Leo (96% similar) rated it 4/5.",
-            "score": 0.7500000000000001,
+            "reason": "Thai Milk Tea: Sarah (100% similar) rated it 4/5.",
+            "score": 0.75,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
+            "target_drink_id": "sr_hojicha_cream",
+            "kind": "support",
+            "reason": "Hojicha Cream Tea: Sarah (100% similar) rated it 5/5.",
+            "score": 0.8773299316320626,
             "dimension": "social"
           },
           {
@@ -1074,14 +1091,6 @@
           },
           {
             "agent_id": "social",
-            "target_drink_id": "kf_thai",
-            "kind": "support",
-            "reason": "Thai Tea: Leo (96% similar) rated it 4/5.",
-            "score": 0.7500000000000001,
-            "dimension": "social"
-          },
-          {
-            "agent_id": "social",
             "target_drink_id": "sr_osmanthus_oolong",
             "kind": "neutral",
             "reason": "Osmanthus Oolong: No one with similar taste has rated it yet.",
@@ -1092,7 +1101,7 @@
             "agent_id": "social",
             "target_drink_id": "sr_wintermelon",
             "kind": "neutral",
-            "reason": "Wintermelon Tea: Rina (96% similar) rated it 3/5.",
+            "reason": "Wintermelon Tea: No one with similar taste has rated it yet.",
             "score": 0.5,
             "dimension": "social"
           },
@@ -1114,6 +1123,14 @@
           },
           {
             "agent_id": "social",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: Leo (96% similar) rated it 4/5.",
+            "score": 0.7500000000000001,
+            "dimension": "social"
+          },
+          {
+            "agent_id": "social",
             "target_drink_id": "ll_osmanthus_milk",
             "kind": "neutral",
             "reason": "Osmanthus Milk Tea: No one with similar taste has rated it yet.",
@@ -1127,11 +1144,11 @@
     {
       "type": "objection",
       "agent_id": "explorer",
-      "message": "Explorer backs Osmanthus Oolong, Wintermelon Tea (+7 more); pushes back on Thai Milk Tea, Brown Sugar Oolong Milk Tea.",
+      "message": "Explorer backs Osmanthus Oolong, Wintermelon Tea (+8 more); pushes back on Thai Milk Tea, Brown Sugar Oolong Milk Tea.",
       "payload": {
         "agent_id": "explorer",
         "kind": "concern",
-        "reason": "Explorer backs Osmanthus Oolong, Wintermelon Tea (+7 more); pushes back on Thai Milk Tea, Brown Sugar Oolong Milk Tea.",
+        "reason": "Explorer backs Osmanthus Oolong, Wintermelon Tea (+8 more); pushes back on Thai Milk Tea, Brown Sugar Oolong Milk Tea.",
         "objections": [
           {
             "agent_id": "explorer",
@@ -1159,6 +1176,14 @@
           },
           {
             "agent_id": "explorer",
+            "target_drink_id": "sr_hojicha_cream",
+            "kind": "support",
+            "reason": "Hojicha Cream Tea: New to you. Closest past order: Classic Milk Tea.",
+            "score": 0.5666666666666667,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
             "target_drink_id": "bg_horchata",
             "kind": "support",
             "reason": "Horchata Milk Tea: New to you. Closest past order: Taro Milk Tea.",
@@ -1171,14 +1196,6 @@
             "kind": "support",
             "reason": "Passion Fruit Green Tea: New to you. Closest past order: Mango Green Tea.",
             "score": 0.5833333333333333,
-            "dimension": "novelty"
-          },
-          {
-            "agent_id": "explorer",
-            "target_drink_id": "kf_thai",
-            "kind": "support",
-            "reason": "Thai Tea: New to you. Closest past order: Thai Milk Tea.",
-            "score": 0.5566666666666666,
             "dimension": "novelty"
           },
           {
@@ -1215,6 +1232,14 @@
           },
           {
             "agent_id": "explorer",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: New to you. Closest past order: Thai Milk Tea.",
+            "score": 0.5566666666666666,
+            "dimension": "novelty"
+          },
+          {
+            "agent_id": "explorer",
             "target_drink_id": "ll_osmanthus_milk",
             "kind": "support",
             "reason": "Osmanthus Milk Tea: New to you. Closest past order: Classic Milk Tea.",
@@ -1228,11 +1253,11 @@
     {
       "type": "objection",
       "agent_id": "budget",
-      "message": "Budget backs Wintermelon Tea, Brown Sugar Hojicha Milk (+4 more); pushes back on Strawberry Matcha Latte, Brown Sugar Oolong Milk Tea (+1 more).",
+      "message": "Budget backs Wintermelon Tea, Brown Sugar Hojicha Milk (+4 more); pushes back on Hojicha Cream Tea, Strawberry Matcha Latte (+2 more).",
       "payload": {
         "agent_id": "budget",
         "kind": "concern",
-        "reason": "Budget backs Wintermelon Tea, Brown Sugar Hojicha Milk (+4 more); pushes back on Strawberry Matcha Latte, Brown Sugar Oolong Milk Tea (+1 more).",
+        "reason": "Budget backs Wintermelon Tea, Brown Sugar Hojicha Milk (+4 more); pushes back on Hojicha Cream Tea, Strawberry Matcha Latte (+2 more).",
         "objections": [
           {
             "agent_id": "budget",
@@ -1260,6 +1285,14 @@
           },
           {
             "agent_id": "budget",
+            "target_drink_id": "sr_hojicha_cream",
+            "kind": "concern",
+            "reason": "Hojicha Cream Tea: $6.75, cheaper than 2% of drinks.",
+            "score": 0.09999999999999998,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
             "target_drink_id": "bg_horchata",
             "kind": "concern",
             "reason": "Horchata Milk Tea: $6.50, cheaper than 14% of drinks.",
@@ -1272,14 +1305,6 @@
             "kind": "support",
             "reason": "Passion Fruit Green Tea: $5.50, cheaper than 67% of drinks.",
             "score": 0.6,
-            "dimension": "cost"
-          },
-          {
-            "agent_id": "budget",
-            "target_drink_id": "kf_thai",
-            "kind": "support",
-            "reason": "Thai Tea: $5.25, cheaper than 77% of drinks.",
-            "score": 0.7,
             "dimension": "cost"
           },
           {
@@ -1312,6 +1337,14 @@
             "kind": "support",
             "reason": "Brown Sugar Hojicha Milk: $4.95, cheaper than 91% of drinks.",
             "score": 0.82,
+            "dimension": "cost"
+          },
+          {
+            "agent_id": "budget",
+            "target_drink_id": "kf_thai",
+            "kind": "support",
+            "reason": "Thai Tea: $5.25, cheaper than 77% of drinks.",
+            "score": 0.7,
             "dimension": "cost"
           },
           {
@@ -1416,17 +1449,25 @@
     {
       "type": "objection",
       "agent_id": "shop_sunright",
-      "message": "Sunright Tea Studio confirms in stock: Osmanthus Oolong, Pearl Milk Tea (+1 more).",
+      "message": "Sunright Tea Studio confirms in stock: Hojicha Cream Tea, Osmanthus Oolong (+2 more).",
       "payload": {
         "agent_id": "shop_sunright",
         "kind": "support",
-        "reason": "Sunright Tea Studio confirms in stock: Osmanthus Oolong, Pearl Milk Tea (+1 more).",
+        "reason": "Sunright Tea Studio confirms in stock: Hojicha Cream Tea, Osmanthus Oolong (+2 more).",
         "objections": [
           {
             "agent_id": "shop_sunright",
             "target_drink_id": "sr_pearl_milk",
             "kind": "support",
             "reason": "Pearl Milk Tea is in stock at Sunright Tea Studio ($5.75).",
+            "score": null,
+            "dimension": null
+          },
+          {
+            "agent_id": "shop_sunright",
+            "target_drink_id": "sr_hojicha_cream",
+            "kind": "support",
+            "reason": "Hojicha Cream Tea is in stock at Sunright Tea Studio ($6.75).",
             "score": null,
             "dimension": null
           },
@@ -1477,19 +1518,19 @@
     {
       "type": "decision",
       "agent_id": null,
-      "message": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 39% for you. It beats Wintermelon Tea mainly on taste match. Ruled out: Brown Sugar Hojicha Milk, Osmanthus Milk Tea.",
+      "message": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 41% for you. It beats Wintermelon Tea mainly on taste match. Ruled out: Brown Sugar Hojicha Milk, Osmanthus Milk Tea.",
       "payload": {
         "drink_id": "kf_thai",
         "drink_name": "Thai Tea",
         "shop_id": "kungfu",
-        "score": 0.7775051306177931,
+        "score": 0.7798207772336249,
         "ask_human": true,
-        "question": "Thai Tea and Wintermelon Tea are nearly tied (0.78 vs 0.76). Your pick will teach us which matters more.",
+        "question": "Thai Tea and Wintermelon Tea are nearly tied (0.78 vs 0.77). Your pick will teach us which matters more.",
         "alternatives": [
           {
             "drink_id": "sr_wintermelon",
             "drink_name": "Wintermelon Tea",
-            "score": 0.7635525006232904,
+            "score": 0.7697907194182723,
             "shop_id": "sunright",
             "price": 4.75,
             "dimension_scores": {
@@ -1502,7 +1543,7 @@
           {
             "drink_id": "sr_pearl_milk",
             "drink_name": "Pearl Milk Tea",
-            "score": 0.7050271915204956,
+            "score": 0.7064204057503521,
             "shop_id": "sunright",
             "price": 5.75,
             "dimension_scores": {
@@ -1513,12 +1554,12 @@
             }
           }
         ],
-        "explanation": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 39% for you. It beats Wintermelon Tea mainly on taste match. Ruled out: Brown Sugar Hojicha Milk, Osmanthus Milk Tea.",
+        "explanation": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 41% for you. It beats Wintermelon Tea mainly on taste match. Ruled out: Brown Sugar Hojicha Milk, Osmanthus Milk Tea.",
         "options": [
           {
             "drink_id": "kf_thai",
             "drink_name": "Thai Tea",
-            "score": 0.7775051306177931,
+            "score": 0.7798207772336249,
             "shop_id": "kungfu",
             "price": 5.25,
             "dimension_scores": {
@@ -1531,7 +1572,7 @@
           {
             "drink_id": "sr_wintermelon",
             "drink_name": "Wintermelon Tea",
-            "score": 0.7635525006232904,
+            "score": 0.7697907194182723,
             "shop_id": "sunright",
             "price": 4.75,
             "dimension_scores": {
@@ -1544,7 +1585,7 @@
           {
             "drink_id": "sr_pearl_milk",
             "drink_name": "Pearl Milk Tea",
-            "score": 0.7050271915204956,
+            "score": 0.7064204057503521,
             "shop_id": "sunright",
             "price": 5.75,
             "dimension_scores": {
@@ -1556,10 +1597,10 @@
           }
         ],
         "weights": {
-          "taste": 0.38964688811501463,
-          "social": 0.13648901170540922,
-          "novelty": 0.05000000000000001,
-          "cost": 0.4238641001795762
+          "taste": 0.40742995723252545,
+          "social": 0.11174454363249801,
+          "novelty": 0.05,
+          "cost": 0.43082549913497653
         },
         "dropped": [
           {
@@ -1585,14 +1626,14 @@
       "drink_id": "ll_brown_sugar_hojicha",
       "drink_name": "Brown Sugar Hojicha Milk",
       "shop_id": "lantern_leaf",
-      "score": 0.8034548717324372,
+      "score": 0.8131514084275199,
       "ask_human": false,
       "question": null,
       "alternatives": [
         {
           "drink_id": "kf_thai",
           "drink_name": "Thai Tea",
-          "score": 0.7775051306177931,
+          "score": 0.7798207772336249,
           "shop_id": "kungfu",
           "price": 5.25,
           "dimension_scores": {
@@ -1605,7 +1646,7 @@
         {
           "drink_id": "sr_wintermelon",
           "drink_name": "Wintermelon Tea",
-          "score": 0.7635525006232904,
+          "score": 0.7697907194182723,
           "shop_id": "sunright",
           "price": 4.75,
           "dimension_scores": {
@@ -1616,12 +1657,12 @@
           }
         }
       ],
-      "explanation": "Brown Sugar Hojicha Milk ranks first (0.80). Its biggest boost is taste match, which counts for 39% for you. It beats Thai Tea mainly on price.",
+      "explanation": "Brown Sugar Hojicha Milk ranks first (0.81). Its biggest boost is taste match, which counts for 41% for you. It beats Thai Tea mainly on price.",
       "options": [
         {
           "drink_id": "ll_brown_sugar_hojicha",
           "drink_name": "Brown Sugar Hojicha Milk",
-          "score": 0.8034548717324372,
+          "score": 0.8131514084275199,
           "shop_id": "lantern_leaf",
           "price": 4.95,
           "dimension_scores": {
@@ -1634,7 +1675,7 @@
         {
           "drink_id": "kf_thai",
           "drink_name": "Thai Tea",
-          "score": 0.7775051306177931,
+          "score": 0.7798207772336249,
           "shop_id": "kungfu",
           "price": 5.25,
           "dimension_scores": {
@@ -1647,7 +1688,7 @@
         {
           "drink_id": "sr_wintermelon",
           "drink_name": "Wintermelon Tea",
-          "score": 0.7635525006232904,
+          "score": 0.7697907194182723,
           "shop_id": "sunright",
           "price": 4.75,
           "dimension_scores": {
@@ -1659,10 +1700,10 @@
         }
       ],
       "weights": {
-        "taste": 0.38964688811501463,
-        "social": 0.13648901170540922,
-        "novelty": 0.05000000000000001,
-        "cost": 0.4238641001795762
+        "taste": 0.40742995723252545,
+        "social": 0.11174454363249801,
+        "novelty": 0.05,
+        "cost": 0.43082549913497653
       },
       "dropped": []
     },
@@ -1670,14 +1711,14 @@
       "drink_id": "kf_thai",
       "drink_name": "Thai Tea",
       "shop_id": "kungfu",
-      "score": 0.7775051306177931,
+      "score": 0.7798207772336249,
       "ask_human": true,
-      "question": "Thai Tea and Wintermelon Tea are nearly tied (0.78 vs 0.76). Your pick will teach us which matters more.",
+      "question": "Thai Tea and Wintermelon Tea are nearly tied (0.78 vs 0.77). Your pick will teach us which matters more.",
       "alternatives": [
         {
           "drink_id": "sr_wintermelon",
           "drink_name": "Wintermelon Tea",
-          "score": 0.7635525006232904,
+          "score": 0.7697907194182723,
           "shop_id": "sunright",
           "price": 4.75,
           "dimension_scores": {
@@ -1690,7 +1731,7 @@
         {
           "drink_id": "ll_osmanthus_milk",
           "drink_name": "Osmanthus Milk Tea",
-          "score": 0.7409017730674377,
+          "score": 0.7492294498143469,
           "shop_id": "lantern_leaf",
           "price": 5.25,
           "dimension_scores": {
@@ -1701,12 +1742,12 @@
           }
         }
       ],
-      "explanation": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 39% for you. It beats Wintermelon Tea mainly on taste match.",
+      "explanation": "Thai Tea ranks first (0.78). Its biggest boost is taste match, which counts for 41% for you. It beats Wintermelon Tea mainly on taste match.",
       "options": [
         {
           "drink_id": "kf_thai",
           "drink_name": "Thai Tea",
-          "score": 0.7775051306177931,
+          "score": 0.7798207772336249,
           "shop_id": "kungfu",
           "price": 5.25,
           "dimension_scores": {
@@ -1719,7 +1760,7 @@
         {
           "drink_id": "sr_wintermelon",
           "drink_name": "Wintermelon Tea",
-          "score": 0.7635525006232904,
+          "score": 0.7697907194182723,
           "shop_id": "sunright",
           "price": 4.75,
           "dimension_scores": {
@@ -1732,7 +1773,7 @@
         {
           "drink_id": "ll_osmanthus_milk",
           "drink_name": "Osmanthus Milk Tea",
-          "score": 0.7409017730674377,
+          "score": 0.7492294498143469,
           "shop_id": "lantern_leaf",
           "price": 5.25,
           "dimension_scores": {
@@ -1744,10 +1785,10 @@
         }
       ],
       "weights": {
-        "taste": 0.38964688811501463,
-        "social": 0.13648901170540922,
-        "novelty": 0.05000000000000001,
-        "cost": 0.4238641001795762
+        "taste": 0.40742995723252545,
+        "social": 0.11174454363249801,
+        "novelty": 0.05,
+        "cost": 0.43082549913497653
       },
       "dropped": []
     }

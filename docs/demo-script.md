@@ -1,6 +1,6 @@
 # TeaLink demo script (3 minutes)
 
-*Owner: Track B. The numbers below come from a real run of this exact sequence on Sat 1:40 PM, re-checked over AGNTCY at 1:55 PM with identical results. If the seed data or the agents change, re-run the sequence and update the numbers. Lines in quotes are what the presenter says.*
+*Owner: Track B. The numbers below come from a real run of this exact sequence over AGNTCY on Sat 2:25 PM, after Track A's re-seed (Sarah as Andrew's closest match). In-process mode gives identical results. If the seed data or the agents change, re-run the sequence and update the numbers. Lines in quotes are what the presenter says.*
 
 ## Before you start
 
@@ -18,12 +18,12 @@
 On Discover, point at the **At the counter** timeline, top to bottom:
 
 1. **Team selected:** "The concierge picks agents by capability, and you can open this to see why each one was chosen. Each agent is its own process. The badge up here shows all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
-2. **Andrew's priorities:** "From his last 4 orders, the Preference agent thinks price matters most to him (42%), then taste (39%)."
-3. **Each agent proposes:** "Taste wants Brown Sugar Oolong, a 96% match. Budget wants the cheapest drinks that still fit. Explorer wants drinks he's never had."
+2. **Andrew's priorities:** "From his last 4 orders, the Preference agent thinks price matters most to him (43%), then taste (41%)."
+3. **Each agent proposes:** "Taste wants Brown Sugar Oolong, a 96% match. Social proposes Hojicha Cream Tea because Sarah, whose taste is almost identical to Andrew's, rated it 5 out of 5. Budget wants the cheapest drinks that still fit. Explorer wants drinks he's never had."
 4. **They argue:** "Then every agent scores *every* candidate on its own objective. Explorer pushes back on drinks he's already had; Budget pushes back on the $6.50-and-up ones. Only the shop agents know inventory."
 5. **Ruled out:** "Lantern Leaf's drinks are ruled out, because no shop agent is online to confirm they're in stock."
 
-Point at the top 3: **Thai Tea 78, Wintermelon Tea 76, Pearl Milk Tea 71**, with the close-call box.
+Point at the top 3: **Thai Tea 78, Wintermelon Tea 77, Pearl Milk Tea 71**, with the close-call box.
 
 > "Thai Tea and Wintermelon are too close to call, so instead of guessing, the team asks Andrew. And it says why: Thai Tea wins on taste and on what people like him rate highly; Wintermelon wins on price and on being new."
 
@@ -31,7 +31,7 @@ Point at the top 3: **Thai Tea 78, Wintermelon Tea 76, Pearl Milk Tea 71**, with
 
 Click **Pick this** on **Pearl Milk Tea** (#3).
 
-> "He skipped both and took the best taste match. The Preference agent learns from that: taste now counts 43% (it was 39%) and price drops to 35%. Pearl Milk Tea climbs from 71 to 73. Every pick from the top 3 is a training signal."
+> "He skipped both and took the best taste match. The Preference agent learns from that: taste now counts 45% (it was 41%) and price drops to 36%. Pearl Milk Tea climbs from 71 to 73. Every pick from the top 3 is a training signal."
 
 Point at **What Andrew cares about**, where the change since the last pick is shown next to each priority.
 
@@ -42,12 +42,12 @@ Each button starts a fresh deliberation. After each one, point at the new top 3 
 1. **#1 sells out** (Thai Tea).
    > "Kung Fu Tea's agent vetoes it, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop."
 2. **Lantern Leaf joins.**
-   > "A new shop registers its agent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 80."
+   > "A new shop registers its agent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 81, with Lantern Leaf's Osmanthus Milk Tea right behind it."
 3. **I don't like brown sugar.**
-   > "New information from the user. Brown Sugar Hojicha drops out of the top 3."
+   > "New information from the user. Brown Sugar Hojicha drops out of the top 3, and Osmanthus Milk Tea moves up to #1."
    Click **What changed** in the nav: "Before and after: what moved, what left and why, and notice his priorities didn't change. The world changed, not his taste."
-4. **#1's shop goes offline** (Sunright).
-   > "Sunright's agent stops responding, so Pearl, Wintermelon, and Osmanthus Oolong are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. Osmanthus Milk Tea from the newly joined shop is now #1."
+4. **#1's shop goes offline** (Lantern Leaf).
+   > "The shop that just joined drops off the network. Its agent stops responding, so its drinks are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. The team falls back to Wintermelon, Pearl, and Thai Milk Tea."
 
 ## 2:15 to 2:45: why should you trust it
 
@@ -57,9 +57,9 @@ Open **Why this order?** on the top drink.
 
 Switch to the **Evidence** tab.
 
-> "We tested this on simulated users with hidden priorities. Learning picks the user's actual drink 63% of the time, vs 46% with fixed priorities, and the learned priorities land close to the hidden ones."
+> "We tested this against simpler baselines. Three simulated users with hidden priorities each made 8 picks. A hit means the recommender's #1 was that user's true favorite drink, which it never gets to see. Learning hit 7 of 24, fixed priorities 5, and just recommending the most popular drink 2. It also re-suggested drinks they'd already tried half as often. The loyalist's learned priorities land almost exactly on the hidden ones: taste 66% vs 70%."
 
-*Use the popularity-baseline number here only once the page no longer shows "Preview data" (when Track A ships `GET /eval`).*
+*Be honest if asked: the sample is small, and for the price hunter and the explorer the learned weights are moving in the right direction but haven't converged in 8 picks (price 37% vs 55%, novelty 29% vs 50%).*
 
 ## 2:45 to 3:00: close
 

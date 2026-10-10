@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 2:10 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 2:25 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -91,7 +91,9 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ AGNTCY badge on the timeline ("AGNTCY · N agents over NATS", or "In-process fallback"), read from `/health`, with a dot on each agent that answered over the bus
 - ✅ An empty result now shows a clear "Nothing survived" card instead of a blank #1 card
 - ✅ README covers AGNTCY mode (the `bus` extra, running NATS without Docker)
-- 🟡 `docs/writeup.md` drafted: overview, Level 2 mapping, results, lessons. Track A's architecture and implementation sections and the popularity numbers are still to come.
+- 🟡 `docs/writeup.md` drafted: overview, Level 2 mapping, results (now Track A's three-way eval), lessons. Track A's architecture and implementation sections are still to come.
+- ✅ Evidence page on live `GET /eval`: hits shown as counts (7/24, 5/24, 2/24), wording matches the stricter "user's favorite" definition, and the offline copy is the real results
+- ✅ Demo script and recorded mocks refreshed after Track A's re-seed (Sarah's 5/5 Hojicha Cream Tea is now a Social proposal in the script)
 - ⬜ Offer badge (if A builds offers)
 - ⬜ Stretch: ElevenLabs voices
 - ⬜ Write-up and backup video
