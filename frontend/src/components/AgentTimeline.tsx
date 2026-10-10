@@ -1,29 +1,85 @@
+import type { ReactNode } from "react";
 import type { LensEvent } from "../api/types.ts";
-import { price } from "../lib/format.ts";
+import { agentLabel, price } from "../lib/format.ts";
 
-function detail(event: LensEvent): string | null {
-  const payload = event.payload;
-  if (event.type === "proposal" && typeof payload.rationale === "string") {
-    const cost = typeof payload.price === "number" ? price(payload.price) : "";
-    return cost ? `${payload.rationale} (${cost})` : payload.rationale;
-  }
-  return null;
+/** Notes the frontend adds itself (e.g. "Thai Tea just sold out.") use seq numbers from here up. */
+const LOCAL_SEQ_START = 100000;
+
+interface Phases {
+  changes: LensEvent[];
+  selections: LensEvent[];
+  preference: LensEvent | null;
+  proposals: Map<string, LensEvent[]>;
+  candidates: LensEvent | null;
+  debate: LensEvent[];
+  dropped: LensEvent[];
+  notes: LensEvent[];
+  decision: LensEvent | null;
 }
 
-function tone(event: LensEvent): string {
-  if (event.type === "decision") return "border-amber bg-[#f8efe2]";
-  if (event.type === "preference") return "border-amber/60 bg-[#fbf4ea]";
-  if (event.type === "objection" && event.payload.kind === "veto") return "border-[#b4533c]/60 bg-[#fbeee9]";
-  if (event.type === "status" && event.message.startsWith("Dropped")) return "border-[#b4533c]/40 bg-cream";
-  return "border-line/80 bg-cream";
+function split(events: LensEvent[]): Phases {
+  const phases: Phases = {
+    changes: [],
+    selections: [],
+    preference: null,
+    proposals: new Map(),
+    candidates: null,
+    debate: [],
+    dropped: [],
+    notes: [],
+    decision: null,
+  };
+  for (const event of events) {
+    switch (event.type) {
+      case "selection":
+        phases.selections.push(event);
+        break;
+      case "preference":
+        phases.preference = event;
+        break;
+      case "proposal": {
+        const agent = event.agent_id ?? "agent";
+        phases.proposals.set(agent, [...(phases.proposals.get(agent) ?? []), event]);
+        break;
+      }
+      case "objection":
+        phases.debate.push(event);
+        break;
+      case "decision":
+        phases.decision = event;
+        break;
+      case "status":
+        if (event.seq >= LOCAL_SEQ_START) phases.changes.push(event);
+        else if (event.message.startsWith("Dropped")) phases.dropped.push(event);
+        else if (event.message.includes("candidates")) phases.candidates = event;
+        else if (event.message !== "Starting deliberation.") phases.notes.push(event);
+        break;
+    }
+  }
+  return phases;
 }
 
-function label(event: LensEvent): string {
-  if (event.type === "objection") {
-    if (event.payload.kind === "veto") return "veto";
-    return event.payload.kind === "concern" ? "pushback" : "review";
-  }
-  return event.type;
+function Phase({ step, title, children }: { step: number; title: string; children: ReactNode }) {
+  return (
+    <li className="timeline-in">
+      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-amber uppercase">
+        {step}. {title}
+      </p>
+      {children}
+    </li>
+  );
+}
+
+function debateTone(event: LensEvent): { card: string; tag: string } {
+  if (event.payload.kind === "veto") return { card: "border-[#b4533c]/60 bg-[#fbeee9]", tag: "Veto" };
+  if (event.payload.kind === "concern") return { card: "border-line/80 bg-cream", tag: "Pushback" };
+  return { card: "border-line/80 bg-cream", tag: "Review" };
+}
+
+function proposalLine(event: LensEvent): string {
+  const name = typeof event.payload.drink_name === "string" ? event.payload.drink_name : event.message;
+  const cost = typeof event.payload.price === "number" ? price(event.payload.price) : "";
+  return cost ? `${name} · ${cost}` : name;
 }
 
 export function AgentTimeline({
@@ -35,39 +91,137 @@ export function AgentTimeline({
   usingMock: boolean;
   started: boolean;
 }) {
+  const phases = split(events);
+  const present = {
+    team: phases.selections.length > 0,
+    priorities: phases.preference !== null,
+    proposals: phases.proposals.size > 0,
+    debate: phases.debate.length > 0,
+    dropped: phases.dropped.length > 0,
+    decision: phases.decision !== null,
+  };
+  const shown = (Object.keys(present) as (keyof typeof present)[]).filter((key) => present[key]);
+  const stepOf = (key: keyof typeof present) => shown.indexOf(key) + 1;
+
   return (
     <section className="rounded-[28px] border border-line bg-foam/80 p-5 sm:p-6">
       <div className="mb-4 flex items-baseline justify-between gap-3">
         <h2 className="font-display text-2xl">At the counter</h2>
-        <p className="text-xs text-mute">
-          {usingMock ? "Saved round" : started ? "Live" : "Waiting"}
-        </p>
+        <p className="text-xs text-mute">{usingMock ? "Saved round" : started ? "Live" : "Waiting"}</p>
       </div>
-      {events.length === 0 ? (
-        <p className="text-sm text-mute">
-          {started ? "Asking the counter…" : "The round has not started."}
+
+      {phases.changes.map((event) => (
+        <p
+          key={event.seq}
+          className="timeline-in mb-4 rounded-2xl border border-amber bg-[#f8efe2] px-4 py-3 text-sm font-semibold"
+        >
+          {event.message}
         </p>
+      ))}
+
+      {events.length === 0 ? (
+        <p className="text-sm text-mute">{started ? "Asking the counter…" : "The round has not started."}</p>
       ) : (
-        <ol className="space-y-3">
-          {events.map((event) => {
-            const extra = detail(event);
-            return (
-              <li
-                key={event.seq}
-                className={`timeline-in rounded-2xl border px-4 py-3 ${tone(event)}`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-semibold tracking-[0.14em] text-amber uppercase">
-                    {label(event)}
-                    {event.agent_id ? ` · ${event.agent_id}` : ""}
-                  </p>
-                  <span className="text-xs text-mute">{event.seq}</span>
-                </div>
-                <p className="mt-1 font-semibold">{event.message}</p>
-                {extra ? <p className="mt-1 text-sm leading-relaxed text-mute">{extra}</p> : null}
-              </li>
-            );
-          })}
+        <ol className="space-y-5">
+          {phases.selections.length > 0 ? (
+            <Phase step={stepOf("team")} title="Team selected">
+              <details className="rounded-2xl border border-line/80 bg-cream px-4 py-3">
+                <summary className="cursor-pointer list-none">
+                  <span className="flex flex-wrap gap-1.5">
+                    {phases.selections.map((event) => (
+                      <span
+                        key={event.seq}
+                        className="rounded-full bg-[#f0e2d0] px-2.5 py-0.5 text-xs font-semibold"
+                      >
+                        {agentLabel(event.agent_id ?? "")}
+                      </span>
+                    ))}
+                  </span>
+                  <span className="mt-2 block text-xs text-mute">
+                    Picked by capability. Tap to see why each agent was chosen.
+                  </span>
+                </summary>
+                <ul className="mt-3 space-y-1.5 text-sm text-mute">
+                  {phases.selections.map((event) => (
+                    <li key={event.seq}>{event.message}</li>
+                  ))}
+                </ul>
+              </details>
+            </Phase>
+          ) : null}
+
+          {phases.preference ? (
+            <Phase step={stepOf("priorities")} title="Andrew's priorities">
+              <p className="rounded-2xl border border-amber/60 bg-[#fbf4ea] px-4 py-3 text-sm">
+                {phases.preference.message}
+              </p>
+            </Phase>
+          ) : null}
+
+          {phases.proposals.size > 0 ? (
+            <Phase step={stepOf("proposals")} title="Each agent proposes">
+              <ul className="space-y-2">
+                {[...phases.proposals.entries()].map(([agent, proposals]) => (
+                  <li key={agent} className="rounded-2xl border border-line/80 bg-cream px-4 py-3">
+                    <p className="font-semibold">{agentLabel(agent)}</p>
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {proposals.map((event) => (
+                        <li key={event.seq}>
+                          <span className="font-semibold">{proposalLine(event)}</span>
+                          {typeof event.payload.rationale === "string" ? (
+                            <span className="block text-mute">{event.payload.rationale}</span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </Phase>
+          ) : null}
+
+          {phases.debate.length > 0 ? (
+            <Phase step={stepOf("debate")} title="They argue">
+              {phases.candidates ? <p className="mb-2 text-sm text-mute">{phases.candidates.message}</p> : null}
+              <ul className="space-y-2">
+                {phases.debate.map((event) => {
+                  const { card, tag } = debateTone(event);
+                  return (
+                    <li key={event.seq} className={`rounded-2xl border px-4 py-3 text-sm ${card}`}>
+                      <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-amber uppercase">
+                        {tag}
+                      </span>
+                      {event.message}
+                    </li>
+                  );
+                })}
+              </ul>
+            </Phase>
+          ) : null}
+
+          {phases.dropped.length > 0 ? (
+            <Phase step={stepOf("dropped")} title="Ruled out">
+              <ul className="space-y-1.5 rounded-2xl border border-[#b4533c]/40 bg-cream px-4 py-3 text-sm">
+                {phases.dropped.map((event) => (
+                  <li key={event.seq}>{event.message.replace(/^Dropped /, "")}</li>
+                ))}
+              </ul>
+            </Phase>
+          ) : null}
+
+          {phases.notes.map((event) => (
+            <li key={event.seq} className="timeline-in text-sm text-mute">
+              {event.message}
+            </li>
+          ))}
+
+          {phases.decision ? (
+            <Phase step={stepOf("decision")} title="Decision">
+              <p className="rounded-2xl border border-amber bg-[#f8efe2] px-4 py-3 font-semibold">
+                {phases.decision.message}
+              </p>
+            </Phase>
+          ) : null}
         </ol>
       )}
     </section>

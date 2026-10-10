@@ -1,7 +1,80 @@
 import { Link } from "react-router-dom";
-import type { Decision, RankedDrink } from "../api/types.ts";
+import type { Decision, Dimension, RankedDrink } from "../api/types.ts";
 import { topOptions } from "../lib/diff.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent, price, shopLabel } from "../lib/format.ts";
+
+/** Score gaps below this aren't worth calling out as a trade-off. */
+const EDGE_MIN = 0.05;
+
+/** Dimensions where `a` beats `b`, biggest gap first. */
+function edges(a: RankedDrink, b: RankedDrink): Dimension[] {
+  const sa = a.dimension_scores;
+  const sb = b.dimension_scores;
+  if (!sa || !sb) return [];
+  return DIMENSIONS.filter((dimension) => sa[dimension] - sb[dimension] >= EDGE_MIN).sort(
+    (x, y) => sa[y] - sb[y] - (sa[x] - sb[x]),
+  );
+}
+
+function EdgeList({ winner, loser }: { winner: RankedDrink; loser: RankedDrink }) {
+  const wins = edges(winner, loser);
+  if (wins.length === 0) return <p className="text-sm text-mute">No clear edge on any one priority.</p>;
+  return (
+    <ul className="text-sm">
+      {wins.map((dimension) => (
+        <li key={dimension}>
+          Wins on <span className="font-semibold">{dimensionLabel(dimension).toLowerCase()}</span>{" "}
+          <span className="text-mute">
+            ({matchPercent(winner.dimension_scores![dimension])} vs {matchPercent(loser.dimension_scores![dimension])})
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CloseCall({
+  a,
+  b,
+  running,
+  onPick,
+}: {
+  a: RankedDrink;
+  b: RankedDrink;
+  running: boolean;
+  onPick: (option: RankedDrink) => void;
+}) {
+  return (
+    <div className="mt-4 rounded-2xl border border-amber/60 bg-[#f8efe2] p-4">
+      <p className="font-semibold">
+        Close call: {a.drink_name} {matchPercent(a.score)} vs {b.drink_name} {matchPercent(b.score)}.
+      </p>
+      <p className="mt-1 text-sm text-mute">
+        The agents can't separate these two, so they're asking you. Your pick also teaches the Preference agent
+        which priority matters more.
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {[
+          [a, b],
+          [b, a],
+        ].map(([winner, loser]) => (
+          <div key={winner.drink_id} className="rounded-xl bg-foam p-3">
+            <p className="font-display text-lg">{winner.drink_name}</p>
+            <EdgeList winner={winner} loser={loser} />
+            <button
+              type="button"
+              disabled={running}
+              onClick={() => onPick(winner)}
+              className="mt-2 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-cream disabled:opacity-40"
+            >
+              I'd take {winner.drink_name}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function ScoreRow({ option }: { option: RankedDrink }) {
   const scores = option.dimension_scores;
@@ -65,7 +138,9 @@ export function TopChoices({
           WHY THIS ORDER?
         </Link>
       </div>
-      {decision.ask_human && decision.question ? (
+      {decision.ask_human && options.length >= 2 ? (
+        <CloseCall a={options[0]} b={options[1]} running={running} onPick={onPick} />
+      ) : decision.ask_human && decision.question ? (
         <p className="mt-3 rounded-2xl border border-amber/60 bg-[#f8efe2] px-4 py-3 text-sm">{decision.question}</p>
       ) : null}
       <ol className="mt-5 grid gap-4 md:grid-cols-3">

@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 1:30 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 1:45 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -80,8 +80,9 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Live Counterfactual diff. The page is now "What changed" in the nav and has its own what-if buttons.
 - ✅ Mocks refreshed from a real run (`node frontend/scripts/capture-mock.mjs` re-records them), `RecommendationCard` removed, Friends on `/users/similar` with a taste comparison
 - ✅ Evidence page at `/evidence`. It uses `mocks/eval.json` with a "preview" label and switches to `GET /eval` automatically when A ships it.
-- ⬜ Ask-the-human and timeline polish
-- ⬜ `docs/demo-script.md`
+- ✅ Ask-the-human prompt: names both drinks, shows what each wins on with scores, and has a button to pick each
+- ✅ Timeline grouped into numbered steps: team selected (collapsible), priorities, proposals by agent, the argument, ruled out, decision
+- 🟡 `docs/demo-script.md`: a 3-minute script with real numbers from a verified run. Dry runs are still needed.
 - ⬜ Offer badge (if A builds offers)
 - ⬜ Stretch: ElevenLabs voices
 - ⬜ Write-up and backup video

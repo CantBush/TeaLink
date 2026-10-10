@@ -157,8 +157,8 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 | 3:00 to 4:00 | ✅ Clean-up: update `sample_session.json` so the offline fallback shows the top 3 and priorities; delete `RecommendationCard.tsx`; point Friends at `/users/similar` (or hide the tab) | `npm run build` and lint pass; the app still works with the API stopped |
 | 4:00 to 6:00 | ✅ **Evidence page** (`/evidence`) built against `mocks/eval.json`: a methods table, hit-rate bars, and hidden vs learned weights per persona | Renders from the mock, then switches to `GET /eval` after A merges |
 | **6:00** | **Sync:** merge, then run the full demo together | |
-| 6:30 to 7:30 | ⬜ Ask-the-human polish: when `ask_human` is set, the prompt names both options and what separates them, and the pick resolves it. Timeline readability (group by round, collapse selection events) | A judge can follow one run without explanation |
-| 7:30 to 9:00 | ⬜ `docs/demo-script.md` (exact clicks and lines, 3 minutes). If A builds offers, add an offer badge on cards and an `offer` timeline style. Stretch: ElevenLabs voice for each agent's line | Two dry runs from a reset |
+| 6:30 to 7:30 | ✅ Ask-the-human polish: when `ask_human` is set, the prompt names both options and what separates them, and the pick resolves it. Timeline readability (group by round, collapse selection events) | A judge can follow one run without explanation |
+| 7:30 to 9:00 | 🟡 `docs/demo-script.md` (written and checked against the API; dry runs and the offer badge are left) (exact clicks and lines, 3 minutes). If A builds offers, add an offer badge on cards and an `offer` timeline style. Stretch: ElevenLabs voice for each agent's line | Two dry runs from a reset |
 | **9:00** | **Merge.** Feature freeze at 9:30 | |
 | Sun 9:00 to 11:30 | UI polish; results and lessons sections of `docs/writeup.md`; record the backup demo video | |
 
@@ -175,15 +175,9 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 
 If one track finishes early, take the other track's next unstarted task, but say so first so you don't both pick it up.
 
-## Demo script (draft)
+## Demo script
 
-1. Reset the demo, then ask "What should I get next?" Show agents being selected, the proposals, the pushback, and the top 3. Lantern Leaf's drinks are ruled out because no shop agent can confirm them.
-2. **Pick #3 (Pearl Milk Tea).** The Preference agent explains: "taste match now counts for 43% (was 39%)."
-3. **#1 sells out.** Kung Fu Tea's agent vetoes it, and the team re-ranks.
-4. **Lantern Leaf joins.** Its agent registers, and Brown Sugar Hojicha jumps to #1.
-5. **"I don't like brown sugar."** The drink drops out, and the timeline shows why.
-6. **A shop goes offline.** Its drinks are ruled out.
-7. Open Why This and walk through score times weight. Show the eval numbers.
+See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines, and real numbers, plus answers to likely judge questions. The order is: reset, top 3 with a close call, pick Pearl Milk Tea, #1 sells out, Lantern Leaf joins, no brown sugar (then open What changed), Sunright goes offline, Why this order, Evidence.
 
 ## If we fall behind, cut in this order
 
@@ -203,6 +197,7 @@ If one track finishes early, take the other track's next unstarted task, but say
 
 ## Plan change log
 
+- **1:45 PM:** Track B also finished the close-call prompt, the timeline regrouping, and a first draft of `docs/demo-script.md`. B's remaining work waits on Track A (the offer badge and the real `/eval` numbers) or is Sunday work (write-up, video, rehearsal). The "Demo script (draft)" section below is replaced by that file.
 - **1:30 PM:** Track B finished its first three blocks early (Counterfactual, clean-up, Evidence page). Next up for B: ask-the-human and timeline polish, then the demo script.
 - **1:15 PM:** Split the remaining work into Track A (backend, agents, evidence) and Track B (frontend, demo, write-ups), with separate file ownership, agreed contracts for `/eval` and offers, and shared sync points. Added an Evidence page, and an AGNTCY-plus-baseline block for A.
 

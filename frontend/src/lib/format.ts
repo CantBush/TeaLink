@@ -29,6 +29,13 @@ export function shopLabel(shopId: string): string {
   return SHOPS[shopId] ?? shopId;
 }
 
+/** "taste" → "Taste", "shop_kungfu" / "shop:kungfu" → "Kung Fu Tea". */
+export function agentLabel(agentId: string): string {
+  const shop = agentId.match(/^shop[_:](.+)$/);
+  if (shop) return shopLabel(shop[1]);
+  return factorLabel(agentId);
+}
+
 export function dimensionLabel(dimension: Dimension): string {
   return DIMENSION_LABELS[dimension];
 }
