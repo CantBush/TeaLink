@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 1:15 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 1:45 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -68,8 +68,8 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 **Both:** ⬜ Merge `feature/top3-preference-learning` into main (1:15)
 
 **Track A (backend, agents, evidence):**
-- ⬜ AGNTCY spike, go/no-go at 2:00
-- ⬜ Serve all agents over NATS (if go)
+- ✅ AGNTCY spike. Go. `TRANSPORT=agntcy` gets Taste (and the rest of the roster) over NATS. `TRANSPORT=local` is still the default, and a down broker falls back to in-process agents. HTTP shapes are unchanged, so Track B does not need a types change.
+- ✅ Serve all agents over NATS, shop heartbeats, `make agents`, startup fallback to local. Demo flow (pick, sold out, Lantern Leaf join, shop offline, reset) passes on the bus.
 - ⬜ Popularity baseline, three-way eval, `GET /eval`
 - ⬜ Sarah seed fix
 - ⬜ Stretch: shop offers
@@ -96,6 +96,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Plan change log
 
+- **1:45 PM:** Track A: AGNTCY transport is in. Local remains the default. Next up is the popularity baseline and `GET /eval`.
 - **1:15 PM:** Progress tracking moved to this file. The Google Doc can't be edited by the coding assistant, so the doc stays as the original brief.
 - **12:50 PM:** Replaced the single recommendation with a **top 3** that the user picks from. Added the **Preference agent**, which learns priorities from past and current picks, and the **Budget agent** for cost. Shop agents no longer propose drinks; they only confirm stock or veto.
 - **12:45 PM:** Reviewed main and found that every agent scored drinks by taste (so Taste always won), "ask the human" fired on every run, shops went offline after 30 seconds, sold-out drinks disappeared silently, and the brown sugar and shop-join buttons didn't do anything. All of these are fixed on the branch.

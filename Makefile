@@ -4,10 +4,7 @@ bus:
 	docker compose up -d nats
 
 agents:
-	@echo "cd backend && .venv/bin/python -m tealink.agents.serve --agent taste"
-	@echo "cd backend && .venv/bin/python -m tealink.agents.serve --agent social"
-	@echo "cd backend && .venv/bin/python -m tealink.agents.serve --agent explorer"
-	@echo "cd backend && .venv/bin/python -m tealink.agents.serve --agent shop --shop-id kungfu"
+	cd backend && .venv/bin/python -m tealink.agents.launch
 
 api:
 	cd backend && .venv/bin/uvicorn tealink.api.main:app --reload --port 8000

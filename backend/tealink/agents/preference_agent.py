@@ -9,7 +9,7 @@ from __future__ import annotations
 from tealink.agents.base import BaseAgent
 from tealink.agents.cards import CAPABILITIES, AgentCardInfo
 from tealink.core import preferences
-from tealink.data.loader import Catalog
+from tealink.data.loader import Catalog, load_choices
 from tealink.schemas import AgentReply, ChoiceRecord, DeliberationRequest, PreferenceReport
 
 
@@ -19,6 +19,12 @@ class PreferenceAgent(BaseAgent):
     def __init__(self, history: list[ChoiceRecord] | None = None) -> None:
         self.history: dict[str, list[ChoiceRecord]] = {}
         for choice in history or []:
+            self.history.setdefault(choice.user_id, []).append(choice)
+
+    def reset(self) -> None:
+        """Drop live picks and reload the seeded history. The demo reset uses this."""
+        self.history.clear()
+        for choice in load_choices():
             self.history.setdefault(choice.user_id, []).append(choice)
 
     def card(self) -> AgentCardInfo:

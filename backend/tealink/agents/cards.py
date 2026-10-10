@@ -56,7 +56,7 @@ def try_a2a_card(info: AgentCardInfo, nats_url: str = "nats://localhost:4222"):
             preferred_transport="natspatterns",
             default_input_modes=["text"],
             default_output_modes=["text"],
-            capabilities=AgentCapabilities(streaming=True),
+            capabilities=AgentCapabilities(streaming=False),
             skills=skills,
             additional_interfaces=[
                 AgentInterface(

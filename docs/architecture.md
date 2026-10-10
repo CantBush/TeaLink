@@ -18,7 +18,7 @@ flowchart LR
   Lens --> Gateway
 ```
 
-`TRANSPORT=local` runs the same agent classes in-process. `TRANSPORT=agntcy` is the NATS spike: each agent is a process speaking A2A through `agntcy-app-sdk`.
+`TRANSPORT=local` (the default) runs the same agent classes in-process. `TRANSPORT=agntcy` serves each agent as its own process speaking A2A through `agntcy-app-sdk` on NATS. The gateway falls back to the in-process agent when the broker is down or that agent is not heartbeating. Heartbeats use `tealink.heartbeat` and demo control (join, offline, reset) uses `tealink.control`. Neither subject is part of the HTTP API.
 
 ## Deliberation
 
