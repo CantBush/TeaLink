@@ -5,7 +5,7 @@ import { Shell } from "./OnboardingShell.tsx";
 export function RoleChoice({ onCustomer, onStore }: { onCustomer: () => void; onStore: () => void }) {
   return (
     <Shell>
-      <div className="flex items-center gap-2 font-logo text-2xl tracking-[0.2em] uppercase">
+      <div className="flex items-center gap-2 font-display text-2xl tracking-[0.14em]">
         <BobaMark /> TeaLink
       </div>
       <h1 className="mt-6 font-display text-4xl leading-tight sm:text-5xl">Are you here for a drink, or for a shop?</h1>
