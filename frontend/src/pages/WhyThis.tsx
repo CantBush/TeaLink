@@ -93,7 +93,7 @@ function PriorityMath({ decision }: { decision: Decision }) {
       </table>
       {decision.dropped && decision.dropped.length > 0 ? (
         <div className="mt-5">
-          <h3 className="text-sm font-semibold tracking-wide text-moss uppercase">Ruled out</h3>
+          <h3 className="text-sm font-semibold tracking-wide text-moss lowercase">Ruled out</h3>
           <ul className="mt-2 space-y-1 text-sm text-mute">
             {decision.dropped.map((item) => (
               <li key={item.drink_id}>
@@ -123,7 +123,7 @@ export function WhyThis() {
     <main className="mx-auto max-w-3xl space-y-6 px-5 py-8">
       <TeaLinkTabs />
       <header className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">
+        <p className="text-xs font-semibold tracking-[0.16em] text-moss lowercase">
           Why this
         </p>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">

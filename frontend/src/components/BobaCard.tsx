@@ -1,3 +1,4 @@
+import { Leaf } from "./Doodles.tsx";
 import type { Avatar as AvatarData, BobaStats, Dimension } from "../api/types.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent } from "../lib/format.ts";
 import { tint } from "../lib/palette.ts";
@@ -45,14 +46,14 @@ export function BobaCard({
         </div>
       </div>
 
-      <p className="relative mt-8 text-xs font-semibold tracking-[0.2em] text-foam/70 uppercase">Your boba personality</p>
+      <p className="relative mt-8 text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">Your boba personality</p>
       <h2 className="relative mt-2 font-display text-4xl leading-[1.05]">{stats.personality || "Still steeping"}</h2>
 
       {traits.length > 0 ? (
         <ul className="relative mt-6 space-y-2">
           {traits.map((trait) => (
             <li key={trait} className="flex items-center gap-2 text-lg font-semibold">
-              <span className="h-1.5 w-1.5 rounded-full bg-foam" aria-hidden />
+              <Leaf className="h-4 w-4 shrink-0 text-foam/80" />
               {trait}
             </li>
           ))}
@@ -61,7 +62,7 @@ export function BobaCard({
 
       {stats.top_notes?.length ? (
         <div className="relative mt-6">
-          <p className="text-xs font-semibold tracking-[0.2em] text-foam/70 uppercase">Top flavors</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">Top flavors</p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {stats.top_notes.map((tag) => (
               <li key={tag} className="rounded-full bg-foam px-3 py-1 text-sm font-semibold text-ink">
@@ -74,7 +75,7 @@ export function BobaCard({
 
       {top && weights ? (
         <div className="relative mt-6 rounded-2xl bg-foam/10 px-4 py-3">
-          <p className="text-xs font-semibold tracking-[0.2em] text-foam/70 uppercase">What matters most</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">What matters most</p>
           <p className="mt-1 font-display text-2xl">
             {dimensionLabel(top)} · {matchPercent(weights[top] ?? 0)}%
           </p>

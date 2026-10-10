@@ -33,7 +33,7 @@ function Swatches({ colors, value, onPick, label }: { colors: string[]; value: s
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold tracking-[0.12em] text-mute uppercase">{label}</p>
+      <p className="mb-2 text-xs font-semibold tracking-[0.12em] text-mute lowercase">{label}</p>
       {children}
     </div>
   );

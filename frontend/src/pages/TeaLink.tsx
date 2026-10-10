@@ -4,6 +4,7 @@ import { ControlPanel } from "../components/ControlPanel.tsx";
 import { PriorityBars } from "../components/PriorityBars.tsx";
 import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
+import { LeafPair, Sprout } from "../components/Doodles.tsx";
 import { TopChoices } from "../components/TopChoices.tsx";
 import { matchPercent } from "../lib/format.ts";
 import { loadProfile, pick, startRecommendation, useSession } from "../state/session.ts";
@@ -36,14 +37,14 @@ export function TeaLink() {
             learned={session.learned}
           />
           <section id="taste" className="min-w-0 scroll-mt-24 rounded-[28px] border border-line bg-foam p-6">
-            <h2 className="font-hand text-[26px] leading-none lowercase">my taste</h2>
+            <h2 className="flex items-center gap-2 font-display text-2xl leading-none"><Sprout className="h-6 w-6 shrink-0 text-moss" />my taste</h2>
             <p className="mt-2 mb-4 text-sm text-mute">From {session.name}'s reviews and quiz answers.</p>
             <TasteBars profile={session.profile} />
           </section>
         </div>
 
         <section className="rounded-[28px] border border-line bg-foam p-6">
-          <h2 className="font-hand text-[26px] leading-none lowercase">people with your taste</h2>
+          <h2 className="flex items-center gap-2 font-display text-2xl leading-none"><LeafPair className="h-6 w-6 shrink-0 text-moss" />people with your taste</h2>
           {session.similar.length === 0 ? (
             <p className="mt-3 text-sm text-mute">Finding people with similar taste…</p>
           ) : (

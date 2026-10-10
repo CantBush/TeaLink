@@ -58,7 +58,7 @@ export function Evidence() {
     <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
       <TeaLinkTabs />
       <header>
-        <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">Evidence</p>
+        <p className="text-xs font-semibold tracking-[0.16em] text-moss lowercase">Evidence</p>
         <h1 className="mt-2 font-display text-4xl leading-tight">Does the team learn what you want?</h1>
         <p className="mt-2 max-w-2xl text-mute">
           {result.personas.length} simulated users with hidden priorities each pick from the top 3 for{" "}

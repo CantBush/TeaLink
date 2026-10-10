@@ -167,7 +167,7 @@ export function Profile() {
             📌
           </span>
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.12em] text-mute uppercase">Go-to order</p>
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-mute lowercase">Go-to order</p>
             {pinned ? (
               <p className="font-display text-xl leading-tight">
                 {pinned.name} <span className="font-sans text-sm text-mute">{price(pinned.price)}</span>

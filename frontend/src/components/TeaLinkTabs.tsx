@@ -10,7 +10,7 @@ const LINKS = [
 /** Sub-navigation inside the TeaLink tab. Scrolls sideways on narrow phones. */
 export function TeaLinkTabs() {
   return (
-    <nav aria-label="TeaLink" className="-mx-5 overflow-x-auto px-5 lg:col-span-full">
+    <nav aria-label="TeaLink" className="-mx-5 overflow-x-auto px-5 [scrollbar-width:none] lg:col-span-full">
       <ul className="flex w-max gap-2">
         {LINKS.map((link) => (
           <li key={link.to}>

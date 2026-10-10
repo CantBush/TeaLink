@@ -1,3 +1,4 @@
+import { TeaBowl } from "../components/Doodles.tsx";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { social } from "../api/social.ts";
@@ -89,8 +90,11 @@ export function Home() {
       <PreviewNote />
       <header className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">Your friends</p>
-          <h1 className="mt-1 font-display text-4xl">What everyone's sipping</h1>
+          <p className="text-xs font-semibold tracking-[0.16em] text-moss lowercase">Your friends</p>
+          <h1 className="mt-1 flex items-center gap-3 font-display text-4xl">
+            What everyone's sipping
+            <TeaBowl steaming className="h-8 w-8 shrink-0 text-moss" />
+          </h1>
         </div>
         <Link to="/" className="hidden shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam sm:block">
           Get a rec

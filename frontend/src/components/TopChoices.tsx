@@ -1,3 +1,4 @@
+import { Sprig, TeaBowl } from "./Doodles.tsx";
 import { Link } from "react-router-dom";
 import type { Decision, Dimension, RankedDrink } from "../api/types.ts";
 import { topOptions } from "../lib/diff.ts";
@@ -115,8 +116,8 @@ export function TopChoices({
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="font-hand text-2xl leading-none lowercase text-moss">for {name}</p>
-        <h2 className="mt-3 font-display text-3xl text-ink">Steeping your top 3…</h2>
+        <p className="flex items-center gap-2 font-display text-2xl leading-none text-moss"><TeaBowl steaming className="h-7 w-7" />for {name}</p>
+        <h2 className="mt-3 font-display text-3xl text-ink">steeping your top 3…</h2>
         <p className="mt-2 max-w-md text-mute">
           Taste, Social, Explorer, and Budget are arguing it out, and the shops are checking stock.
         </p>
@@ -128,7 +129,7 @@ export function TopChoices({
   if (options.length === 0) {
     return (
       <article className="rounded-[28px] border border-moss bg-foam p-6 sm:p-8">
-        <p className="font-hand text-2xl leading-none lowercase">your top 3</p>
+        <p className="flex items-center gap-2 font-display text-2xl leading-none"><Sprig className="h-6 w-6 shrink-0 text-moss" />your top 3</p>
         <h2 className="mt-3 font-display text-3xl">Nothing survived</h2>
         <p className="mt-2 text-mute">{decision.explanation}</p>
         {decision.question ? (
@@ -144,7 +145,7 @@ export function TopChoices({
   return (
     <section className="@container rounded-[28px] border border-line bg-foam p-5 sm:p-7">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="font-hand text-3xl leading-none lowercase">your top 3</h2>
+        <h2 className="flex items-center gap-2 font-display text-3xl leading-none"><Sprig className="h-7 w-7 shrink-0 text-moss" />your top 3</h2>
         <Link to="/why" className="text-sm tracking-[0.08em] text-ink/70 lowercase underline-offset-4 hover:text-ink hover:underline">
           why this order?
         </Link>

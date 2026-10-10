@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 /*
- * Look: HEYTEA's near-white pages, line doodles, and lowercase spaced nav, with
- * Molly Tea's flared uppercase wordmark and pill buttons, in a tea-garden palette:
+ * Look: a quiet tea house. Lowercase, light geometric type with wide tracking,
+ * lots of air, thin line-drawn leaves and tea things, and a tea-garden palette:
  * rice-paper background, deep tea-green ink, moss accent, and sage surfaces.
+ * Only the logo keeps the flared uppercase wordmark.
  */
 @theme {
-  --font-display: "Marcellus", "Optima", "Candara", serif;
-  --font-logo: "Marcellus SC", "Marcellus", "Optima", serif;
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-hand: "Gaegu", "Comic Sans MS", cursive;
+  --font-display: "Jost", "Futura", "Avenir Next", ui-sans-serif, sans-serif;
+  --font-logo: "Marcellus SC", "Optima", serif;
+  --font-sans: "Jost", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 500;
   --color-cream: #f5f7f2;
   --color-ink: #15231b;
   --color-moss: #3d6b4f;
@@ -21,35 +23,55 @@
   --color-leaf: #24392b;
 }
 
-html {
-  scroll-behavior: smooth;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  li,
+  span {
+    overflow-wrap: break-word;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 300;
+    text-transform: lowercase;
+    letter-spacing: 0.03em;
+  }
+
+  button,
+  a[class*="rounded-full"] {
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+  }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--color-cream);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-h1,
-h2,
-h3,
-p,
-li,
-span {
-  overflow-wrap: break-word;
-}
-
-/* Marcellus has one weight; letter-spacing does the work bold would. */
-.font-display {
-  letter-spacing: 0.01em;
+@layer utilities {
+  .font-display {
+    font-weight: 300;
+    text-transform: lowercase;
+    letter-spacing: 0.03em;
+  }
 }
 
 @keyframes timeline-in {
@@ -65,4 +87,20 @@ span {
 
 .timeline-in {
   animation: timeline-in 0.4s ease;
+}
+
+@keyframes steam {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1.5px);
+  }
+}
+
+.steam {
+  animation: steam 2.4s ease-in-out infinite;
 }

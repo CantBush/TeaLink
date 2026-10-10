@@ -1,3 +1,4 @@
+import { TeaBowl } from "./Doodles.tsx";
 import { type ReactNode, useState } from "react";
 import type { Health, LensEvent } from "../api/types.ts";
 import { agentLabel, price, readableShops } from "../lib/format.ts";
@@ -70,7 +71,7 @@ function split(events: LensEvent[]): Phases {
 function Phase({ step, title, children }: { step: number; title: string; children: ReactNode }) {
   return (
     <li className="timeline-in">
-      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-moss uppercase">
+      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-moss lowercase">
         {step}. {title}
       </p>
       {children}
@@ -91,7 +92,7 @@ function proposalLine(event: LensEvent): string {
 }
 
 function TransportBadge({ health, busCount, usingMock }: { health: Health | null; busCount: number; usingMock: boolean }) {
-  const base = "rounded-full px-2.5 py-0.5 text-xs font-semibold";
+  const base = "rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-[0.04em] normal-case";
   if (usingMock) return <span className={`${base} text-mute`}>Saved round</span>;
   if (!health) return <span className={`${base} text-mute`}>Live</span>;
   if (health.effective === "agntcy" && busCount > 0) {
@@ -166,7 +167,7 @@ export function AgentTimeline({
       >
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="font-hand text-[26px] leading-none lowercase">at the counter</span>
+            <span className="flex items-center gap-2 font-display text-2xl leading-none"><TeaBowl steaming={!started || events.length === 0} className="h-6 w-6 shrink-0 text-moss" />at the counter</span>
             {started || usingMock ? (
               <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} />
             ) : null}
@@ -274,7 +275,7 @@ export function AgentTimeline({
                   const { card, tag } = debateTone(event);
                   return (
                     <li key={event.seq} className={`rounded-2xl border px-4 py-3 text-sm ${card}`}>
-                      <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-moss uppercase">
+                      <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-moss lowercase">
                         {tag}
                       </span>
                       {event.message}
@@ -300,7 +301,7 @@ export function AgentTimeline({
               <ul className="space-y-2">
                 {phases.offers.map((event) => (
                   <li key={event.seq} className="rounded-2xl border border-[#3f7d58]/50 bg-[#eef6ef] px-4 py-3 text-sm">
-                    <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-[#3f7d58] uppercase">
+                    <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-[#3f7d58] lowercase">
                       {typeof event.payload.percent === "number" ? `${event.payload.percent}% off` : "Offer"}
                     </span>
                     {readableShops(event.message)}

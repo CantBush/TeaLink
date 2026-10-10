@@ -134,7 +134,7 @@ export function BobaStatsGrid({
             hidden.includes(card.key) ? "border-dashed border-line bg-cream" : "border-line bg-foam"
           }`}
         >
-          <p className="flex justify-between gap-2 text-[11px] font-semibold tracking-[0.12em] text-mute uppercase">
+          <p className="flex justify-between gap-2 text-[11px] font-semibold tracking-[0.12em] text-mute lowercase">
             {STAT_LABELS[card.key]}
             {hidden.includes(card.key) ? <span className="tracking-normal normal-case">Only you</span> : null}
           </p>

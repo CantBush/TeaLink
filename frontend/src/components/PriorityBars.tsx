@@ -1,3 +1,4 @@
+import { Leaf } from "./Doodles.tsx";
 import type { DimensionScores, PreferenceReport } from "../api/types.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent } from "../lib/format.ts";
 
@@ -15,7 +16,7 @@ export function PriorityBars({
   const before = learned?.previous_weights ?? null;
   return (
     <section className="rounded-[28px] border border-line bg-foam p-6">
-      <h2 className="font-hand text-[26px] leading-none lowercase">what {name} cares about</h2>
+      <h2 className="flex items-center gap-2 font-display text-2xl leading-none"><Leaf className="h-6 w-6 shrink-0 text-moss" />what {name} cares about</h2>
       <p className="mt-2 text-sm text-mute">
         Learned by the Preference agent from past picks (or the quiz, for new users) and every pick from the top 3.
       </p>

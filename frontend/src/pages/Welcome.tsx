@@ -225,7 +225,7 @@ function QuestionStep({
 function Result({ profile }: { profile: UserProfile }) {
   return (
     <Shell progress={1}>
-      <p className="text-center text-sm font-semibold tracking-[0.16em] text-moss uppercase">You're all set</p>
+      <p className="text-center text-sm font-semibold tracking-[0.16em] text-moss lowercase">You're all set</p>
       <h1 className="mt-2 mb-8 text-center font-display text-4xl leading-tight">Meet your boba self</h1>
       <BobaCard
         name={profile.display_name}

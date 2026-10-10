@@ -1,3 +1,4 @@
+import { Sprig } from "../components/Doodles.tsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { social } from "../api/social.ts";
@@ -253,7 +254,10 @@ export function Discover() {
     <main className="mx-auto max-w-2xl space-y-6 px-5 py-6 sm:py-8">
       <PreviewNote />
       <header>
-        <h1 className="font-display text-4xl">Discover</h1>
+        <h1 className="flex items-center gap-3 font-display text-4xl">
+          Discover
+          <Sprig className="h-8 w-8 text-moss" />
+        </h1>
         <label className="mt-4 flex items-center gap-3 rounded-full border border-line bg-foam px-5 focus-within:border-moss">
           <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-mute" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <circle cx="11" cy="11" r="7" />

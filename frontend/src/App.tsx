@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { GardenBackdrop, Vine } from "./components/Doodles.tsx";
 import { NavBar } from "./components/NavBar.tsx";
 import { Counterfactual } from "./pages/Counterfactual.tsx";
 import { Discover } from "./pages/Discover.tsx";
@@ -19,6 +20,7 @@ import { WhyThis } from "./pages/WhyThis.tsx";
 export default function App() {
   return (
     <BrowserRouter>
+      <GardenBackdrop />
       <NavBar />
       <div className="pb-24 md:pb-0">
         <Routes>
@@ -41,6 +43,10 @@ export default function App() {
           <Route path="/evidence" element={<Evidence />} />
           <Route path="/friends" element={<Navigate to="/discover?scope=people" replace />} />
         </Routes>
+        <footer className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-5 pt-6 pb-10 text-moss/60">
+          <Vine className="h-5 w-40" />
+          <p className="text-xs tracking-[0.2em] text-mute lowercase">steeped by a team of agents · tealink</p>
+        </footer>
       </div>
     </BrowserRouter>
   );

@@ -37,7 +37,7 @@ function Column({
       className={`rounded-[28px] border p-6 ${highlight ? "border-moss bg-foam" : "border-line bg-cream"}`}
     >
       <p
-        className={`text-xs font-semibold tracking-[0.14em] uppercase ${highlight ? "text-moss" : "text-mute"}`}
+        className={`text-xs font-semibold tracking-[0.14em] lowercase ${highlight ? "text-moss" : "text-mute"}`}
       >
         {title}
       </p>
@@ -90,7 +90,7 @@ export function Counterfactual() {
     <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
       <TeaLinkTabs />
       <header>
-        <p className="text-xs font-semibold tracking-[0.16em] text-moss uppercase">What changed</p>
+        <p className="text-xs font-semibold tracking-[0.16em] text-moss lowercase">What changed</p>
         <h1 className="mt-2 font-display text-4xl leading-tight">
           {change ?? "The agents re-planned"}
         </h1>

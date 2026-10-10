@@ -1,3 +1,4 @@
+import { Sprout } from "../components/Doodles.tsx";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { BobaCard } from "../components/BobaCard.tsx";
@@ -34,7 +35,10 @@ export function Stats() {
       <PreviewNote />
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-4xl">Your stats</h1>
+          <h1 className="flex items-center gap-3 font-display text-4xl">
+            Your stats
+            <Sprout className="h-8 w-8 text-moss" />
+          </h1>
           <p className="mt-1 text-mute">Updated every time you rate a drink.</p>
         </div>
         <button type="button" onClick={() => setEditing(true)} className="min-h-11 rounded-full bg-ink px-5 text-sm font-semibold text-foam">
