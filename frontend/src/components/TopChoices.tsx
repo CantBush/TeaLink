@@ -100,10 +100,12 @@ function ScoreRow({ option }: { option: RankedDrink }) {
 }
 
 export function TopChoices({
+  name,
   decision,
   running,
   onPick,
 }: {
+  name: string;
   decision: Decision | null;
   running: boolean;
   onPick: (option: RankedDrink) => void;
@@ -111,7 +113,7 @@ export function TopChoices({
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">For Andrew</p>
+        <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">For {name}</p>
         <h2 className="mt-4 font-display text-3xl text-ink">Steeping your top 3…</h2>
         <p className="mt-2 max-w-md text-mute">
           Taste, Social, Explorer, and Budget are arguing it out, and the shops are checking stock.

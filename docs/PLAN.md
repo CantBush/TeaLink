@@ -284,7 +284,7 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 | When | Task | Done when |
 |---|---|---|
 | 3:00 to 4:00 | ✅ Mirror the contracts in `types.ts`, mocks in `frontend/src/mocks/social/`, client calls with mock fallback. App shell: bottom tab bar on phones (Home, Discover, Profile), top nav on desktop | Every new screen renders from mocks with the API stopped |
-| 4:00 to 5:00 | ⬜ **Onboarding quiz** at `/welcome`: one question per screen, big tappable option cards, progress bar, then a personality reveal and a "Boba card" (Wrapped-style). New visitors without a user id land here | Finishing the quiz creates a user and opens Discover with their own weights |
+| 4:00 to 5:00 | ✅ **Onboarding quiz** at `/welcome`: one question per screen, big tappable option cards, progress bar, then a personality reveal and a "Boba card" (Wrapped-style). New visitors without a user id land here | Finishing the quiz creates a user and opens Discover with their own weights |
 | 5:00 to 6:00 | ✅ (done early) **Profile page** at `/u/:handle`: Instagram-style header, stats grid, pinned drink and store, drinks-tried grid, taste match, follow button. **Edit profile** sheet: name, bio, emoji avatar and color, accent, show/hide and reorder stats | Edits and hidden stats persist after a reload |
 | **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
 | 6:30 to 8:00 | 🟡 (started early; likes, comments, and suggestions are done; "send a rec," "Try this," and folding in Friends are left) **Home feed**: friend activity cards, likes, comments, "send a rec," and "Try this" that opens Discover. Fold the current Friends page into profiles and follow lists | Liking and commenting work on two users in two tabs |
@@ -368,7 +368,7 @@ This reshuffles B's remaining evening; the earlier Track B social rows keep thei
 
 | When | Task | Done when |
 |---|---|---|
-| 4:00 to 5:00 | ⬜ Onboarding quiz and Boba card (unchanged) | See the social-frontend table |
+| 4:00 to 5:00 | ✅ Onboarding quiz and Boba card (unchanged) | See the social-frontend table |
 | 5:00 to 6:00 | ⬜ Five-tab navigation and routes; the TeaLink tab links to What changed, Why this order, and Evidence; Friends folded in | Every tab works on phone and desktop, and the demo script still runs from `/` |
 | **6:00** | **Sync:** merge, then run the full demo plus the quiz once | |
 | 6:30 to 7:30 | ⬜ Generate the placeholder images; Discover with search, filters, and the drink detail sheet | Searching "matcha" finds drinks, shops, and people |

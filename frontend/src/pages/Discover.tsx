@@ -5,20 +5,22 @@ import { PriorityBars } from "../components/PriorityBars.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
 import { TopChoices } from "../components/TopChoices.tsx";
 import { matchPercent } from "../lib/format.ts";
-import { USER_ID, loadProfile, pick, startRecommendation, useSession } from "../state/session.ts";
+import { loadProfile, pick, startRecommendation, useSession } from "../state/session.ts";
 
 export function Discover() {
   const session = useSession();
+  const { userId, started } = session;
 
   useEffect(() => {
-    startRecommendation();
-    loadProfile(USER_ID);
-  }, []);
+    if (!started) startRecommendation();
+    loadProfile(userId);
+  }, [userId, started]);
 
   return (
     <main className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
       <div className="space-y-6">
         <TopChoices
+          name={session.name}
           decision={session.decision}
           running={session.running}
           onPick={(option) => void pick(option.drink_id, option.drink_name)}
@@ -26,13 +28,14 @@ export function Discover() {
 
         <div className="grid gap-6 md:grid-cols-2">
           <PriorityBars
+            name={session.name}
             weights={session.weights}
             summary={session.preferenceSummary}
             learned={session.learned}
           />
           <section id="taste" className="scroll-mt-24 rounded-[28px] border border-line bg-foam p-6">
             <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">My taste</p>
-            <p className="mt-2 mb-4 text-sm text-mute">From Andrew's reviews.</p>
+            <p className="mt-2 mb-4 text-sm text-mute">From {session.name}'s reviews and quiz answers.</p>
             <TasteBars profile={session.profile} />
           </section>
         </div>
@@ -65,6 +68,7 @@ export function Discover() {
       </div>
 
       <AgentTimeline
+        name={session.name}
         events={session.events}
         usingMock={session.usingMock}
         started={session.started}

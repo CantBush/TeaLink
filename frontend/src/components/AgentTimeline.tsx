@@ -109,7 +109,9 @@ export function AgentTimeline({
   started,
   health = null,
   busAgents = [],
+  name = "Andrew",
 }: {
+  name?: string;
   events: LensEvent[];
   usingMock: boolean;
   started: boolean;
@@ -186,7 +188,7 @@ export function AgentTimeline({
           ) : null}
 
           {phases.preference ? (
-            <Phase step={stepOf("priorities")} title="Andrew's priorities">
+            <Phase step={stepOf("priorities")} title={`${name}'s priorities`}>
               <p className="rounded-2xl border border-amber/60 bg-[#fbf4ea] px-4 py-3 text-sm">
                 {phases.preference.message}
               </p>

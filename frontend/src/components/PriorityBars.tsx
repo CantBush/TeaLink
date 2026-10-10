@@ -2,10 +2,12 @@ import type { DimensionScores, PreferenceReport } from "../api/types.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent } from "../lib/format.ts";
 
 export function PriorityBars({
+  name,
   weights,
   summary,
   learned,
 }: {
+  name: string;
   weights: DimensionScores | null;
   summary: string | null;
   learned: PreferenceReport | null;
@@ -13,9 +15,9 @@ export function PriorityBars({
   const before = learned?.previous_weights ?? null;
   return (
     <section className="rounded-[28px] border border-line bg-foam p-6">
-      <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">What Andrew cares about</p>
+      <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">What {name} cares about</p>
       <p className="mt-2 text-sm text-mute">
-        Learned by the Preference agent from past picks and every pick from the top 3.
+        Learned by the Preference agent from past picks (or the quiz, for new users) and every pick from the top 3.
       </p>
       {weights ? (
         <ul className="mt-4 space-y-3">

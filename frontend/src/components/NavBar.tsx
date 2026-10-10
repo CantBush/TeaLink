@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useProfile } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
 import { BobaMark } from "./BobaMark.tsx";
@@ -36,7 +36,9 @@ function DiscoverIcon() {
 
 export function NavBar() {
   const { profile } = useProfile();
+  const { pathname } = useLocation();
   const profilePath = profile ? `/u/${profile.handle}` : "/me";
+  const quiz = pathname === "/welcome";
 
   return (
     <>
@@ -60,7 +62,9 @@ export function NavBar() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-foam/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <nav
+        className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-foam/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden ${quiz ? "hidden" : ""}`}
+      >
         <div className="mx-auto grid max-w-md grid-cols-3 text-xs font-semibold">
           <NavLink to="/home" className={({ isActive }) => `flex flex-col items-center gap-1 py-2.5 ${itemClass(isActive)}`}>
             <HomeIcon />

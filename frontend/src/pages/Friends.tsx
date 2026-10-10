@@ -3,18 +3,18 @@ import { Link } from "react-router-dom";
 import { client } from "../api/client.ts";
 import type { SimilarUser, TasteProfile } from "../api/types.ts";
 import { TASTE_ORDER, attributeLabel, matchPercent } from "../lib/format.ts";
-import { USER_ID, loadProfile, useSession } from "../state/session.ts";
+import { loadProfile, useSession } from "../state/session.ts";
 
 /** Attributes within this distance count as shared taste. */
 const AGREE_WITHIN = 0.1;
 
-function Compare({ mine, theirs, name }: { mine: TasteProfile; theirs: TasteProfile; name: string }) {
+function Compare({ mine, theirs, name, me }: { mine: TasteProfile; theirs: TasteProfile; name: string; me: string }) {
   const agree = TASTE_ORDER.filter((key) => Math.abs((mine[key] ?? 0) - (theirs[key] ?? 0)) <= AGREE_WITHIN);
   return (
     <>
       <div className="mt-5 flex gap-4 text-xs font-semibold text-mute">
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-amber" /> Andrew
+          <span className="h-2.5 w-2.5 rounded-full bg-amber" /> {me}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-[#8a6a52]" /> {name}
@@ -60,9 +60,10 @@ export function Friends() {
   const friend = selected ?? session.similar[0] ?? null;
   const friendId = friend?.id ?? null;
 
+  const { userId } = session;
   useEffect(() => {
-    loadProfile(USER_ID);
-  }, []);
+    loadProfile(userId);
+  }, [userId]);
 
   useEffect(() => {
     if (!friendId) return;
@@ -89,7 +90,7 @@ export function Friends() {
         <p className="text-xs font-semibold tracking-[0.16em] text-amber uppercase">People with your taste</p>
         <h1 className="mt-2 font-display text-4xl">Friends</h1>
         <p className="mt-2 text-mute">
-          Ranked by how closely their reviews match Andrew's, the same similarity the Social agent uses.
+          Ranked by how closely their reviews match {session.name}'s, the same similarity the Social agent uses.
         </p>
       </header>
 
@@ -130,9 +131,11 @@ export function Friends() {
 
       {friend ? (
         <article className="rounded-[28px] border border-line bg-foam p-6">
-          <h2 className="font-display text-3xl">Andrew and {friend.name}</h2>
+          <h2 className="font-display text-3xl">
+            {session.name} and {friend.name}
+          </h2>
           {theirs ? (
-            <Compare mine={session.profile} theirs={theirs} name={friend.name} />
+            <Compare mine={session.profile} theirs={theirs} name={friend.name} me={session.name} />
           ) : (
             <p className="mt-3 text-sm text-mute">
               {failed ? `Couldn't load ${friend.name}'s taste profile.` : "Loading taste profile…"}

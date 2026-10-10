@@ -20,6 +20,15 @@ export function getMe(): string {
   return me;
 }
 
+/** False until this browser has picked an account (signed up, or chose the demo account). */
+export function hasChosenAccount(): boolean {
+  try {
+    return localStorage.getItem(KEY) !== null;
+  } catch {
+    return true;
+  }
+}
+
 export function setMe(userId: string) {
   me = userId;
   try {

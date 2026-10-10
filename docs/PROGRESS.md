@@ -105,7 +105,14 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
   - ✅ App shell: bottom tabs on phones, top nav on desktop.
   - ✅ Profile page (`/u/:handle`): header, personality, taste match, go-to order, stats grid, reviews, and follow. The edit sheet covers name, bio, emoji avatar, colors, pinned order, and show/hide and reorder stats.
   - 🟡 Home feed (`/home`): suggestions, likes, and comments are in; "send a rec" and folding in Friends are left.
-  - ⬜ Onboarding quiz and Boba card.
+  - ✅ Onboarding quiz at `/welcome`, checked against the live API:
+    - Sign-up asks for an avatar, a name, and a handle.
+    - Six questions, one per screen, with a progress bar.
+    - It ends with a Wrapped-style Boba card.
+    - First-time visitors to Home or Profile land there; `/` still opens the recommender, so the demo URL is unaffected.
+    - "Skip and use the demo account" signs in as Andrew.
+  - ✅ The recommender follows the signed-in user instead of a hard-coded Andrew. A test user who chose fruit, low budget, and adventurous got Honey Lemon, Wintermelon, and Grapefruit Green Tea, with the quiz's priorities.
+  - ✅ Reset demo switches back to Andrew. The demo numbers are unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71.
 
 **UI cleanup and five tabs (new, 3:30 PM; spec in [`PLAN.md`](PLAN.md#ui-cleanup-and-five-tabs-added-330-pm)):**
 - Track A: ⬜ `GET /drinks` (all 43 drinks, with `photo_url`) · ⬜ reserved `photo_url` on feed items and `cover_url` on profiles (both `null` for now) · ⬜ stretch, after the freeze: photo uploads
@@ -120,6 +127,11 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 **The social API matches the frontend contract.** `GET /quiz`, `GET /users?viewer=`, and `GET /feed` return bare lists. Likes and comments take `{viewer}`. Every feed item and comment carries an `author`, and `GET /feed?author=` is one person's posts. `toppings` is a 0–1 number. A missing user returns 404 with `detail: "user not found"`, so the frontend does not treat it as a route that has not shipped. After Reset demo, users created through `/users` are gone.
 
 ## Known issues and decisions to revisit
+
+- **For Track A: quiz flavors don't reach `top_notes`.**
+  - **Repro:** a test user who picked Fruity, Floral, and Matcha in the quiz got `top_notes: ["fruit", "oolong"]`.
+  - **Cause:** `core/stats.py` uses `top_notes(liked) or quiz_flavors`, and the quiz's synthetic five-star reviews count as liked drinks, so the chosen flavors are never used.
+  - **Suggested fix:** for a user with no real reviews, use the quiz flavors first, or put them ahead of the inferred notes.
 
 - **AGNTCY reset heartbeat is fixed.** Bus heartbeats now update whichever runtime is serving requests, so Reset demo no longer lets the new registry time out. Local mode was already fine.
 - **Setup note:** AGNTCY mode needs `pip install -e ".[dev,bus]"`. Without the `bus` extra, `make agents` exits with "agntcy-app-sdk is not installed", and the API quietly runs in-process.

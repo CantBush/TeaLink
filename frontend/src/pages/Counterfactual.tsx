@@ -133,10 +133,10 @@ export function Counterfactual() {
         </article>
 
         <article className="rounded-[28px] border border-line bg-foam p-6">
-          <h2 className="font-display text-2xl">Andrew's priorities</h2>
+          <h2 className="font-display text-2xl">{session.name}'s priorities</h2>
           {diff.weights.length === 0 ? (
             <p className="mt-3 text-sm text-mute">
-              Unchanged. The world changed, not what Andrew cares about.
+              Unchanged. The world changed, not what {session.name} cares about.
             </p>
           ) : (
             <ul className="mt-3 space-y-2 text-sm">

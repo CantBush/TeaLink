@@ -10,7 +10,7 @@ import { PreviewNote } from "../components/PreviewNote.tsx";
 import { drinkInfo } from "../lib/catalog.ts";
 import { matchPercent, price, shopLabel } from "../lib/format.ts";
 import { ALL_STATS } from "../lib/stats.ts";
-import { useMe } from "../state/me.ts";
+import { hasChosenAccount, useMe } from "../state/me.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
 function Count({ value, label }: { value: number; label: string }) {
@@ -25,6 +25,7 @@ function Count({ value, label }: { value: number; label: string }) {
 /** `/me` → your own profile. */
 export function MyProfile() {
   const { profile } = useProfile();
+  if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
   if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-sm text-mute">Loading your profile…</main>;
   return <Navigate to={`/u/${profile.handle}`} replace />;
 }

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { social } from "../api/social.ts";
 import type { FeedItem, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { FeedCard } from "../components/FeedCard.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { matchPercent } from "../lib/format.ts";
-import { useMe } from "../state/me.ts";
+import { hasChosenAccount, useMe } from "../state/me.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
 function Suggested({ users, onFollow }: { users: UserProfile[]; onFollow: (user: UserProfile) => void }) {
@@ -77,6 +77,8 @@ export function Home() {
   };
 
   const newcomer = profile !== null && (profile.stats.tried_count ?? 0) === 0;
+
+  if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-4 py-5 sm:px-5 sm:py-8">

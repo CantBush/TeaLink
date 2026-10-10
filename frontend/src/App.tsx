@@ -6,6 +6,7 @@ import { Evidence } from "./pages/Evidence.tsx";
 import { Friends } from "./pages/Friends.tsx";
 import { Home } from "./pages/Home.tsx";
 import { MyProfile, Profile } from "./pages/Profile.tsx";
+import { Welcome } from "./pages/Welcome.tsx";
 import { WhyThis } from "./pages/WhyThis.tsx";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/me" element={<MyProfile />} />
           <Route path="/u/:handle" element={<Profile />} />
+          <Route path="/welcome" element={<Welcome />} />
           <Route path="/why" element={<WhyThis />} />
           <Route path="/counterfactual" element={<Counterfactual />} />
           <Route path="/friends" element={<Friends />} />

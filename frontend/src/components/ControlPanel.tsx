@@ -1,7 +1,7 @@
 import type { Decision } from "../api/types.ts";
 import { client } from "../api/client.ts";
 import { shopLabel } from "../lib/format.ts";
-import { USER_ID, pushStatus, rerun, resetAll } from "../state/session.ts";
+import { getSession, pushStatus, rerun, resetAll } from "../state/session.ts";
 
 const button =
   "rounded-full border border-ink/15 bg-cream px-4 py-2 text-sm font-semibold disabled:opacity-40";
@@ -60,8 +60,8 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
           disabled={running}
           onClick={() =>
             void act(
-              () => client.setPreference(USER_ID, { brown_sugar: 0 }),
-              "Andrew says he doesn't like brown sugar.",
+              () => client.setPreference(getSession().userId, { brown_sugar: 0 }),
+              `${getSession().name} doesn't like brown sugar.`,
             )
           }
         >

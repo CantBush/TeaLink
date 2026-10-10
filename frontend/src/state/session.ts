@@ -10,14 +10,20 @@ import type {
   SimilarUser,
   TasteProfile,
 } from "../api/types.ts";
+import { social } from "../api/social.ts";
 import { sampleSession } from "../mocks/sample.ts";
 import { resetSocialMock } from "../mocks/socialStore.ts";
-import { DEMO_USER, setMe } from "./me.ts";
+import { DEMO_USER, getMe, setMe } from "./me.ts";
 import { profilesChanged } from "./social.ts";
 
-export const USER_ID = "andrew";
+function guessName(userId: string): string {
+  return userId.charAt(0).toUpperCase() + userId.slice(1);
+}
 
 export interface SessionState {
+  /** Who the agents are recommending for, and how to address them. */
+  userId: string;
+  name: string;
   profile: TasteProfile;
   events: LensEvent[];
   proposals: Proposal[];
@@ -42,6 +48,8 @@ export interface SessionState {
 }
 
 let state: SessionState = {
+  userId: getMe(),
+  name: guessName(getMe()),
   profile: sampleSession.profile,
   events: [],
   proposals: [],
@@ -143,7 +151,7 @@ function run(note?: string) {
   }
 
   void client
-    .recommend({ user_id: USER_ID, query: "What should I get next?", preference_overrides: {} }, pushEvent)
+    .recommend({ user_id: state.userId, query: "What should I get next?", preference_overrides: {} }, pushEvent)
     .catch(() => {
       if (state.decision === null) replayMock();
     })
@@ -181,27 +189,61 @@ export function rerun(note?: string) {
 /** The user picked one of the top 3: teach the Preference agent, then re-rank. */
 export async function pick(drinkId: string, drinkName: string) {
   try {
-    const learned = await client.choose(USER_ID, drinkId);
+    const learned = await client.choose(state.userId, drinkId);
     set({ learned, weights: learned.weights });
-    rerun(`Andrew picked ${drinkName}. ${learned.summary}`);
+    rerun(`${state.name} picked ${drinkName}. ${learned.summary}`);
   } catch {
-    pushStatus(`Andrew picked ${drinkName}, but the Preference agent did not answer.`);
+    pushStatus(`${state.name} picked ${drinkName}, but the Preference agent did not answer.`);
   }
+}
+
+/** The signed-in account changed (sign-up, quiz, or reset): forget the old user's rounds. */
+export function switchUser() {
+  const userId = getMe();
+  seen.clear();
+  set({
+    userId,
+    name: guessName(userId),
+    events: [],
+    proposals: [],
+    decision: null,
+    previousDecision: null,
+    change: null,
+    weights: null,
+    preferenceSummary: null,
+    learned: null,
+    similar: [],
+    usingMock: false,
+    started: false,
+    running: false,
+    round: state.round + 1,
+  });
+  loadProfile(userId);
 }
 
 export async function resetAll() {
   await client.resetDemo().catch(() => {});
   resetSocialMock();
+  const switched = getMe() !== DEMO_USER;
   setMe(DEMO_USER);
   profilesChanged();
+  if (switched) switchUser();
   set({ learned: null, previousDecision: null, decision: null, change: null });
   rerun("Demo reset to the seeded state.");
 }
 
 export function loadProfile(userId: string) {
+  void social
+    .getUser(userId, userId)
+    .then((profile) => {
+      if (state.userId === userId) set({ name: profile.display_name });
+    })
+    .catch(() => {});
   void client
     .getProfile(userId)
-    .then((profile) => setProfile(profile))
+    .then((profile) => {
+      if (state.userId === userId) setProfile(profile);
+    })
     .catch(() => {
       /* Keep the scripted profile when the API is down. */
     });
