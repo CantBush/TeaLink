@@ -1,0 +1,34 @@
+import type { TasteProfile } from "../api/types.ts";
+import { attributeLabel, matchPercent } from "../lib/format.ts";
+
+const ORDER: (keyof TasteProfile)[] = [
+  "sweetness",
+  "milkiness",
+  "tea_intensity",
+  "fruitiness",
+  "toppings",
+];
+
+export function TasteBars({ profile }: { profile: TasteProfile }) {
+  return (
+    <ul className="space-y-3">
+      {ORDER.map((key) => {
+        const pct = matchPercent(profile[key] ?? 0);
+        return (
+          <li key={key}>
+            <div className="mb-1 flex items-baseline justify-between text-sm">
+              <span className="font-semibold">{attributeLabel(key)}</span>
+              <span className="text-mute">{pct}%</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-[#eadfce]">
+              <div
+                className="h-full rounded-full bg-amber"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

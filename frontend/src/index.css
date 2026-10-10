@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", "Iowan Old Style", Palatino, serif;
+  --font-sans: "Source Sans 3", ui-sans-serif, sans-serif;
+  --color-cream: #f6f1e7;
+  --color-ink: #2c1810;
+  --color-amber: #c4742a;
+  --color-foam: #fffaf3;
+  --color-line: #e6d5c3;
+  --color-mute: #8a7264;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f6f1e7;
+  color: #2c1810;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@keyframes timeline-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.timeline-in {
+  animation: timeline-in 0.4s ease;
+}

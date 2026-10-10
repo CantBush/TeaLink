@@ -1,0 +1,245 @@
+{
+  "user_id": "andrew",
+  "profile": {
+    "sweetness": 0.82,
+    "milkiness": 0.91,
+    "tea_intensity": 0.61,
+    "fruitiness": 0.29,
+    "toppings": 0.73
+  },
+  "events": [
+    {
+      "type": "status",
+      "agent_id": null,
+      "message": "Deliberation started",
+      "payload": {},
+      "seq": 1
+    },
+    {
+      "type": "selection",
+      "agent_id": "taste",
+      "message": "Taste joined the counter",
+      "payload": {
+        "agent_id": "taste",
+        "capabilities": ["taste_profile", "review_evidence"],
+        "reason": "Andrew orders sweet, very milky drinks and usually adds a topping."
+      },
+      "seq": 2
+    },
+    {
+      "type": "selection",
+      "agent_id": "social",
+      "message": "Social joined the counter",
+      "payload": {
+        "agent_id": "social",
+        "capabilities": ["friend_graph", "order_overlap"],
+        "reason": "Sarah and Mike share this creamy, low-fruit corner of the menu."
+      },
+      "seq": 3
+    },
+    {
+      "type": "selection",
+      "agent_id": "explorer",
+      "message": "Explorer joined the counter",
+      "payload": {
+        "agent_id": "explorer",
+        "capabilities": ["novelty", "untried_drinks"],
+        "reason": "Leave one seat for a drink Andrew has not logged yet."
+      },
+      "seq": 4
+    },
+    {
+      "type": "selection",
+      "agent_id": "shop:kungfu",
+      "message": "Kung Fu Tea joined the counter",
+      "payload": {
+        "agent_id": "shop:kungfu",
+        "capabilities": ["menu", "stock"],
+        "reason": "Kung Fu Tea can make the short list from what is on the board right now."
+      },
+      "seq": 5
+    },
+    {
+      "type": "proposal",
+      "agent_id": "taste",
+      "message": "Taste proposes Brown Sugar Oolong Milk Tea",
+      "payload": {
+        "agent_id": "taste",
+        "drink_id": "brown-sugar-oolong",
+        "drink_name": "Brown Sugar Oolong Milk Tea",
+        "shop_id": "kungfu",
+        "score": 0.93,
+        "factors": [
+          { "factor": "milkiness", "weight": 0.28 },
+          { "factor": "brown_sugar", "weight": 0.24 },
+          { "factor": "tea_intensity", "weight": 0.16 },
+          { "factor": "toppings", "weight": 0.14 },
+          { "factor": "fruitiness", "weight": -0.03 }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev-bs-1",
+            "drink_name": "Brown Sugar Oolong Milk Tea",
+            "rating": 5,
+            "text": "Caramel all the way through, and the oolong still shows up under the milk.",
+            "relevance": 0.96
+          },
+          {
+            "review_id": "rev-bs-2",
+            "drink_name": "Brown Sugar Oolong Milk Tea",
+            "rating": 5,
+            "text": "Pearls were warm and the drink was sweet without turning into syrup.",
+            "relevance": 0.91
+          },
+          {
+            "review_id": "rev-peach-1",
+            "drink_name": "Peach Green Tea",
+            "rating": 2,
+            "text": "Too much peach syrup. I wanted tea, not a fruit cooler.",
+            "relevance": 0.62
+          }
+        ],
+        "rationale": "Milkiness, brown sugar, and a topping habit line up, and the fruit signal stays quiet."
+      },
+      "seq": 6
+    },
+    {
+      "type": "proposal",
+      "agent_id": "social",
+      "message": "Social proposes Hojicha Cream Tea",
+      "payload": {
+        "agent_id": "social",
+        "drink_id": "hojicha-cream",
+        "drink_name": "Hojicha Cream Tea",
+        "shop_id": "kungfu",
+        "score": 0.91,
+        "factors": [
+          { "factor": "friend_overlap", "weight": 0.31 },
+          { "factor": "milkiness", "weight": 0.22 },
+          { "factor": "tea_intensity", "weight": 0.18 },
+          { "factor": "sweetness", "weight": 0.08 },
+          { "factor": "fruitiness", "weight": -0.06 }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev-hj-1",
+            "drink_name": "Hojicha Cream Tea",
+            "rating": 5,
+            "text": "Roasted tea, soft cream, no candy fruit. I would order it again tomorrow.",
+            "relevance": 0.88
+          },
+          {
+            "review_id": "rev-hj-2",
+            "drink_name": "Hojicha Cream Tea",
+            "rating": 4,
+            "text": "Less sweet than brown sugar milk tea, still cozy.",
+            "relevance": 0.8
+          }
+        ],
+        "rationale": "Sarah is 94% similar and keeps coming back to Hojicha Cream Tea."
+      },
+      "seq": 7
+    },
+    {
+      "type": "proposal",
+      "agent_id": "explorer",
+      "message": "Explorer proposes Osmanthus Mountain Tea",
+      "payload": {
+        "agent_id": "explorer",
+        "drink_id": "osmanthus-mountain",
+        "drink_name": "Osmanthus Mountain Tea",
+        "shop_id": "kungfu",
+        "score": 0.81,
+        "factors": [
+          { "factor": "novelty", "weight": 0.22 },
+          { "factor": "tea_intensity", "weight": 0.15 },
+          { "factor": "sweetness", "weight": 0.06 },
+          { "factor": "milkiness", "weight": -0.08 },
+          { "factor": "fruitiness", "weight": -0.04 }
+        ],
+        "evidence": [
+          {
+            "review_id": "rev-os-1",
+            "drink_name": "Osmanthus Mountain Tea",
+            "rating": 5,
+            "text": "Floral, light, and nothing like the milk teas on the usual ticket.",
+            "relevance": 0.7
+          }
+        ],
+        "rationale": "Andrew has not tried this one. It keeps the tea and drops the milk, so the score sits a step behind the usual order."
+      },
+      "seq": 8
+    },
+    {
+      "type": "objection",
+      "agent_id": "shop:kungfu",
+      "message": "Kung Fu Tea raises a stock concern",
+      "payload": {
+        "agent_id": "shop:kungfu",
+        "target_drink_id": "brown-sugar-oolong",
+        "kind": "concern",
+        "reason": "Brown sugar pearls are running low, though the milk tea itself is still on the board."
+      },
+      "seq": 9
+    },
+    {
+      "type": "decision",
+      "agent_id": null,
+      "message": "Decision: Brown Sugar Oolong Milk Tea",
+      "payload": {
+        "drink_id": "brown-sugar-oolong",
+        "drink_name": "Brown Sugar Oolong Milk Tea",
+        "shop_id": "kungfu",
+        "score": 0.93,
+        "ask_human": false,
+        "question": null,
+        "alternatives": [
+          {
+            "drink_id": "hojicha-cream",
+            "drink_name": "Hojicha Cream Tea",
+            "score": 0.91
+          },
+          {
+            "drink_id": "osmanthus-mountain",
+            "drink_name": "Osmanthus Mountain Tea",
+            "score": 0.81
+          }
+        ],
+        "explanation": "Milkiness, brown sugar, and a topping habit outweigh a weak fruit signal. The shop only flagged pearl stock, not the drink."
+      },
+      "seq": 10
+    }
+  ],
+  "counterfactual": {
+    "preference_label": "Brown sugar",
+    "from": 0.84,
+    "to": 0,
+    "before": {
+      "drink_id": "brown-sugar-oolong",
+      "drink_name": "Brown Sugar Oolong Milk Tea",
+      "score": 0.93
+    },
+    "after": {
+      "drink_id": "jasmine-milk",
+      "drink_name": "Jasmine Milk Tea",
+      "shop_id": "kungfu",
+      "score": 0.89,
+      "ask_human": false,
+      "question": null,
+      "alternatives": [
+        {
+          "drink_id": "hojicha-cream",
+          "drink_name": "Hojicha Cream Tea",
+          "score": 0.86
+        },
+        {
+          "drink_id": "brown-sugar-oolong",
+          "drink_name": "Brown Sugar Oolong Milk Tea",
+          "score": 0.71
+        }
+      ],
+      "explanation": "Without the brown sugar pull, the milky profile points to Jasmine Milk Tea and the caramel note drops out."
+    },
+    "why": "Without the brown sugar pull, the milky profile points to Jasmine Milk Tea and the caramel note drops out."
+  }
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "andrew",
+    "name": "Andrew",
+    "persona": "Sweet, milky tea with boba and very little fruit."
+  },
+  {
+    "id": "sarah",
+    "name": "Sarah",
+    "persona": "Milky tea like Andrew, with a roasted hojicha favorite he has not tried."
+  },
+  {
+    "id": "maya",
+    "name": "Maya",
+    "persona": "Orders fruit tea when the weather is warm."
+  },
+  {
+    "id": "jordan",
+    "name": "Jordan",
+    "persona": "Splits time between matcha and milk tea."
+  },
+  {
+    "id": "priya",
+    "name": "Priya",
+    "persona": "Likes jasmine and lighter sweetness."
+  },
+  {
+    "id": "leo",
+    "name": "Leo",
+    "persona": "Looks for roasted tea and not much fruit."
+  },
+  {
+    "id": "nora",
+    "name": "Nora",
+    "persona": "Happy with classic milk tea and pearls."
+  },
+  {
+    "id": "owen",
+    "name": "Owen",
+    "persona": "Prefers unsweetened oolong."
+  },
+  {
+    "id": "rina",
+    "name": "Rina",
+    "persona": "Matcha first, fruit second."
+  },
+  {
+    "id": "chris",
+    "name": "Chris",
+    "persona": "Brown sugar when it is on the menu."
+  },
+  {
+    "id": "hana",
+    "name": "Hana",
+    "persona": "Hojicha and other roasted drinks."
+  },
+  {
+    "id": "marco",
+    "name": "Marco",
+    "persona": "Thai tea and horchata fan."
+  },
+  {
+    "id": "elena",
+    "name": "Elena",
+    "persona": "Taro and other creamy drinks."
+  },
+  {
+    "id": "sam",
+    "name": "Sam",
+    "persona": "Tries a new shop drink every week."
+  },
+  {
+    "id": "yuki",
+    "name": "Yuki",
+    "persona": "Keeps tea intensity high and sugar low."
+  }
+]

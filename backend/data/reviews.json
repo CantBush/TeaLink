@@ -1,0 +1,1094 @@
+[
+  {
+    "id": "rev_andrew_01",
+    "user_id": "andrew",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 5,
+    "text": "Brown sugar and oolong, exactly my order."
+  },
+  {
+    "id": "rev_andrew_02",
+    "user_id": "andrew",
+    "drink_id": "ts_tiger_brown",
+    "rating": 5,
+    "text": "Sweet, milky, and plenty of boba."
+  },
+  {
+    "id": "rev_andrew_03",
+    "user_id": "andrew",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 5,
+    "text": "Could drink this every day."
+  },
+  {
+    "id": "rev_andrew_04",
+    "user_id": "andrew",
+    "drink_id": "st_brown_sugar",
+    "rating": 4,
+    "text": "Really sweet, in a good way."
+  },
+  {
+    "id": "rev_andrew_05",
+    "user_id": "andrew",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "Solid milk tea, not too fruity."
+  },
+  {
+    "id": "rev_andrew_06",
+    "user_id": "andrew",
+    "drink_id": "bg_classic",
+    "rating": 4,
+    "text": "House milk tea hits the spot."
+  },
+  {
+    "id": "rev_andrew_07",
+    "user_id": "andrew",
+    "drink_id": "kf_taro",
+    "rating": 4,
+    "text": "Creamy taro with the right sugar."
+  },
+  {
+    "id": "rev_andrew_08",
+    "user_id": "andrew",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "Milky Thai tea, good sugar level."
+  },
+  {
+    "id": "rev_andrew_09",
+    "user_id": "andrew",
+    "drink_id": "kf_mango_green",
+    "rating": 2,
+    "text": "Too fruity, not enough milk."
+  },
+  {
+    "id": "rev_andrew_10",
+    "user_id": "andrew",
+    "drink_id": "st_qq",
+    "rating": 1,
+    "text": "Way too much passion fruit for me."
+  },
+  {
+    "id": "rev_sarah_01",
+    "user_id": "sarah",
+    "drink_id": "sr_hojicha_cream",
+    "rating": 5,
+    "text": "The hojicha cream tea is perfect."
+  },
+  {
+    "id": "rev_sarah_02",
+    "user_id": "sarah",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 5,
+    "text": "Roasty, creamy, and not too sweet."
+  },
+  {
+    "id": "rev_sarah_03",
+    "user_id": "sarah",
+    "drink_id": "ts_oolong_milk",
+    "rating": 5,
+    "text": "Roasted oolong milk tea, a new favorite."
+  },
+  {
+    "id": "rev_sarah_04",
+    "user_id": "sarah",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 4,
+    "text": "Sweet, but I still like it."
+  },
+  {
+    "id": "rev_sarah_05",
+    "user_id": "sarah",
+    "drink_id": "bg_classic",
+    "rating": 4,
+    "text": "Reliable house milk tea."
+  },
+  {
+    "id": "rev_sarah_06",
+    "user_id": "sarah",
+    "drink_id": "kf_jasmine_milk",
+    "rating": 4,
+    "text": "Jasmine is gentle and milky."
+  },
+  {
+    "id": "rev_sarah_07",
+    "user_id": "sarah",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "Good matcha with enough milk."
+  },
+  {
+    "id": "rev_sarah_08",
+    "user_id": "sarah",
+    "drink_id": "sr_pearl_milk",
+    "rating": 4,
+    "text": "Classic pearls, easy to finish."
+  },
+  {
+    "id": "rev_sarah_09",
+    "user_id": "sarah",
+    "drink_id": "kf_passion_fruit",
+    "rating": 2,
+    "text": "A bit too sharp and fruity."
+  },
+  {
+    "id": "rev_sarah_10",
+    "user_id": "sarah",
+    "drink_id": "ts_peach",
+    "rating": 2,
+    "text": "Peach overpowers the tea."
+  },
+  {
+    "id": "rev_maya_01",
+    "user_id": "maya",
+    "drink_id": "bg_dirty_horchata",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_maya_02",
+    "user_id": "maya",
+    "drink_id": "bg_horchata",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_maya_03",
+    "user_id": "maya",
+    "drink_id": "bg_jasmine",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_maya_04",
+    "user_id": "maya",
+    "drink_id": "bg_pineapple",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_maya_05",
+    "user_id": "maya",
+    "drink_id": "bg_ube",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_maya_06",
+    "user_id": "maya",
+    "drink_id": "kf_passion_fruit",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_maya_07",
+    "user_id": "maya",
+    "drink_id": "st_honey_lemon",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_maya_08",
+    "user_id": "maya",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_maya_09",
+    "user_id": "maya",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_maya_10",
+    "user_id": "maya",
+    "drink_id": "ts_peach",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_jordan_01",
+    "user_id": "jordan",
+    "drink_id": "bg_horchata",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_jordan_02",
+    "user_id": "jordan",
+    "drink_id": "bg_jasmine",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_jordan_03",
+    "user_id": "jordan",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_jordan_04",
+    "user_id": "jordan",
+    "drink_id": "kf_mango_green",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_jordan_05",
+    "user_id": "jordan",
+    "drink_id": "kf_matcha_latte",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_jordan_06",
+    "user_id": "jordan",
+    "drink_id": "kf_thai",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_jordan_07",
+    "user_id": "jordan",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_jordan_08",
+    "user_id": "jordan",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_jordan_09",
+    "user_id": "jordan",
+    "drink_id": "ts_brown_cream",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_jordan_10",
+    "user_id": "jordan",
+    "drink_id": "ts_oolong_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_jordan_11",
+    "user_id": "jordan",
+    "drink_id": "ts_peach",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_jordan_12",
+    "user_id": "jordan",
+    "drink_id": "ts_sesame",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_priya_01",
+    "user_id": "priya",
+    "drink_id": "bg_dirty_horchata",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_priya_02",
+    "user_id": "priya",
+    "drink_id": "bg_jasmine",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_priya_03",
+    "user_id": "priya",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_priya_04",
+    "user_id": "priya",
+    "drink_id": "kf_jasmine_milk",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_priya_05",
+    "user_id": "priya",
+    "drink_id": "kf_mango_green",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_priya_06",
+    "user_id": "priya",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_priya_07",
+    "user_id": "priya",
+    "drink_id": "sr_pearl_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_priya_08",
+    "user_id": "priya",
+    "drink_id": "sr_strawberry_matcha",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_priya_09",
+    "user_id": "priya",
+    "drink_id": "st_honey_lemon",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_priya_10",
+    "user_id": "priya",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_priya_11",
+    "user_id": "priya",
+    "drink_id": "ts_sesame",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_leo_01",
+    "user_id": "leo",
+    "drink_id": "bg_horchata",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_leo_02",
+    "user_id": "leo",
+    "drink_id": "bg_ube",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_leo_03",
+    "user_id": "leo",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_leo_04",
+    "user_id": "leo",
+    "drink_id": "kf_passion_fruit",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_leo_05",
+    "user_id": "leo",
+    "drink_id": "kf_thai",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_leo_06",
+    "user_id": "leo",
+    "drink_id": "sr_hojicha_cream",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_leo_07",
+    "user_id": "leo",
+    "drink_id": "st_coffee_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_leo_08",
+    "user_id": "leo",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_leo_09",
+    "user_id": "leo",
+    "drink_id": "st_qq",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_leo_10",
+    "user_id": "leo",
+    "drink_id": "st_thai",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_leo_11",
+    "user_id": "leo",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_leo_12",
+    "user_id": "leo",
+    "drink_id": "ts_brown_cream",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_nora_01",
+    "user_id": "nora",
+    "drink_id": "bg_banana_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_nora_02",
+    "user_id": "nora",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_nora_03",
+    "user_id": "nora",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_nora_04",
+    "user_id": "nora",
+    "drink_id": "kf_mango_green",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_nora_05",
+    "user_id": "nora",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_nora_06",
+    "user_id": "nora",
+    "drink_id": "sr_hojicha_cream",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_nora_07",
+    "user_id": "nora",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_nora_08",
+    "user_id": "nora",
+    "drink_id": "sr_strawberry_matcha",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_nora_09",
+    "user_id": "nora",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_nora_10",
+    "user_id": "nora",
+    "drink_id": "st_honey_lemon",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_nora_11",
+    "user_id": "nora",
+    "drink_id": "st_matcha",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_nora_12",
+    "user_id": "nora",
+    "drink_id": "ts_sesame",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_owen_01",
+    "user_id": "owen",
+    "drink_id": "bg_classic",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_owen_02",
+    "user_id": "owen",
+    "drink_id": "bg_jasmine",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_owen_03",
+    "user_id": "owen",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_owen_04",
+    "user_id": "owen",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_owen_05",
+    "user_id": "owen",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_owen_06",
+    "user_id": "owen",
+    "drink_id": "kf_mango_green",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_owen_07",
+    "user_id": "owen",
+    "drink_id": "kf_passion_fruit",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_owen_08",
+    "user_id": "owen",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_owen_09",
+    "user_id": "owen",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_owen_10",
+    "user_id": "owen",
+    "drink_id": "st_brown_sugar",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_owen_11",
+    "user_id": "owen",
+    "drink_id": "ts_lychee",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_owen_12",
+    "user_id": "owen",
+    "drink_id": "ts_tiger_brown",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_rina_01",
+    "user_id": "rina",
+    "drink_id": "bg_classic",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_rina_02",
+    "user_id": "rina",
+    "drink_id": "bg_pineapple",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_rina_03",
+    "user_id": "rina",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_rina_04",
+    "user_id": "rina",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_rina_05",
+    "user_id": "rina",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_rina_06",
+    "user_id": "rina",
+    "drink_id": "sr_wintermelon",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_rina_07",
+    "user_id": "rina",
+    "drink_id": "ts_brown_cream",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_rina_08",
+    "user_id": "rina",
+    "drink_id": "ts_lychee",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_rina_09",
+    "user_id": "rina",
+    "drink_id": "ts_tiger_brown",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_chris_01",
+    "user_id": "chris",
+    "drink_id": "kf_matcha_latte",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_chris_02",
+    "user_id": "chris",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_chris_03",
+    "user_id": "chris",
+    "drink_id": "sr_grapefruit",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_chris_04",
+    "user_id": "chris",
+    "drink_id": "sr_strawberry_matcha",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_chris_05",
+    "user_id": "chris",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_chris_06",
+    "user_id": "chris",
+    "drink_id": "st_oolong",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_chris_07",
+    "user_id": "chris",
+    "drink_id": "st_taro",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_chris_08",
+    "user_id": "chris",
+    "drink_id": "ts_matcha_brown",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_hana_01",
+    "user_id": "hana",
+    "drink_id": "bg_pineapple",
+    "rating": 2,
+    "text": "The flavors missed for me."
+  },
+  {
+    "id": "rev_hana_02",
+    "user_id": "hana",
+    "drink_id": "bg_ube",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_hana_03",
+    "user_id": "hana",
+    "drink_id": "kf_mango_green",
+    "rating": 2,
+    "text": "The flavors missed for me."
+  },
+  {
+    "id": "rev_hana_04",
+    "user_id": "hana",
+    "drink_id": "kf_matcha_latte",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_hana_05",
+    "user_id": "hana",
+    "drink_id": "sr_pearl_milk",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_hana_06",
+    "user_id": "hana",
+    "drink_id": "st_brown_sugar",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_hana_07",
+    "user_id": "hana",
+    "drink_id": "st_coffee_milk",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_hana_08",
+    "user_id": "hana",
+    "drink_id": "st_matcha",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_hana_09",
+    "user_id": "hana",
+    "drink_id": "st_taro",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_hana_10",
+    "user_id": "hana",
+    "drink_id": "ts_tiger_brown",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_marco_01",
+    "user_id": "marco",
+    "drink_id": "bg_banana_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_marco_02",
+    "user_id": "marco",
+    "drink_id": "bg_classic",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_marco_03",
+    "user_id": "marco",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_marco_04",
+    "user_id": "marco",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_marco_05",
+    "user_id": "marco",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_marco_06",
+    "user_id": "marco",
+    "drink_id": "st_matcha",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_marco_07",
+    "user_id": "marco",
+    "drink_id": "st_thai",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_marco_08",
+    "user_id": "marco",
+    "drink_id": "ts_matcha_brown",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_marco_09",
+    "user_id": "marco",
+    "drink_id": "ts_oolong_milk",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_marco_10",
+    "user_id": "marco",
+    "drink_id": "ts_sesame",
+    "rating": 2,
+    "text": "The flavors missed for me."
+  },
+  {
+    "id": "rev_elena_01",
+    "user_id": "elena",
+    "drink_id": "bg_classic",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_elena_02",
+    "user_id": "elena",
+    "drink_id": "bg_pineapple",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_elena_03",
+    "user_id": "elena",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_elena_04",
+    "user_id": "elena",
+    "drink_id": "kf_classic_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_elena_05",
+    "user_id": "elena",
+    "drink_id": "sr_hojicha_latte",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_elena_06",
+    "user_id": "elena",
+    "drink_id": "st_brown_sugar",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_elena_07",
+    "user_id": "elena",
+    "drink_id": "st_honey_lemon",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_elena_08",
+    "user_id": "elena",
+    "drink_id": "st_oolong",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_elena_09",
+    "user_id": "elena",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_elena_10",
+    "user_id": "elena",
+    "drink_id": "ts_brown_cream",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_elena_11",
+    "user_id": "elena",
+    "drink_id": "ts_lychee",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_elena_12",
+    "user_id": "elena",
+    "drink_id": "ts_sesame",
+    "rating": 2,
+    "text": "Not really my thing."
+  },
+  {
+    "id": "rev_sam_01",
+    "user_id": "sam",
+    "drink_id": "kf_matcha_latte",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_sam_02",
+    "user_id": "sam",
+    "drink_id": "sr_grapefruit",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_sam_03",
+    "user_id": "sam",
+    "drink_id": "sr_osmanthus_oolong",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_sam_04",
+    "user_id": "sam",
+    "drink_id": "st_oolong",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_sam_05",
+    "user_id": "sam",
+    "drink_id": "ts_black_sugar_fresh",
+    "rating": 2,
+    "text": "The flavors missed for me."
+  },
+  {
+    "id": "rev_sam_06",
+    "user_id": "sam",
+    "drink_id": "ts_oolong_milk",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_sam_07",
+    "user_id": "sam",
+    "drink_id": "ts_peach",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_sam_08",
+    "user_id": "sam",
+    "drink_id": "ts_tiger_brown",
+    "rating": 2,
+    "text": "Not really my thing."
+  },
+  {
+    "id": "rev_yuki_01",
+    "user_id": "yuki",
+    "drink_id": "bg_strawberry_matcha",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_yuki_02",
+    "user_id": "yuki",
+    "drink_id": "bg_ube",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_yuki_03",
+    "user_id": "yuki",
+    "drink_id": "kf_brown_sugar_oolong",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_yuki_04",
+    "user_id": "yuki",
+    "drink_id": "kf_classic_milk",
+    "rating": 4,
+    "text": "Really enjoyable."
+  },
+  {
+    "id": "rev_yuki_05",
+    "user_id": "yuki",
+    "drink_id": "kf_matcha_latte",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_yuki_06",
+    "user_id": "yuki",
+    "drink_id": "kf_taro",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_yuki_07",
+    "user_id": "yuki",
+    "drink_id": "sr_brown_sugar_black",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  },
+  {
+    "id": "rev_yuki_08",
+    "user_id": "yuki",
+    "drink_id": "sr_wintermelon",
+    "rating": 4,
+    "text": "I would get this again."
+  },
+  {
+    "id": "rev_yuki_09",
+    "user_id": "yuki",
+    "drink_id": "st_qq",
+    "rating": 3,
+    "text": "It was okay."
+  },
+  {
+    "id": "rev_yuki_10",
+    "user_id": "yuki",
+    "drink_id": "ts_sesame",
+    "rating": 3,
+    "text": "Fine, nothing I would seek out."
+  }
+]

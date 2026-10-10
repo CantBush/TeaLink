@@ -1,0 +1,29 @@
+[project]
+name = "tealink"
+version = "0.1.0"
+description = "Explainable multi-agent boba recommender"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "sse-starlette",
+    "pydantic",
+    "numpy",
+    "litellm",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+bus = ["agntcy-app-sdk", "a2a-sdk"]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tealink*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
