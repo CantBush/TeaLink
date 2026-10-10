@@ -182,6 +182,8 @@ class DeliberationRequest(BaseModel):
     candidate_drink_ids: list[str] = Field(default_factory=list)
     sold_out_drink_ids: list[str] = Field(default_factory=list)
     choice: ChoiceRecord | None = None
+    # Starting weights from the onboarding quiz. Picks are learned on top of them.
+    prior_weights: dict[str, float] | None = None
 
 
 class AgentReply(BaseModel):
@@ -189,3 +191,123 @@ class AgentReply(BaseModel):
     proposals: list[Proposal] = Field(default_factory=list)
     objections: list[Objection] = Field(default_factory=list)
     preference: PreferenceReport | None = None
+
+
+# Social layer. Mirrored in frontend/src/api/types.ts.
+
+StatKey = Literal[
+    "fav_drink",
+    "fav_shop",
+    "sweetness",
+    "toppings",
+    "milk_vs_fruit",
+    "tried_count",
+    "shops_visited",
+    "streak",
+    "top_notes",
+    "priorities",
+]
+
+STAT_KEYS: tuple[str, ...] = (
+    "fav_drink",
+    "fav_shop",
+    "sweetness",
+    "toppings",
+    "milk_vs_fruit",
+    "tried_count",
+    "shops_visited",
+    "streak",
+    "top_notes",
+    "priorities",
+)
+
+# The BobaStats fields each stat key shows. Personality is always shown.
+STAT_FIELDS: dict[str, str] = {
+    "fav_drink": "fav_drink_id",
+    "fav_shop": "fav_shop_id",
+    "sweetness": "sweetness",
+    "toppings": "toppings",
+    "milk_vs_fruit": "milk_vs_fruit",
+    "tried_count": "tried_count",
+    "shops_visited": "shops_visited",
+    "streak": "streak_weeks",
+    "top_notes": "top_notes",
+    "priorities": "priorities",
+}
+
+
+class BobaStats(BaseModel):
+    fav_drink_id: str | None = None
+    fav_shop_id: str | None = None
+    sweetness: float = 0.5
+    toppings: list[str] = Field(default_factory=list)
+    milk_vs_fruit: float = 0.5
+    tried_count: int = 0
+    shops_visited: int = 0
+    streak_weeks: int = 0
+    top_notes: list[str] = Field(default_factory=list)
+    priorities: dict[str, float] = Field(default_factory=dict)
+    personality: str = ""
+
+
+class Avatar(BaseModel):
+    emoji: str = Field(min_length=1, max_length=8)
+    color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
+
+
+class UserProfile(BaseModel):
+    user_id: str
+    handle: str
+    display_name: str
+    bio: str
+    avatar: Avatar
+    accent: str
+    pinned_drink_id: str | None
+    pinned_shop_id: str | None
+    visible_stats: list[StatKey]
+    followers: int
+    following: int
+    followed_by_me: bool
+    taste_match: float | None
+    stats: dict
+
+
+class QuizOption(BaseModel):
+    id: str
+    label: str
+    emoji: str | None = None
+
+
+class QuizQuestion(BaseModel):
+    id: str
+    prompt: str
+    options: list[QuizOption]
+    multi: bool = False
+
+
+class QuizResult(BaseModel):
+    user_id: str
+    personality: str
+    stats: BobaStats
+    weights: dict[str, float]
+
+
+class FeedComment(BaseModel):
+    id: str
+    user_id: str
+    text: str
+    created_at: str
+
+
+class FeedItem(BaseModel):
+    id: str
+    user_id: str
+    kind: Literal["review", "pick", "rec", "joined"]
+    drink_id: str | None = None
+    rating: int | None = None
+    text: str | None = None
+    to_user_id: str | None = None
+    created_at: str
+    likes: int = 0
+    liked_by_me: bool = False
+    comments: list[FeedComment] = Field(default_factory=list)

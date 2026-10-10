@@ -23,7 +23,13 @@ def taste(
 
 
 def neighbors(catalog: Catalog, user_id: str, k: int = 3) -> list[tuple[str, float]]:
-    profiles = {user.id: user_profile(catalog, user.id) for user in catalog.users}
+    """Nearest users who have rated something. A new user with no reviews has
+    nothing to recommend, so they never take a neighbor slot."""
+    profiles = {
+        user.id: user_profile(catalog, user.id)
+        for user in catalog.users
+        if user.id == user_id or catalog.reviews_for(user.id)
+    }
     return most_similar_users(user_id, profiles, k=k)
 
 

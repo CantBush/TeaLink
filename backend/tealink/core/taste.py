@@ -21,15 +21,26 @@ def apply_overrides(
     return adjusted
 
 
+BASE_PROFILE_WEIGHT = 3.0
+
+
 def taste_profile(
-    reviews: list[Review], drinks_by_id: dict[str, Drink]
+    reviews: list[Review],
+    drinks_by_id: dict[str, Drink],
+    base: dict[str, float] | None = None,
 ) -> dict[str, float]:
     """Weighted average of reviewed drink vectors. Weight is rating / 5.
 
-    Missing drinks are skipped. With no usable reviews, every attribute is 0.5.
+    ``base`` (a quiz profile) counts as BASE_PROFILE_WEIGHT five-star
+    reviews, so a new user's first reviews move it rather than replace it.
+    Missing drinks are skipped. With no usable reviews or base, every
+    attribute is 0.5.
     """
     weighted = np.zeros(len(ATTRIBUTES), dtype=float)
     weight_sum = 0.0
+    if base is not None:
+        weighted += np.array([float(base.get(attr, 0.5)) for attr in ATTRIBUTES]) * BASE_PROFILE_WEIGHT
+        weight_sum += BASE_PROFILE_WEIGHT
     for review in reviews:
         drink = drinks_by_id.get(review.drink_id)
         if drink is None:

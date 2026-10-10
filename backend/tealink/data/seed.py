@@ -8,13 +8,25 @@ from __future__ import annotations
 
 import json
 import random
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from tealink.core import objectives
 from tealink.core.preferences import PRIOR, combined_score
 from tealink.core.taste import match_score
 from tealink.data.loader import Catalog
-from tealink.schemas import ATTRIBUTES, ChoiceRecord, Drink, RankedDrink, Review, Shop, User
+from tealink.schemas import (
+    ATTRIBUTES,
+    STAT_KEYS,
+    ChoiceRecord,
+    Drink,
+    FeedComment,
+    RankedDrink,
+    Review,
+    Shop,
+    User,
+)
+from tealink.social.store import ProfileSettings, StoredFeedItem, parse_time
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
@@ -136,6 +148,53 @@ OTHER_USERS: list[tuple[str, str, str]] = [
     ("yuki", "Yuki", "Keeps tea intensity high and sugar low."),
 ]
 
+# Social seed. Every review becomes a feed item dated so that each user's
+# weekly streak ends in the week of SEED_NOW.
+SEED_NOW = datetime(2026, 10, 10, 12, 0, tzinfo=UTC)
+
+# user id -> (emoji, avatar color, accent color, bio)
+PROFILES: dict[str, tuple[str, str, str, str]] = {
+    "andrew": ("🧋", "#F4C27A", "#8B5E3C", "Brown sugar, extra pearls, as cheap as it gets."),
+    "sarah": ("🍵", "#B8D8BA", "#3E7C59", "Hojicha evangelist. Ask me for a rec."),
+    "maya": ("🍓", "#F7A6A6", "#B23A48", "Orders fruit tea when the weather is warm."),
+    "jordan": ("🍃", "#A8D5BA", "#2D6A4F", "Splits time between matcha and milk tea."),
+    "priya": ("🌸", "#F5C6E0", "#A23B72", "Jasmine and lighter sweetness, please."),
+    "leo": ("🔥", "#E8B07A", "#9C4A1A", "Roasted tea, not much fruit."),
+    "nora": ("🧸", "#E6D3B3", "#7F5539", "Classic milk tea and pearls. Never change."),
+    "owen": ("🫖", "#C9D6A3", "#556B2F", "Unsweetened oolong or nothing."),
+    "rina": ("🍡", "#F2B5D4", "#C9184A", "Matcha first, fruit second."),
+    "chris": ("🍯", "#E3A857", "#8A5A00", "Brown sugar when it's on the menu."),
+    "hana": ("🍂", "#D4A373", "#7A4419", "Hojicha and other roasted drinks."),
+    "marco": ("🌶️", "#F28C6A", "#A33B20", "Thai tea and horchata fan."),
+    "elena": ("💜", "#C3B1E1", "#5A3E85", "Taro and anything creamy."),
+    "sam": ("🧭", "#9AD0EC", "#1D5C7A", "A new shop drink every week."),
+    "yuki": ("❄️", "#BDE0FE", "#2B4C7E", "High tea intensity, low sugar."),
+}
+PINNED: dict[str, tuple[str, str]] = {
+    "andrew": ("kf_brown_sugar_oolong", "kungfu"),
+    "sarah": ("sr_hojicha_cream", "sunright"),
+}
+# Andrew's and Sarah's circles are written out so the demo feed is stable.
+FOLLOWS: dict[str, tuple[str, ...]] = {
+    "andrew": ("sarah", "hana", "nora", "chris", "marco"),
+    "sarah": ("andrew", "hana", "priya"),
+    "hana": ("andrew", "sarah", "leo"),
+    "nora": ("andrew", "elena"),
+    "chris": ("andrew", "sarah"),
+}
+STREAKS: dict[str, int] = {"andrew": 6, "sarah": 9}
+# Other viewers don't see priorities unless the user opts in.
+PUBLIC_STATS: list[str] = [
+    "fav_drink", "fav_shop", "top_notes", "tried_count", "sweetness",
+    "milk_vs_fruit", "toppings", "shops_visited", "streak",
+]
+COMMENTS: list[tuple[str, str, str]] = [
+    ("f_rev_sarah_01", "andrew", "Okay, adding it to my list."),
+    ("f_rev_andrew_01", "sarah", "Same order, every time."),
+    ("f_rev_andrew_01", "chris", "Brown sugar gang."),
+]
+SARAH_REC = ("sr_hojicha_cream", "You'd love the hojicha cream tea. Trust me on this one.")
+
 _TEXTS = {
     1: ["Too far from what I like.", "I would not order this again."],
     2: ["Not really my thing.", "The flavors missed for me."],
@@ -187,7 +246,129 @@ def write_dataset(directory: Path | None = None) -> Path:
     _dump(target / "reviews.json", [review.model_dump(mode="json") for review in reviews])
     choices = build_choices(Catalog(shops=shops, drinks=drinks, users=users, reviews=reviews))
     _dump(target / "choices.json", [choice.model_dump(mode="json") for choice in choices])
+    social = build_social(users, reviews, choices)
+    (target / "social.json").write_text(json.dumps(social, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return target
+
+
+def build_social(users: list[User], reviews: list[Review], choices: list[ChoiceRecord]) -> dict:
+    """Profiles, follows, and a feed built from the seeded reviews and Andrew's past picks."""
+    rng = random.Random(11)
+    ids = [user.id for user in users]
+    profiles = []
+    for user in users:
+        emoji, color, accent, bio = PROFILES[user.id]
+        drink_id, shop_id = PINNED.get(user.id, (None, None))
+        visible = list(STAT_KEYS) if user.id == "andrew" else list(PUBLIC_STATS)
+        profiles.append(
+            ProfileSettings(
+                user_id=user.id,
+                handle=user.id,
+                display_name=user.name,
+                bio=bio,
+                avatar={"emoji": emoji, "color": color},
+                accent=accent,
+                pinned_drink_id=drink_id,
+                pinned_shop_id=shop_id,
+                visible_stats=visible,
+            ).model_dump(mode="json")
+        )
+
+    follows: set[tuple[str, str]] = set()
+    for user_id in ids:
+        targets = FOLLOWS.get(user_id)
+        if targets is None:
+            others = [other for other in ids if other != user_id]
+            targets = tuple(sorted(rng.sample(others, rng.randint(2, 4))))
+        follows.update((user_id, target) for target in targets)
+
+    by_user: dict[str, list[Review]] = {}
+    for review in reviews:
+        by_user.setdefault(review.user_id, []).append(review)
+    feed: dict[str, StoredFeedItem] = {}
+    for user_id in ids:
+        streak = STREAKS.get(user_id, rng.randint(0, 5))
+        mine = by_user.get(user_id, [])
+        oldest = SEED_NOW
+        for back, review in enumerate(reversed(mine)):
+            moment = _seed_moment(_week_offset(back, streak), rng)
+            oldest = min(oldest, moment)
+            item_id = f"f_{review.id}"
+            feed[item_id] = StoredFeedItem(
+                id=item_id,
+                user_id=user_id,
+                kind="review",
+                drink_id=review.drink_id,
+                rating=review.rating,
+                text=review.text,
+                created_at=_iso(moment),
+            )
+        joined = f"f_joined_{user_id}"
+        feed[joined] = StoredFeedItem(id=joined, user_id=user_id, kind="joined", created_at=_iso(oldest - timedelta(days=1)))
+
+    for index, choice in enumerate(choices, start=1):
+        item_id = f"f_pick_{choice.user_id}_{index:02d}"
+        moment = _seed_moment(len(choices) - index + 1, rng)
+        feed[item_id] = StoredFeedItem(
+            id=item_id,
+            user_id=choice.user_id,
+            kind="pick",
+            drink_id=choice.chosen_drink_id,
+            created_at=_iso(moment),
+        )
+
+    drink_id, text = SARAH_REC
+    feed["f_rec_sarah_andrew"] = StoredFeedItem(
+        id="f_rec_sarah_andrew",
+        user_id="sarah",
+        kind="rec",
+        drink_id=drink_id,
+        text=text,
+        to_user_id="andrew",
+        created_at=_iso(SEED_NOW - timedelta(hours=20)),
+    )
+
+    followers: dict[str, list[str]] = {}
+    for follower, followee in sorted(follows):
+        followers.setdefault(followee, []).append(follower)
+    for item in feed.values():
+        if item.kind == "review" and (item.rating or 0) >= 4:
+            fans = followers.get(item.user_id, [])
+            item.liked_by = sorted(rng.sample(fans, rng.randint(0, len(fans)))) if fans else []
+    for index, (item_id, user_id, text) in enumerate(COMMENTS, start=1):
+        item = feed[item_id]
+        moment = min(parse_time(item.created_at) + timedelta(hours=index), SEED_NOW)
+        item.comments.append(FeedComment(id=f"c_seed_{index:02d}", user_id=user_id, text=text, created_at=_iso(moment)))
+        if user_id not in item.liked_by:
+            item.liked_by = sorted([*item.liked_by, user_id])
+
+    ordered = sorted(feed.values(), key=lambda item: (item.created_at, item.id), reverse=True)
+    return {
+        "profiles": profiles,
+        "follows": [list(pair) for pair in sorted(follows)],
+        "feed": [item.model_dump(mode="json") for item in ordered],
+    }
+
+
+def _week_offset(back: int, streak: int) -> int:
+    """Weeks before SEED_NOW for the user's back-th newest review.
+
+    The newest ``streak`` reviews fill consecutive weeks ending this week,
+    then one empty week, then one review per week. A streak of 0 leaves this
+    week and last week empty.
+    """
+    if streak == 0:
+        return 2 + back
+    return back if back < streak else streak + 1 + (back - streak)
+
+
+def _seed_moment(weeks_back: int, rng: random.Random) -> datetime:
+    """A time in the week ``weeks_back`` before SEED_NOW (a Saturday), never after it."""
+    return SEED_NOW - timedelta(weeks=weeks_back, hours=rng.randint(0, 96), minutes=rng.randint(0, 59))
+
+
+def _iso(moment: datetime) -> str:
+    return moment.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def build_choices(catalog: Catalog) -> list[ChoiceRecord]:

@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 2:35 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, 3:35 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -99,8 +99,26 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ⬜ Write-up and backup video
 
 **Social layer (new, 2:55 PM; full spec and contracts in [`PLAN.md`](PLAN.md#social-layer-added-255-pm)):**
-- Track A: ⬜ social schemas and seed · ⬜ boba stats and quiz mapping (seeds the Preference agent) · ⬜ profile, follow, feed, like, comment, and rec endpoints · ⬜ optional follow boost in the Social agent
+- Track A: ✅ social schemas and seed · ✅ boba stats and quiz mapping (seeds the Preference agent) · ✅ profile, follow, feed, like, comment, and rec endpoints · ⬜ optional follow boost in the Social agent
 - Track B: ⬜ types, mocks, and app shell with bottom tabs · ⬜ onboarding quiz and Boba card · ⬜ profile page and edit sheet with stat toggles · ⬜ home feed with likes, comments, and recs
+
+**Track A social backend (branch `a/social-backend`, 3:35 PM).** All Track A blocks from 3:00 to 6:00 are done, and 36 backend tests pass. The demo is unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71, with the close-call prompt, and `eval_results.json` is byte-identical.
+- **Seed:** `make seed` also writes `backend/data/social.json`: a profile for each of the 15 users (handle = user id, emoji avatar, bio, accent), follows (Andrew follows Sarah, Hana, Nora, Chris, and Marco), and 177 feed items. Every seeded review is a feed item, plus Andrew's 4 past picks, a "joined" item per user, likes, 3 comments, and Sarah's rec of Hojicha Cream Tea to Andrew (the newest item in his feed). Reset demo reloads all of it and drops users created since.
+- **Quiz (`core/quiz.py`):** six questions. Sweetness and base set the taste profile; toppings set the toppings level; budget, adventurousness, and "wherever my friends go" nudge the default priorities, which are then normalized with the usual 5% floor. The quiz profile counts as three five-star reviews in the taste profile, so a new user's first round already has real taste scores, and the weights are the Preference agent's prior (`DeliberationRequest.prior_weights`). Picks are learned on top. The priorities line reads "From your quiz answers: ...".
+- **Stats (`core/stats.py`):** favorite drink and shop, sweetness, milk vs fruit, go-to toppings, drinks tried and shops visited (reviews plus picks), weekly streak (from feed activity dates), top flavor notes, current learned priorities, and a personality ("Brown Sugar Deal Hunter" for Andrew, "Brown Sugar Loyalist" for Sarah). Before a quiz user has tried anything, notes come from the 5 drinks their profile matches best.
+- **Demo safety:** the Social agent only takes neighbors who have rated something, so a new user never pushes Sarah out of Andrew's top 3 neighbors (tested). In AGNTCY mode, requests for users created or re-profiled at runtime are answered in-process, because the agent processes loaded the catalog at startup.
+
+**For Track B: where the API differs from the contract in `PLAN.md`** (mirror these in `types.ts`):
+- `BobaStats.top_notes` is `string[]` of flavor tags (`"brown_sugar"`, `"oolong"`, `"hojicha"`, ...), not `Dimension[]`. Priorities already cover the dimensions.
+- Wrapped lists: `GET /quiz` returns `{questions: QuizQuestion[]}` and `GET /feed?user_id=&limit=` returns `{items: FeedItem[]}` (newest first, default 50).
+- Likes take `{user_id}`: `POST /feed/{id}/like` likes and `DELETE /feed/{id}/like` unlikes. Both return the updated `FeedItem` (liking twice counts once). `POST /feed/{id}/comments` takes `{user_id, text}` and returns the `FeedItem`.
+- Follow and unfollow take `{viewer}` as specified and return the target's `UserProfile` as the viewer sees it, so the button and counts update from one response.
+- `/users/{id}` accepts a user id or a handle (`sarah` or `@sarah`). `PATCH /users/{id}` and `POST /users` return the owner's view.
+- **Owner vs other viewers:** the owner gets every stat, including hidden ones, so the edit sheet can toggle them. Other viewers get only `visible_stats`, in order, plus `personality`, which is always shown. Stats keys are the `BobaStats` field names (`streak` shows as `streak_weeks`, `fav_drink` as `fav_drink_id`).
+- **Extras not in the contract:** `GET /users?viewer=` (everyone), `GET /users/{id}/followers?viewer=`, and `GET /users/{id}/following?viewer=`. Each returns `{users: [{user_id, handle, display_name, avatar, followed_by_me, taste_match}]}` for follow lists and "find friends".
+- **Errors:** `POST /users` returns 409 when a handle is taken or malformed (2 to 20 of `a-z 0-9 _`; it's lowercased for you). `POST /quiz` returns 422 with a readable message for a missing or unknown answer. Multi-select answers are arrays; single answers can be a string.
+- **After Reset demo or an API restart,** users created through `/users` are gone. `GET /users/{stored id}` then returns 404: send the visitor back to `/welcome` and clear `localStorage`. Unknown `viewer` values are treated as signed out, not as an error.
+- Pick feed items have `text: null`. Write the copy from `kind` and `drink_id`.
 
 ## Known issues and decisions to revisit
 
@@ -114,6 +132,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Plan change log
 
+- **3:35 PM:** Track A: the social backend is in on `a/social-backend`, covering the quiz, boba stats, profiles, follows, feed, likes, comments, and recs. The quiz seeds the Preference agent's prior and the taste profile. The demo numbers and the eval are unchanged. Track B: see "where the API differs from the contract" above before mirroring `types.ts`.
 - **2:10 PM:** Track A: popularity baseline and `GET /eval` are in, and Sarah is Andrew's closest match. Demo order is unchanged (Thai Tea, Wintermelon, Pearl Milk Tea). Priorities are now price 43% and taste 41% (were 42% and 39%), and Wintermelon scores 77 rather than 76.
 - **1:45 PM:** Track A: AGNTCY transport is in. Local remains the default. Next up is the popularity baseline and `GET /eval`.
 - **1:15 PM:** Progress tracking moved to this file. The Google Doc can't be edited by the coding assistant, so the doc stays as the original brief.
