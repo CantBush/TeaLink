@@ -1,7 +1,16 @@
-"""TeaLink gateway. SSE deliberation uses LocalTransport unless TRANSPORT says otherwise."""
+"""TeaLink gateway. SSE deliberation uses LocalTransport unless TRANSPORT says otherwise.
+
+``TRANSPORT=agntcy`` talks to agent processes over NATS. If the broker is
+down, or an agent is not heartbeating, that call is answered in-process.
+The HTTP routes and JSON shapes stay the same, so the frontend does not
+branch on transport.
+"""
 
 from __future__ import annotations
 
+import asyncio
+import sys
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 
 from fastapi import FastAPI, HTTPException
@@ -21,7 +30,23 @@ from tealink.data.loader import Catalog, load_catalog
 from tealink.lens.recorder import LensRecorder
 from tealink.schemas import ChoiceRecord, Decision, DeliberationRequest, LensEventType
 
-app = FastAPI(title="TeaLink")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Open NATS outside a request so its reader task outlives each call.
+
+    A connection opened inside a request is cancelled when that request
+    ends, and later replies never arrive.
+    """
+    if get_settings().transport == "agntcy":
+        await _prepare(get_runtime())
+    yield
+    runtime = getattr(app.state, "runtime", None)
+    transport = getattr(runtime, "transport", None)
+    if isinstance(transport, AgntcyTransport):
+        await transport.close()
+
+
+app = FastAPI(title="TeaLink", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -84,10 +109,11 @@ def _build_runtime() -> Runtime:
         registry.register(card)
         by_id[card.id] = agent
     settings = get_settings()
-    if settings.transport == "local":
-        transport: LocalTransport | AgntcyTransport = LocalTransport(by_id, catalog)
+    local = LocalTransport(by_id, catalog)
+    if settings.transport == "agntcy":
+        transport: LocalTransport | AgntcyTransport = AgntcyTransport(settings.nats_url, fallback=local)
     else:
-        transport = AgntcyTransport()
+        transport = local
     return Runtime(catalog=catalog, registry=registry, transport=transport)
 
 
@@ -107,7 +133,24 @@ def _require_user(runtime: Runtime, user_id: str) -> None:
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "transport": get_settings().transport}
+    settings = get_settings()
+    runtime = getattr(app.state, "runtime", None)
+    transport = getattr(runtime, "transport", None)
+    if isinstance(transport, AgntcyTransport) and transport.connected:
+        effective = "agntcy"
+        remote_replies = dict(transport.remote_replies)
+    elif isinstance(transport, AgntcyTransport):
+        effective = "pending"
+        remote_replies = {}
+    else:
+        effective = "local"
+        remote_replies = {}
+    return {
+        "status": "ok",
+        "transport": settings.transport,
+        "effective": effective,
+        "remote_replies": remote_replies,
+    }
 
 
 @app.get("/profile/{user_id}")
@@ -132,7 +175,7 @@ def similar_users(user_id: str) -> dict:
 async def recommend(body: RecommendRequest) -> EventSourceResponse:
     runtime = get_runtime()
     _require_user(runtime, body.user_id)
-    _refresh_heartbeats(runtime)
+    await _prepare(runtime)
     overrides = dict(runtime.preferences.get(body.user_id, {}))
     overrides.update(body.preference_overrides)
 
@@ -156,6 +199,7 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
 @app.get("/preferences/{user_id}")
 async def preferences(user_id: str) -> dict:
     runtime = get_runtime()
+    await _prepare(runtime)
     _require_user(runtime, user_id)
     card = runtime.registry.get("preference")
     if card is None:
@@ -171,6 +215,7 @@ async def preferences(user_id: str) -> dict:
 async def choose(body: ChoiceRequest) -> dict:
     """The user picked one of the top 3. The Preference agent learns from it."""
     runtime = get_runtime()
+    await _prepare(runtime)
     _require_user(runtime, body.user_id)
     decision = runtime.last_decision.get(body.user_id)
     if decision is None or not any(option.drink_id == body.drink_id for option in decision.options):
@@ -194,31 +239,46 @@ def sold_out(body: SoldOutEvent) -> dict:
 
 
 @app.post("/events/shop-offline")
-def shop_offline(body: ShopEvent) -> dict:
+async def shop_offline(body: ShopEvent) -> dict:
     runtime = get_runtime()
+    await _prepare(runtime)
     agent_id = f"shop_{body.shop_id}"
     if runtime.registry.get(agent_id) is None:
         raise HTTPException(status_code=404, detail="shop agent not registered")
     runtime.offline.add(agent_id)
     runtime.registry.mark_offline(agent_id)
+    if isinstance(runtime.transport, AgntcyTransport):
+        await runtime.transport.publish_control("offline", agent_id)
     return {"ok": True, "agent_id": agent_id, "online": False}
 
 
 @app.post("/events/shop-join")
-def shop_join(body: ShopEvent) -> dict:
+async def shop_join(body: ShopEvent) -> dict:
     runtime = get_runtime()
+    await _prepare(runtime)
     agent_id = f"shop_{body.shop_id}"
+    shop = runtime.catalog.shop(body.shop_id)
+    if shop is None:
+        raise HTTPException(status_code=404, detail="shop not found")
     runtime.offline.discard(agent_id)
-    if isinstance(runtime.transport, LocalTransport) and agent_id not in runtime.transport.agents:
-        shop = runtime.catalog.shop(body.shop_id)
-        if shop is None:
-            raise HTTPException(status_code=404, detail="shop not found")
-        agent = ShopAgent(body.shop_id, shop.name)
-        runtime.transport.agents[agent_id] = agent
+    agent = ShopAgent(body.shop_id, shop.name)
+    _local_agent_map(runtime)[agent_id] = agent
+    if runtime.registry.get(agent_id) is None:
         runtime.registry.register(agent.card())
-    elif runtime.registry.get(agent_id) is None:
-        runtime.registry.register(ShopAgent(body.shop_id, body.shop_id).card())
     else:
+        runtime.registry.heartbeat(agent_id)
+    if isinstance(runtime.transport, AgntcyTransport):
+        await runtime.transport.publish_control("join", agent_id)
+        heard = False
+        for _ in range(20):
+            if runtime.transport.recent(agent_id):
+                heard = True
+                break
+            await asyncio.sleep(0.1)
+        if heard:
+            runtime.transport._local_only.discard(agent_id)
+        else:
+            runtime.transport._local_only.add(agent_id)
         runtime.registry.heartbeat(agent_id)
     return {"ok": True, "agent_id": agent_id, "online": runtime.registry.is_online(agent_id)}
 
@@ -233,7 +293,60 @@ def preference(body: PreferenceEvent) -> dict:
 
 
 @app.post("/events/reset")
-def reset() -> dict:
+async def reset() -> dict:
     """Back to the seeded state, so the demo can be replayed."""
-    app.state.runtime = _build_runtime()
+    old = getattr(app.state, "runtime", None)
+    fresh = _build_runtime()
+    remote = getattr(old, "transport", None)
+    if isinstance(remote, AgntcyTransport) and remote.connected and isinstance(fresh.transport, AgntcyTransport):
+        remote.fallback = fresh.transport.fallback
+        remote.reset_routes()
+        fresh.transport = remote
+        app.state.runtime = fresh
+        await remote.publish_control("reset", "*")
+        await asyncio.sleep(0.2)
+        await remote.reconcile(fresh.registry, offline=fresh.offline)
+        return {"ok": True}
+    app.state.runtime = fresh
     return {"ok": True}
+
+
+async def _prepare(runtime: Runtime) -> None:
+    """Connect the bus once. If that fails, stay on the in-process agents."""
+    transport = runtime.transport
+    if isinstance(transport, LocalTransport):
+        _refresh_heartbeats(runtime)
+        return
+    if not isinstance(transport, AgntcyTransport):
+        return
+    if not transport.connected:
+        ok = await transport.connect()
+        if not ok:
+            print(transport.failure or "AGNTCY transport unavailable. Using in-process agents.", file=sys.stderr)
+            runtime.transport = transport.fallback
+            _refresh_heartbeats(runtime)
+            return
+        await transport.listen(lambda agent_id: _on_remote_heartbeat(runtime, agent_id))
+        await transport.reconcile(runtime.registry, offline=runtime.offline)
+    for agent_id in transport.local_only:
+        if agent_id not in runtime.offline and runtime.registry.get(agent_id) is not None:
+            runtime.registry.heartbeat(agent_id)
+
+
+def _on_remote_heartbeat(runtime: Runtime, agent_id: str) -> None:
+    transport = runtime.transport
+    if not isinstance(transport, AgntcyTransport):
+        return
+    transport.note(agent_id)
+    if agent_id in runtime.offline or runtime.registry.get(agent_id) is None:
+        return
+    runtime.registry.heartbeat(agent_id)
+
+
+def _local_agent_map(runtime: Runtime) -> dict:
+    transport = runtime.transport
+    if isinstance(transport, AgntcyTransport):
+        return transport.fallback.agents
+    if isinstance(transport, LocalTransport):
+        return transport.agents
+    return {}

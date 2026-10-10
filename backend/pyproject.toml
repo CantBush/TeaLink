@@ -27,3 +27,5 @@ include = ["tealink*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not nats'"
+markers = ["nats: needs a local NATS broker and is not part of make test"]

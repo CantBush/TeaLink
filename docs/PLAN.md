@@ -52,7 +52,7 @@ Schemas are in `backend/tealink/schemas.py`, mirrored in `frontend/src/api/types
 | New information changes the decision | User picks update the weights. Brown sugar dislike, sell-outs, and shop joins each trigger a fresh deliberation | ✅ |
 | *Level 3:* baseline comparison | So far: learning vs fixed weights (15/24 vs 11/24 hits). Still to build: a popularity baseline | 🟡 |
 | *Level 3:* ask the human | Near-tie or everything ruled out shows a prompt over the top 3 | ✅ |
-| AGNTCY transport | `AgntcyTransport` over NATS | ⬜ (go/no-go at 2:00) |
+| AGNTCY transport | `AgntcyTransport` over NATS | ✅ (go: demo flow passes on NATS, local stays the default) |
 
 ## Repo layout (current)
 
@@ -137,9 +137,9 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 
 | When | Task | Done when |
 |---|---|---|
-| 1:30 to 2:00 | ⬜ **AGNTCY spike.** Get one Taste agent answering over NATS through `AgntcyTransport` (`docker compose up nats`, then `python -m tealink.agents.serve --agent taste`) | One `/recommend` with `TRANSPORT=agntcy` gets a Taste reply over NATS |
-| **2:00** | **Go/no-go.** If the spike fails, stay on `TRANSPORT=local`. Either way, tell B | |
-| 2:00 to 3:30 | ⬜ If go: serve every agent over NATS, run shop heartbeats over the bus, add `make agents`, and a startup fallback to local. If no-go: skip straight to the baseline | The demo flow passes on both transports |
+| 1:30 to 2:00 | ✅ **AGNTCY spike.** Get one Taste agent answering over NATS through `AgntcyTransport` (`docker compose up nats`, then `python -m tealink.agents.serve --agent taste`) | One `/recommend` with `TRANSPORT=agntcy` gets a Taste reply over NATS |
+| **2:00** | **Go/no-go.** Go. Stay able to run `TRANSPORT=local`. B does not need a frontend change | |
+| 2:00 to 3:30 | ✅ If go: serve every agent over NATS, run shop heartbeats over the bus, add `make agents`, and a startup fallback to local. If no-go: skip straight to the baseline | The demo flow passes on both transports |
 | 3:30 to 5:00 | ⬜ `core/baseline.py` (most popular untried drink that's in stock). Extend `eval/run_eval.py` to popularity vs fixed weights vs learning, write `eval_results.json`, and add `GET /eval` | `GET /eval` matches the contract, with a test |
 | 5:00 to 6:00 | ⬜ Story data fixes: tune Sarah's seed reviews so she's Andrew's top match, re-seed, and update the tests | `/users/similar?user_id=andrew` returns Sarah first |
 | **6:00** | **Sync:** merge, then run the full demo together | |
@@ -198,6 +198,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## Plan change log
 
 - **1:45 PM:** Track B also finished the close-call prompt, the timeline regrouping, and a first draft of `docs/demo-script.md`. B's remaining work waits on Track A (the offer badge and the real `/eval` numbers) or is Sunday work (write-up, video, rehearsal). The "Demo script (draft)" section below is replaced by that file.
+- **1:45 PM:** AGNTCY is a go. Track A serves the roster over NATS, with in-process fallback. No schema change for Track B.
 - **1:30 PM:** Track B finished its first three blocks early (Counterfactual, clean-up, Evidence page). Next up for B: ask-the-human and timeline polish, then the demo script.
 - **1:15 PM:** Split the remaining work into Track A (backend, agents, evidence) and Track B (frontend, demo, write-ups), with separate file ownership, agreed contracts for `/eval` and offers, and shared sync points. Added an Evidence page, and an AGNTCY-plus-baseline block for A.
 
