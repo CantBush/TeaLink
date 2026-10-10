@@ -149,7 +149,13 @@ export function Profile() {
                 {pinned.name} <span className="font-sans text-sm text-mute">{price(pinned.price)}</span>
               </p>
             ) : null}
-            <p className="text-sm text-mute">{shopLabel(profile.pinned_shop_id ?? pinned?.shop_id ?? "")}</p>
+            {pinned ? <p className="text-sm text-mute">{shopLabel(pinned.shop_id)}</p> : null}
+            {profile.pinned_shop_id && profile.pinned_shop_id !== pinned?.shop_id ? (
+              <p className={pinned ? "mt-1 text-sm" : "font-display text-xl leading-tight"}>
+                {pinned ? "Favorite spot: " : ""}
+                {shopLabel(profile.pinned_shop_id)}
+              </p>
+            ) : null}
           </div>
         </section>
       ) : null}
