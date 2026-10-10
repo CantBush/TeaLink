@@ -9,10 +9,14 @@ from tealink.schemas import AgentSelection
 
 HEARTBEAT_TTL_SECONDS = 30.0
 
+CORE_AGENTS = ("taste", "social", "explorer", "budget", "preference")
+
 _CORE_REASONS = {
-    "taste": "Selected taste for taste_profile and personal_history{query}.",
-    "social": "Selected social for similar_users{query}.",
-    "explorer": "Selected explorer for novelty{query}.",
+    "taste": "Selected Taste: it ranks drinks by fit to this user's own reviews{query}.",
+    "social": "Selected Social: it knows what this user's most similar people loved{query}.",
+    "explorer": "Selected Explorer: it argues for drinks this user hasn't tried{query}.",
+    "budget": "Selected Budget: it argues for cheaper drinks that still fit{query}.",
+    "preference": "Selected Preference: it knows how much this user weighs taste, friends, novelty, and price.",
 }
 
 
@@ -28,6 +32,9 @@ class Registry:
     def heartbeat(self, agent_id: str, now: datetime | None = None) -> None:
         self._heartbeats[agent_id] = now or datetime.now(timezone.utc)
 
+    def mark_offline(self, agent_id: str) -> None:
+        self._heartbeats.pop(agent_id, None)
+
     def get(self, agent_id: str) -> AgentCardInfo | None:
         return self._cards.get(agent_id)
 
@@ -42,12 +49,12 @@ class Registry:
         return (current - last).total_seconds() <= HEARTBEAT_TTL_SECONDS
 
     def select_for_query(self, query: str, now: datetime | None = None) -> list[AgentSelection]:
-        """Always include taste, social, and explorer, plus online shop agents."""
+        """Online core agents by capability, plus every online shop agent."""
         suffix = f" to answer '{query}'" if query else ""
         selected: list[AgentSelection] = []
-        for agent_id in ("taste", "social", "explorer"):
+        for agent_id in CORE_AGENTS:
             card = self._cards.get(agent_id)
-            if card is None:
+            if card is None or not self.is_online(agent_id, now=now):
                 continue
             selected.append(
                 AgentSelection(
@@ -67,10 +74,7 @@ class Registry:
                 AgentSelection(
                     agent_id=card.id,
                     capabilities=list(card.capabilities),
-                    reason=(
-                        f"Selected {card.name} for availability and menu"
-                        f"{suffix}, and the shop is online."
-                    ),
+                    reason=f"Selected {card.name}: it is online and can confirm what is in stock.",
                 )
             )
         return selected

@@ -1,15 +1,34 @@
 import { useSyncExternalStore } from "react";
 import { client } from "../api/client.ts";
-import type { Decision, LensEvent, Proposal, TasteProfile } from "../api/types.ts";
+import type {
+  Decision,
+  DimensionScores,
+  LensEvent,
+  PreferenceReport,
+  Proposal,
+  SimilarUser,
+  TasteProfile,
+} from "../api/types.ts";
 import { sampleSession } from "../mocks/sample.ts";
+
+export const USER_ID = "andrew";
 
 export interface SessionState {
   profile: TasteProfile;
   events: LensEvent[];
   proposals: Proposal[];
   decision: Decision | null;
+  /** Decision from the previous round, for before/after comparisons. */
+  previousDecision: Decision | null;
+  weights: DimensionScores | null;
+  preferenceSummary: string | null;
+  /** What the last pick taught the Preference agent. */
+  learned: PreferenceReport | null;
+  similar: SimilarUser[];
   usingMock: boolean;
   started: boolean;
+  running: boolean;
+  round: number;
 }
 
 let state: SessionState = {
@@ -17,14 +36,22 @@ let state: SessionState = {
   events: [],
   proposals: [],
   decision: null,
+  previousDecision: null,
+  weights: null,
+  preferenceSummary: null,
+  learned: null,
+  similar: [],
   usingMock: false,
   started: false,
+  running: false,
+  round: 0,
 };
 
 const listeners = new Set<() => void>();
-let localSeq = 1000;
+let localSeq = 100000;
 
-function emit() {
+function set(patch: Partial<SessionState>) {
+  state = { ...state, ...patch };
   listeners.forEach((listener) => listener());
 }
 
@@ -41,71 +68,101 @@ export function useSession(): SessionState {
   return useSyncExternalStore(subscribeSession, getSession, getSession);
 }
 
+function eventKey(event: LensEvent): string {
+  return `${state.round}:${event.seq}`;
+}
+
+const seen = new Set<string>();
+
 export function pushEvent(event: LensEvent) {
-  if (state.events.some((item) => item.seq === event.seq)) return;
-  const proposals = state.proposals.slice();
-  let decision = state.decision;
+  const key = eventKey(event);
+  if (seen.has(key)) return;
+  seen.add(key);
+  const patch: Partial<SessionState> = { events: [...state.events, event] };
   if (event.type === "proposal") {
-    proposals.push(event.payload as unknown as Proposal);
+    patch.proposals = [...state.proposals, event.payload as unknown as Proposal];
   }
   if (event.type === "decision") {
-    decision = event.payload as unknown as Decision;
+    const decision = event.payload as unknown as Decision;
+    patch.decision = decision;
+    if (decision.weights) patch.weights = decision.weights;
   }
-  state = {
-    ...state,
-    events: [...state.events, event],
-    proposals,
-    decision,
-  };
-  emit();
+  if (event.type === "preference") {
+    const report = event.payload as unknown as Partial<PreferenceReport>;
+    if (report.weights) patch.weights = report.weights;
+    patch.preferenceSummary = event.message;
+  }
+  set(patch);
 }
 
 export function pushStatus(message: string) {
   localSeq += 1;
-  pushEvent({
-    type: "status",
-    agent_id: null,
-    message,
-    payload: {},
-    seq: localSeq,
-  });
+  pushEvent({ type: "status", agent_id: null, message, payload: {}, seq: localSeq });
 }
 
 export function setProfile(profile: TasteProfile) {
-  state = { ...state, profile };
-  emit();
+  set({ profile });
 }
 
 function replayMock() {
-  state = { ...state, usingMock: true };
-  emit();
+  set({ usingMock: true });
   sampleSession.events.forEach((event, index) => {
     window.setTimeout(() => pushEvent(event), index * 400);
   });
 }
 
-export function startRecommendation() {
-  if (state.started) return;
-  state = { ...state, started: true };
-  emit();
+function run(note?: string) {
+  set({
+    round: state.round + 1,
+    events: [],
+    proposals: [],
+    previousDecision: state.decision ?? state.previousDecision,
+    decision: null,
+    running: true,
+  });
+  if (note) pushStatus(note);
 
   if (import.meta.env.VITE_USE_MOCK === "1") {
     replayMock();
+    set({ running: false });
     return;
   }
 
   void client
-    .recommend(
-      {
-        user_id: "andrew",
-        query: "What should I get next?",
-        preference_overrides: {},
-      },
-      pushEvent,
-    )
+    .recommend({ user_id: USER_ID, query: "What should I get next?", preference_overrides: {} }, pushEvent)
     .catch(() => {
-      if (state.events.length === 0) replayMock();
-    });
+      if (state.decision === null) replayMock();
+    })
+    .finally(() => set({ running: false }));
+}
+
+export function startRecommendation() {
+  if (state.started) return;
+  set({ started: true });
+  run();
+}
+
+/** Re-run the whole deliberation, e.g. after an event changed the world. */
+export function rerun(note?: string) {
+  set({ started: true });
+  run(note);
+}
+
+/** The user picked one of the top 3: teach the Preference agent, then re-rank. */
+export async function pick(drinkId: string, drinkName: string) {
+  try {
+    const learned = await client.choose(USER_ID, drinkId);
+    set({ learned, weights: learned.weights });
+    rerun(`Andrew picked ${drinkName}. ${learned.summary}`);
+  } catch {
+    pushStatus(`Andrew picked ${drinkName}, but the Preference agent did not answer.`);
+  }
+}
+
+export async function resetAll() {
+  await client.resetDemo().catch(() => {});
+  set({ learned: null, previousDecision: null, decision: null });
+  rerun("Demo reset to the seeded state.");
 }
 
 export function loadProfile(userId: string) {
@@ -115,4 +172,8 @@ export function loadProfile(userId: string) {
     .catch(() => {
       /* Keep the scripted profile when the API is down. */
     });
+  void client
+    .getSimilar(userId)
+    .then((similar) => set({ similar }))
+    .catch(() => {});
 }

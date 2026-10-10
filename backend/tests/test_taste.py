@@ -98,7 +98,8 @@ def test_seed_personas_and_agents():
         "boba_guys",
         "sharetea",
     }
-    assert len(catalog.drinks) == 40
+    assert len(catalog.drinks) == 43
+    assert not catalog.shop("lantern_leaf").online
     assert len(catalog.users) == 15
     assert catalog.users_by_id["andrew"].name == "Andrew"
     assert catalog.users_by_id["sarah"].name == "Sarah"
@@ -122,18 +123,24 @@ def test_seed_personas_and_agents():
 
     request = DeliberationRequest(round="propose", user_id="andrew", query="What should I get next?")
     taste = TasteAgent().handle(request, catalog)
-    assert len(taste.proposals) == 1
+    assert len(taste.proposals) == 3
     proposal = taste.proposals[0]
     assert proposal.score > 0.85
+    assert proposal.evidence
     assert "brown_sugar" in catalog.drink(proposal.drink_id).flavor_tags
     assert abs(sum(factor.weight for factor in proposal.factors) - proposal.score) < 1e-6
 
+    tried = {review.drink_id for review in andrew}
     social = SocialAgent().handle(request, catalog)
-    assert social.proposals[0].drink_id == "sr_hojicha_cream"
+    assert social.proposals and all(item.drink_id not in tried for item in social.proposals)
+    assert all(item.dimension == "social" for item in social.proposals)
 
     explorer = ExplorerAgent().handle(request, catalog)
-    tried = {review.drink_id for review in andrew}
     assert explorer.proposals[0].drink_id not in tried
+
+    no_brown_sugar = request.model_copy(update={"preference_overrides": {"brown_sugar": 0.0}})
+    marked_down = TasteAgent().handle(no_brown_sugar, catalog).proposals[0]
+    assert "brown_sugar" not in catalog.drink(marked_down.drink_id).flavor_tags
 
 
 def pytest_approx(value: float):

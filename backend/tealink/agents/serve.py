@@ -12,7 +12,7 @@ import asyncio
 import sys
 
 from tealink.agents.base import BaseAgent
-from tealink.agents.roster import make_agent
+from tealink.agents.roster import AGENT_KINDS, make_agent
 from tealink.config import get_settings
 from tealink.data.loader import Catalog, load_catalog
 from tealink.schemas import DeliberationRequest
@@ -20,7 +20,7 @@ from tealink.schemas import DeliberationRequest
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Serve one TeaLink agent over A2A/NATS")
-    parser.add_argument("--agent", required=True, choices=["taste", "social", "explorer", "shop"])
+    parser.add_argument("--agent", required=True, choices=list(AGENT_KINDS))
     parser.add_argument("--shop-id", default=None)
     args = parser.parse_args(argv)
     if args.agent == "shop" and not args.shop_id:

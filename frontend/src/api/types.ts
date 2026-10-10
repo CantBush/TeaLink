@@ -8,6 +8,11 @@ export type TasteAttribute =
 /** The five taste attributes, each a 0–1 number. */
 export type TasteProfile = Record<TasteAttribute, number>;
 
+/** What each objective agent argues for. Weights over these are learned per user. */
+export type Dimension = "taste" | "social" | "novelty" | "cost";
+
+export type DimensionScores = Record<Dimension, number>;
+
 export interface Evidence {
   review_id: string;
   drink_name: string;
@@ -30,15 +35,19 @@ export interface Proposal {
   factors: FactorContribution[];
   evidence: Evidence[];
   rationale: string;
+  price?: number;
+  dimension?: Dimension | null;
 }
 
-export type ObjectionKind = "veto" | "concern" | "support";
+export type ObjectionKind = "veto" | "concern" | "neutral" | "support";
 
 export interface Objection {
   agent_id: string;
   target_drink_id: string;
   kind: ObjectionKind;
   reason: string;
+  score?: number | null;
+  dimension?: Dimension | null;
 }
 
 export interface AgentSelection {
@@ -51,6 +60,16 @@ export interface RankedDrink {
   drink_id: string;
   drink_name: string;
   score: number;
+  shop_id?: string;
+  price?: number;
+  dimension_scores?: DimensionScores;
+}
+
+export interface DroppedDrink {
+  drink_id: string;
+  drink_name: string;
+  reason: string;
+  by: string;
 }
 
 export interface Decision {
@@ -62,6 +81,23 @@ export interface Decision {
   question: string | null;
   alternatives: RankedDrink[];
   explanation: string;
+  options?: RankedDrink[];
+  weights?: DimensionScores;
+  dropped?: DroppedDrink[];
+}
+
+export interface PreferenceReport {
+  user_id: string;
+  weights: DimensionScores;
+  previous_weights: DimensionScores | null;
+  choices_seen: number;
+  summary: string;
+}
+
+export interface SimilarUser {
+  id: string;
+  name: string;
+  similarity: number;
 }
 
 export type LensEventType =
@@ -69,7 +105,8 @@ export type LensEventType =
   | "proposal"
   | "objection"
   | "decision"
-  | "status";
+  | "status"
+  | "preference";
 
 export interface LensEvent {
   type: LensEventType;

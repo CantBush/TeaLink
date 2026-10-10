@@ -683,5 +683,57 @@
       "oolong"
     ],
     "available": true
+  },
+  {
+    "id": "ll_brown_sugar_hojicha",
+    "name": "Brown Sugar Hojicha Milk",
+    "shop_id": "lantern_leaf",
+    "price": 4.95,
+    "attributes": {
+      "sweetness": 0.82,
+      "milkiness": 0.85,
+      "tea_intensity": 0.55,
+      "fruitiness": 0.05,
+      "toppings": 0.75
+    },
+    "flavor_tags": [
+      "brown_sugar",
+      "hojicha"
+    ],
+    "available": true
+  },
+  {
+    "id": "ll_osmanthus_milk",
+    "name": "Osmanthus Milk Tea",
+    "shop_id": "lantern_leaf",
+    "price": 5.25,
+    "attributes": {
+      "sweetness": 0.65,
+      "milkiness": 0.75,
+      "tea_intensity": 0.5,
+      "fruitiness": 0.15,
+      "toppings": 0.4
+    },
+    "flavor_tags": [
+      "oolong"
+    ],
+    "available": true
+  },
+  {
+    "id": "ll_yuzu_green",
+    "name": "Yuzu Green Tea",
+    "shop_id": "lantern_leaf",
+    "price": 5.0,
+    "attributes": {
+      "sweetness": 0.5,
+      "milkiness": 0.05,
+      "tea_intensity": 0.45,
+      "fruitiness": 0.85,
+      "toppings": 0.1
+    },
+    "flavor_tags": [
+      "fruit"
+    ],
+    "available": true
   }
 ]

@@ -1,70 +1,119 @@
-"""Pick a winner from proposals and objections.
+"""Rank candidates by the user's learned priorities and return the top 3.
 
-TODO: blend agent scores with learned weights and compare the result to the
-popularity baseline. The rule below is the demo resolver: drop vetoed drinks,
-keep the highest score, and ask a human when the top two are within 0.05.
+Every objective agent scores every candidate on its own dimension. A drink's
+overall score is the weighted sum of those dimension scores, using the weights
+the Preference agent learned for this user. Vetoed drinks, and drinks whose
+shop has no online agent to confirm stock, are dropped first. No agent gets a
+casting vote; the weights decide.
 """
 
 from __future__ import annotations
 
-from tealink.schemas import Decision, Objection, ObjectionKind, Proposal, RankedDrink
+from tealink.core.preferences import LABELS, PRIOR, combined_score, normalize
+from tealink.schemas import (
+    DIMENSIONS,
+    Decision,
+    DroppedDrink,
+    Objection,
+    ObjectionKind,
+    Proposal,
+    RankedDrink,
+)
 
-ASK_HUMAN_GAP = 0.05
+TIE_GAP = 0.02
+TOP_K = 3
 
 
-def resolve(proposals: list[Proposal], objections: list[Objection]) -> Decision:
-    """Deterministic winner among proposals that were not vetoed."""
-    vetoed = {
-        objection.target_drink_id
-        for objection in objections
-        if objection.kind == ObjectionKind.veto
-    }
-    best_by_drink: dict[str, Proposal] = {}
+def resolve(
+    proposals: list[Proposal],
+    objections: list[Objection],
+    weights: dict[str, float] | None = None,
+    confirmed_shop_ids: set[str] | None = None,
+    top_k: int = TOP_K,
+) -> Decision:
+    weights = normalize(weights or PRIOR)
+    first: dict[str, Proposal] = {}
     for proposal in proposals:
-        if proposal.drink_id in vetoed:
-            continue
-        current = best_by_drink.get(proposal.drink_id)
-        if current is None or _better(proposal, current):
-            best_by_drink[proposal.drink_id] = proposal
+        first.setdefault(proposal.drink_id, proposal)
+
+    scores: dict[str, dict[str, float]] = {drink_id: {} for drink_id in first}
+    for proposal in proposals:
+        if proposal.dimension:
+            scores[proposal.drink_id].setdefault(proposal.dimension, proposal.score)
+    for objection in objections:
+        if objection.target_drink_id in scores and objection.dimension and objection.score is not None:
+            scores[objection.target_drink_id][objection.dimension] = objection.score
+
+    dropped: list[DroppedDrink] = []
+    removed: set[str] = set()
+    for objection in objections:
+        drink_id = objection.target_drink_id
+        if objection.kind == ObjectionKind.veto and drink_id in first and drink_id not in removed:
+            removed.add(drink_id)
+            dropped.append(
+                DroppedDrink(
+                    drink_id=drink_id,
+                    drink_name=first[drink_id].drink_name,
+                    reason=objection.reason,
+                    by=objection.agent_id,
+                )
+            )
+    if confirmed_shop_ids is not None:
+        for drink_id, proposal in first.items():
+            if drink_id in removed or proposal.shop_id in confirmed_shop_ids:
+                continue
+            removed.add(drink_id)
+            dropped.append(
+                DroppedDrink(
+                    drink_id=drink_id,
+                    drink_name=proposal.drink_name,
+                    reason=f"No shop agent is online for {proposal.shop_id}, so nobody can confirm it is in stock.",
+                    by="registry",
+                )
+            )
 
     ranked = sorted(
-        best_by_drink.values(), key=lambda item: (-item.score, item.drink_id)
+        (
+            RankedDrink(
+                drink_id=drink_id,
+                drink_name=proposal.drink_name,
+                score=combined_score(weights, scores[drink_id]),
+                shop_id=proposal.shop_id,
+                price=proposal.price,
+                dimension_scores={dim: scores[drink_id].get(dim, 0.0) for dim in DIMENSIONS},
+            )
+            for drink_id, proposal in first.items()
+            if drink_id not in removed
+        ),
+        key=lambda item: (-item.score, item.drink_id),
     )
+
     if not ranked:
-        veto_list = ", ".join(sorted(vetoed)) if vetoed else "none"
         return Decision(
             drink_id="",
             drink_name="",
             shop_id="",
             score=0.0,
             ask_human=True,
-            question="Every suggested drink was vetoed. What would you like instead?",
+            question="Every suggested drink was ruled out. What would you like instead?",
             alternatives=[],
-            explanation=f"No proposal survived the vetoes ({veto_list}).",
+            explanation="No candidate survived the vetoes and stock checks.",
+            options=[],
+            weights=weights,
+            dropped=dropped,
         )
 
-    winner = ranked[0]
+    options = ranked[:top_k]
+    winner = options[0]
     ask_human = False
     question: str | None = None
-    if len(ranked) >= 2 and abs(ranked[0].score - ranked[1].score) <= ASK_HUMAN_GAP:
+    if len(options) >= 2 and winner.score - options[1].score <= TIE_GAP:
         ask_human = True
-        runner = ranked[1]
         question = (
-            f"{winner.drink_name} ({winner.score:.2f}) and {runner.drink_name} "
-            f"({runner.score:.2f}) are within 0.05. Which one should we order?"
+            f"{winner.drink_name} and {options[1].drink_name} are nearly tied "
+            f"({winner.score:.2f} vs {options[1].score:.2f}). Your pick will teach us which matters more."
         )
 
-    alternatives = [
-        RankedDrink(drink_id=item.drink_id, drink_name=item.drink_name, score=item.score)
-        for item in ranked[1:]
-    ]
-    veto_note = ""
-    if vetoed:
-        veto_note = " Vetoed: " + ", ".join(sorted(vetoed)) + "."
-    explanation = (
-        f"Chose {winner.drink_name} with score {winner.score:.2f} from {winner.agent_id}."
-        + veto_note
-    )
     return Decision(
         drink_id=winner.drink_id,
         drink_name=winner.drink_name,
@@ -72,22 +121,31 @@ def resolve(proposals: list[Proposal], objections: list[Objection]) -> Decision:
         score=winner.score,
         ask_human=ask_human,
         question=question,
-        alternatives=alternatives,
-        explanation=explanation,
+        alternatives=options[1:],
+        explanation=_explain(winner, options[1] if len(options) > 1 else None, weights, dropped),
+        options=options,
+        weights=weights,
+        dropped=dropped,
     )
 
 
-def _better(candidate: Proposal, current: Proposal) -> bool:
-    if candidate.score != current.score:
-        return candidate.score > current.score
-    return _agent_rank(candidate.agent_id) < _agent_rank(current.agent_id)
-
-
-def _agent_rank(agent_id: str) -> tuple[int, str]:
-    if agent_id == "taste":
-        return (0, agent_id)
-    if agent_id == "social":
-        return (1, agent_id)
-    if agent_id == "explorer":
-        return (2, agent_id)
-    return (3, agent_id)
+def _explain(
+    winner: RankedDrink,
+    runner: RankedDrink | None,
+    weights: dict[str, float],
+    dropped: list[DroppedDrink],
+) -> str:
+    lead = max(DIMENSIONS, key=lambda dim: (weights[dim] * winner.dimension_scores[dim], dim))
+    text = (
+        f"{winner.drink_name} ranks first ({winner.score:.2f}). "
+        f"Its biggest boost is {LABELS[lead]}, which counts for {round(weights[lead] * 100)}% for you."
+    )
+    if runner is not None:
+        edge = max(
+            DIMENSIONS,
+            key=lambda dim: (weights[dim] * (winner.dimension_scores[dim] - runner.dimension_scores[dim]), dim),
+        )
+        text += f" It beats {runner.drink_name} mainly on {LABELS[edge]}."
+    if dropped:
+        text += " Ruled out: " + ", ".join(item.drink_name for item in dropped) + "."
+    return text

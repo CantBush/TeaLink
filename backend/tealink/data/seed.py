@@ -10,8 +10,11 @@ import json
 import random
 from pathlib import Path
 
+from tealink.core import objectives
+from tealink.core.preferences import PRIOR, combined_score
 from tealink.core.taste import match_score
-from tealink.schemas import ATTRIBUTES, Drink, Review, Shop, User
+from tealink.data.loader import Catalog
+from tealink.schemas import ATTRIBUTES, ChoiceRecord, Drink, RankedDrink, Review, Shop, User
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 
@@ -21,6 +24,11 @@ SHOPS: list[tuple[str, str, str]] = [
     ("tigersugar", "Tiger Sugar Lab", "SoMa"),
     ("boba_guys", "Boba Guys", "Hayes Valley"),
     ("sharetea", "Sharetea Lounge", "Richmond"),
+]
+
+# Shops with no agent at startup. They join mid-session through /events/shop-join.
+LATE_SHOPS: list[tuple[str, str, str]] = [
+    ("lantern_leaf", "Lantern Leaf", "Outer Sunset"),
 ]
 
 # id, name, shop_id, price, sweetness, milkiness, tea_intensity, fruitiness, toppings, tags
@@ -65,6 +73,22 @@ RAW_DRINKS: list[tuple] = [
     ("st_honey_lemon", "Honey Lemon Tea", "sharetea", 4.75, 0.55, 0.05, 0.40, 0.70, 0.05, ("fruit",)),
     ("st_matcha", "Matcha Milk Tea", "sharetea", 6.00, 0.50, 0.75, 0.55, 0.05, 0.35, ("matcha",)),
     ("st_coffee_milk", "Coffee Milk Tea", "sharetea", 6.25, 0.60, 0.70, 0.65, 0.02, 0.40, ("oolong",)),
+]
+
+# Lantern Leaf's menu. Nobody has reviewed these yet, so the seeded reviews stay stable.
+LATE_DRINKS: list[tuple] = [
+    ("ll_brown_sugar_hojicha", "Brown Sugar Hojicha Milk", "lantern_leaf", 4.95, 0.82, 0.85, 0.55, 0.05, 0.75, ("brown_sugar", "hojicha")),
+    ("ll_osmanthus_milk", "Osmanthus Milk Tea", "lantern_leaf", 5.25, 0.65, 0.75, 0.50, 0.15, 0.40, ("oolong",)),
+    ("ll_yuzu_green", "Yuzu Green Tea", "lantern_leaf", 5.00, 0.50, 0.05, 0.45, 0.85, 0.10, ("fruit",)),
+]
+
+# Andrew's past picks: (chosen, passed over). He sticks with drinks he knows and
+# usually takes the cheaper one.
+ANDREW_CHOICES: list[tuple[str, tuple[str, ...]]] = [
+    ("kf_classic_milk", ("ts_tiger_brown", "ts_brown_cream")),
+    ("st_thai", ("sr_brown_sugar_black", "bg_ube")),
+    ("kf_thai", ("ts_black_sugar_fresh", "sr_hojicha_cream")),
+    ("bg_classic", ("ts_matcha_brown", "sr_hojicha_latte")),
 ]
 
 ANDREW_REVIEWS: list[tuple[str, int, str]] = [
@@ -123,9 +147,13 @@ def build_dataset() -> tuple[list[Shop], list[Drink], list[User], list[Review]]:
     shops = [
         Shop(id=shop_id, name=name, neighborhood=neighborhood, online=True)
         for shop_id, name, neighborhood in SHOPS
+    ] + [
+        Shop(id=shop_id, name=name, neighborhood=neighborhood, online=False)
+        for shop_id, name, neighborhood in LATE_SHOPS
     ]
-    drinks = [_drink_from_row(row) for row in RAW_DRINKS]
-    drinks_by_id = {drink.id: drink for drink in drinks}
+    drinks = [_drink_from_row(row) for row in RAW_DRINKS + LATE_DRINKS]
+    late_ids = {row[0] for row in LATE_DRINKS}
+    drinks_by_id = {drink.id: drink for drink in drinks if drink.id not in late_ids}
     users = [
         User(id="andrew", name="Andrew", persona="Sweet, milky tea with boba and very little fruit."),
         User(
@@ -154,7 +182,40 @@ def write_dataset(directory: Path | None = None) -> Path:
     _dump(target / "drinks.json", [drink.model_dump(mode="json") for drink in drinks])
     _dump(target / "users.json", [user.model_dump(mode="json") for user in users])
     _dump(target / "reviews.json", [review.model_dump(mode="json") for review in reviews])
+    choices = build_choices(Catalog(shops=shops, drinks=drinks, users=users, reviews=reviews))
+    _dump(target / "choices.json", [choice.model_dump(mode="json") for choice in choices])
     return target
+
+
+def build_choices(catalog: Catalog) -> list[ChoiceRecord]:
+    """Andrew's past picks, scored with today's objective functions."""
+    near = objectives.neighbors(catalog, "andrew")
+    records: list[ChoiceRecord] = []
+    for chosen, passed in ANDREW_CHOICES:
+        options = []
+        for drink_id in (chosen, *passed):
+            drink = catalog.drinks_by_id[drink_id]
+            taste, _factors = objectives.taste(catalog, "andrew", drink, None)
+            scores = {
+                "taste": taste,
+                "social": objectives.social(catalog, drink, near)[0],
+                "novelty": objectives.novelty(catalog, "andrew", drink)[0],
+                "cost": objectives.cost(catalog, drink)[0],
+            }
+            options.append(
+                RankedDrink(
+                    drink_id=drink.id,
+                    drink_name=drink.name,
+                    score=combined_score(PRIOR, scores),
+                    shop_id=drink.shop_id,
+                    price=drink.price,
+                    dimension_scores=scores,
+                )
+            )
+        records.append(
+            ChoiceRecord(user_id="andrew", chosen_drink_id=chosen, options=options, source="history")
+        )
+    return records
 
 
 def main() -> None:
@@ -247,8 +308,8 @@ def _assert_unique(
         ids = [row.id for row in rows]
         if len(ids) != len(set(ids)):
             raise RuntimeError(f"duplicate {label} id")
-    if len(drinks) != 40:
-        raise RuntimeError(f"expected 40 drinks, got {len(drinks)}")
+    if len(drinks) != len(RAW_DRINKS) + len(LATE_DRINKS):
+        raise RuntimeError(f"unexpected drink count {len(drinks)}")
     if len(users) != 15:
         raise RuntimeError(f"expected 15 users, got {len(users)}")
 

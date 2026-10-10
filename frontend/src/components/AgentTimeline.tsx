@@ -1,23 +1,29 @@
 import type { LensEvent } from "../api/types.ts";
-import { factorLabel, matchPercent } from "../lib/format.ts";
+import { price } from "../lib/format.ts";
 
 function detail(event: LensEvent): string | null {
   const payload = event.payload;
-  if (event.type === "selection" && typeof payload.reason === "string") {
-    return payload.reason;
-  }
-  if (event.type === "objection" && typeof payload.reason === "string") {
-    const kind = typeof payload.kind === "string" ? payload.kind : "note";
-    return `${factorLabel(kind)}: ${payload.reason}`;
-  }
   if (event.type === "proposal" && typeof payload.rationale === "string") {
-    const score = typeof payload.score === "number" ? matchPercent(payload.score) : null;
-    return score === null ? payload.rationale : `${score}% match. ${payload.rationale}`;
-  }
-  if (event.type === "decision" && typeof payload.explanation === "string") {
-    return payload.explanation;
+    const cost = typeof payload.price === "number" ? price(payload.price) : "";
+    return cost ? `${payload.rationale} (${cost})` : payload.rationale;
   }
   return null;
+}
+
+function tone(event: LensEvent): string {
+  if (event.type === "decision") return "border-amber bg-[#f8efe2]";
+  if (event.type === "preference") return "border-amber/60 bg-[#fbf4ea]";
+  if (event.type === "objection" && event.payload.kind === "veto") return "border-[#b4533c]/60 bg-[#fbeee9]";
+  if (event.type === "status" && event.message.startsWith("Dropped")) return "border-[#b4533c]/40 bg-cream";
+  return "border-line/80 bg-cream";
+}
+
+function label(event: LensEvent): string {
+  if (event.type === "objection") {
+    if (event.payload.kind === "veto") return "veto";
+    return event.payload.kind === "concern" ? "pushback" : "review";
+  }
+  return event.type;
 }
 
 export function AgentTimeline({
@@ -48,15 +54,11 @@ export function AgentTimeline({
             return (
               <li
                 key={event.seq}
-                className={`timeline-in rounded-2xl border px-4 py-3 ${
-                  event.type === "decision"
-                    ? "border-amber bg-[#f8efe2]"
-                    : "border-line/80 bg-cream"
-                }`}
+                className={`timeline-in rounded-2xl border px-4 py-3 ${tone(event)}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold tracking-[0.14em] text-amber uppercase">
-                    {event.type}
+                    {label(event)}
                     {event.agent_id ? ` · ${event.agent_id}` : ""}
                   </p>
                   <span className="text-xs text-mute">{event.seq}</span>

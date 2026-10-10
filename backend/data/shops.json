@@ -28,5 +28,11 @@
     "name": "Sharetea Lounge",
     "neighborhood": "Richmond",
     "online": true
+  },
+  {
+    "id": "lantern_leaf",
+    "name": "Lantern Leaf",
+    "neighborhood": "Outer Sunset",
+    "online": false
   }
 ]

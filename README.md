@@ -30,13 +30,21 @@ curl -N -X POST http://localhost:8000/recommend \
 
 `make test` runs the backend tests. `make seed` rewrites `backend/data/*.json` (deterministic, `random.seed(7)`).
 
+Progress, to-dos, and plan changes are tracked in [`docs/PROGRESS.md`](docs/PROGRESS.md).
+
 ## Level 2 mapping
 
-- **Capability-based selection.** The registry reads agent cards and the concierge logs a one-sentence reason for taste, social, explorer, and each online shop.
-- **Unexpected change.** A sold-out event, or a shop heartbeat older than 30 seconds, drops that drink or that shop on the next deliberation.
-- **Dynamic discovery.** A shop joins by registering a shop agent, which the next selection includes while the heartbeat is fresh.
-- **Conflict resolution.** The resolver drops vetoed drinks, picks the highest remaining score, and sets `ask_human` when the top two scores are within 0.05.
-- **Explaining the choice.** Selection, proposal, objection, and decision are Lens events. A preference change starts a new deliberation, and the overrides are applied in the taste math before any wording.
+- **Agents with competing objectives.** Taste (fit to the user's reviews), Social (what similar users loved), Explorer (new but plausible), and Budget (price) each propose drinks, then score every candidate by their own objective. Shop agents only confirm stock or veto.
+- **Capability-based selection.** The registry reads agent cards, and the concierge logs a one-sentence reason for each agent it selects.
+- **Unexpected change.** A sold-out event triggers a shop veto. A shop going offline (`/events/shop-offline`, or a stale heartbeat) drops its drinks, because nobody can confirm them.
+- **Dynamic discovery.** Lantern Leaf has no agent at startup. `/events/shop-join` registers one mid-session.
+- **Conflict resolution.** The resolver blends every agent's score using weights the Preference agent learned for this user, and returns a top 3. It sets `ask_human` when the top two are within 0.02, or when everything was ruled out.
+- **Learning from the user.** `/choices` records a pick from the top 3. The Preference agent updates how much the user weighs taste, price, novelty, and friends, starting from seeded past picks.
+- **Explaining the choice.** Selection, preference, proposal, objection, and decision are all Lens events. Why This shows each objective's score times the user's weight.
+
+## Evidence
+
+`cd backend && .venv/bin/python eval/run_eval.py` compares learning against fixed weights on simulated users with hidden priorities. Results are in `docs/PROGRESS.md`.
 
 ## AGNTCY transport
 

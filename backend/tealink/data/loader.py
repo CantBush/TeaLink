@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from tealink.config import get_settings
-from tealink.schemas import Drink, Review, Shop, User
+from tealink.schemas import ChoiceRecord, Drink, Review, Shop, User
 
 
 class Catalog:
@@ -45,6 +45,14 @@ def load_catalog(data_dir: Path | None = None) -> Catalog:
     users = [User.model_validate(row) for row in _read(directory / "users.json")]
     reviews = [Review.model_validate(row) for row in _read(directory / "reviews.json")]
     return Catalog(shops=shops, drinks=drinks, users=users, reviews=reviews)
+
+
+def load_choices(data_dir: Path | None = None) -> list[ChoiceRecord]:
+    """Seeded past picks. Missing file means no history yet."""
+    path = (data_dir or get_settings().data_dir) / "choices.json"
+    if not path.exists():
+        return []
+    return [ChoiceRecord.model_validate(row) for row in _read(path)]
 
 
 def _read(path: Path) -> list[dict]:

@@ -1,4 +1,10 @@
-import type { LensEvent, RecommendRequest, TasteProfile } from "./types.ts";
+import type {
+  LensEvent,
+  PreferenceReport,
+  RecommendRequest,
+  SimilarUser,
+  TasteProfile,
+} from "./types.ts";
 
 function apiBase(): string {
   const configured = import.meta.env.VITE_API_URL;
@@ -108,9 +114,61 @@ export async function setPreference(
   }
 }
 
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${apiBase()}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`${path} failed (${response.status})`);
+  }
+  return response.json() as Promise<T>;
+}
+
+/** POST /choices: the user picked one of the top 3; returns what the Preference agent learned. */
+export function choose(userId: string, drinkId: string): Promise<PreferenceReport> {
+  return post<PreferenceReport>("/choices", { user_id: userId, drink_id: drinkId });
+}
+
+export async function getPreferences(userId: string): Promise<PreferenceReport> {
+  const response = await fetch(`${apiBase()}/preferences/${encodeURIComponent(userId)}`);
+  if (!response.ok) {
+    throw new Error(`preferences failed (${response.status})`);
+  }
+  return response.json() as Promise<PreferenceReport>;
+}
+
+export async function getSimilar(userId: string): Promise<SimilarUser[]> {
+  const response = await fetch(`${apiBase()}/users/similar?user_id=${encodeURIComponent(userId)}`);
+  if (!response.ok) {
+    throw new Error(`similar failed (${response.status})`);
+  }
+  const body = (await response.json()) as { users: SimilarUser[] };
+  return body.users;
+}
+
+export function shopJoin(shopId: string): Promise<unknown> {
+  return post("/events/shop-join", { shop_id: shopId });
+}
+
+export function shopOffline(shopId: string): Promise<unknown> {
+  return post("/events/shop-offline", { shop_id: shopId });
+}
+
+export function resetDemo(): Promise<unknown> {
+  return post("/events/reset", {});
+}
+
 export const client = {
   recommend,
   getProfile,
   setSoldOut,
   setPreference,
+  choose,
+  getPreferences,
+  getSimilar,
+  shopJoin,
+  shopOffline,
+  resetDemo,
 };

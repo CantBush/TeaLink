@@ -8,6 +8,8 @@ CAPABILITIES: dict[str, list[str]] = {
     "taste": ["taste_profile", "personal_history"],
     "social": ["similar_users"],
     "explorer": ["novelty"],
+    "budget": ["cost"],
+    "preference": ["preference_learning"],
     "shop": ["availability", "menu"],
 }
 

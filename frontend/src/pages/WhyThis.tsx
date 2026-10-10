@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import type { FactorContribution, Proposal } from "../api/types.ts";
-import { factorLabel, matchPercent, shopLabel } from "../lib/format.ts";
+import type { Decision, FactorContribution, Proposal } from "../api/types.ts";
+import { DIMENSIONS, dimensionLabel, factorLabel, matchPercent, shopLabel } from "../lib/format.ts";
 import { sampleDecision, sampleProposal } from "../mocks/sample.ts";
 import { useSession } from "../state/session.ts";
 
@@ -51,13 +51,70 @@ function FactorBars({ factors }: { factors: FactorContribution[] }) {
   );
 }
 
+function PriorityMath({ decision }: { decision: Decision }) {
+  const top = decision.options?.[0];
+  const weights = decision.weights;
+  if (!top?.dimension_scores || !weights) return null;
+  const scores = top.dimension_scores;
+  return (
+    <section className="rounded-[28px] border border-line bg-foam p-6">
+      <h2 className="font-display text-2xl">How your priorities ranked it</h2>
+      <p className="mt-1 text-sm text-mute">
+        Each agent scores the drink on its own objective. Your learned weights decide how much each one counts.
+      </p>
+      <table className="mt-4 w-full text-sm">
+        <thead className="text-left text-mute">
+          <tr>
+            <th className="py-1 font-semibold">Agent's objective</th>
+            <th className="py-1 text-right font-semibold">Score</th>
+            <th className="py-1 text-right font-semibold">Your weight</th>
+            <th className="py-1 text-right font-semibold">Adds</th>
+          </tr>
+        </thead>
+        <tbody>
+          {DIMENSIONS.map((dimension) => (
+            <tr key={dimension} className="border-t border-line/70">
+              <td className="py-2 font-semibold">{dimensionLabel(dimension)}</td>
+              <td className="py-2 text-right">{matchPercent(scores[dimension])}</td>
+              <td className="py-2 text-right">{matchPercent(weights[dimension])}%</td>
+              <td className="py-2 text-right text-amber">
+                {(scores[dimension] * weights[dimension] * 100).toFixed(0)}
+              </td>
+            </tr>
+          ))}
+          <tr className="border-t border-ink/20 font-semibold">
+            <td className="py-2" colSpan={3}>
+              Overall
+            </td>
+            <td className="py-2 text-right text-amber">{matchPercent(top.score)}</td>
+          </tr>
+        </tbody>
+      </table>
+      {decision.dropped && decision.dropped.length > 0 ? (
+        <div className="mt-5">
+          <h3 className="text-sm font-semibold tracking-wide text-amber uppercase">Ruled out</h3>
+          <ul className="mt-2 space-y-1 text-sm text-mute">
+            {decision.dropped.map((item) => (
+              <li key={item.drink_id}>
+                <span className="font-semibold text-ink">{item.drink_name}</span>: {item.reason}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function WhyThis() {
   const session = useSession();
   const fallback = sampleDecision();
   const decision = session.decision ?? fallback;
-  const liveProposal = session.proposals.find(
-    (proposal) => proposal.drink_id === decision.drink_id,
-  );
+  const forDrink = session.proposals.filter((proposal) => proposal.drink_id === decision.drink_id);
+  const liveProposal =
+    forDrink.find((proposal) => proposal.agent_id === "taste") ??
+    forDrink.find((proposal) => proposal.evidence.length > 0) ??
+    forDrink[0];
   const proposal: Proposal | null = liveProposal ?? sampleProposal(decision.drink_id);
   const pct = matchPercent(decision.score);
 
@@ -82,6 +139,8 @@ export function WhyThis() {
           <p className="mt-3 text-sm text-mute">{proposal.rationale}</p>
         ) : null}
       </header>
+
+      <PriorityMath decision={decision} />
 
       {proposal ? (
         <section className="rounded-[28px] border border-line bg-foam p-6">

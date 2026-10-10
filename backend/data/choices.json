@@ -1,0 +1,186 @@
+[
+  {
+    "user_id": "andrew",
+    "chosen_drink_id": "kf_classic_milk",
+    "options": [
+      {
+        "drink_id": "kf_classic_milk",
+        "drink_name": "Classic Milk Tea",
+        "score": 0.6840105263157895,
+        "shop_id": "kungfu",
+        "price": 5.5,
+        "dimension_scores": {
+          "taste": 0.8754736842105263,
+          "social": 0.75,
+          "novelty": 0.0,
+          "cost": 0.6
+        }
+      },
+      {
+        "drink_id": "ts_tiger_brown",
+        "drink_name": "Tiger Brown Sugar Boba",
+        "score": 0.5691879093737018,
+        "shop_id": "tigersugar",
+        "price": 7.0,
+        "dimension_scores": {
+          "taste": 0.8640000000000001,
+          "social": 0.6265860624913446,
+          "novelty": 0.0,
+          "cost": 0.0
+        }
+      },
+      {
+        "drink_id": "ts_brown_cream",
+        "drink_name": "Brown Sugar Cream Foam",
+        "score": 0.7212000000000001,
+        "shop_id": "tigersugar",
+        "price": 6.75,
+        "dimension_scores": {
+          "taste": 0.914,
+          "social": 0.7500000000000001,
+          "novelty": 0.6066666666666667,
+          "cost": 0.09999999999999998
+        }
+      }
+    ],
+    "source": "history"
+  },
+  {
+    "user_id": "andrew",
+    "chosen_drink_id": "st_thai",
+    "options": [
+      {
+        "drink_id": "st_thai",
+        "drink_name": "Thai Milk Tea",
+        "score": 0.6966842105263158,
+        "shop_id": "sharetea",
+        "price": 5.75,
+        "dimension_scores": {
+          "taste": 0.9257894736842105,
+          "social": 0.7500000000000001,
+          "novelty": 0.0,
+          "cost": 0.5
+        }
+      },
+      {
+        "drink_id": "sr_brown_sugar_black",
+        "drink_name": "Brown Sugar Black Milk",
+        "score": 0.6241842105263158,
+        "shop_id": "sunright",
+        "price": 6.5,
+        "dimension_scores": {
+          "taste": 0.8757894736842106,
+          "social": 0.75,
+          "novelty": 0.0,
+          "cost": 0.19999999999999996
+        }
+      },
+      {
+        "drink_id": "bg_ube",
+        "drink_name": "Ube Milk Tea",
+        "score": 0.7033263157894737,
+        "shop_id": "boba_guys",
+        "price": 6.5,
+        "dimension_scores": {
+          "taste": 0.8696842105263157,
+          "social": 0.75,
+          "novelty": 0.55,
+          "cost": 0.19999999999999996
+        }
+      }
+    ],
+    "source": "history"
+  },
+  {
+    "user_id": "andrew",
+    "chosen_drink_id": "kf_thai",
+    "options": [
+      {
+        "drink_id": "kf_thai",
+        "drink_name": "Thai Tea",
+        "score": 0.7958842105263159,
+        "shop_id": "kungfu",
+        "price": 5.25,
+        "dimension_scores": {
+          "taste": 0.8997894736842105,
+          "social": 0.7500000000000001,
+          "novelty": 0.5566666666666666,
+          "cost": 0.7
+        }
+      },
+      {
+        "drink_id": "ts_black_sugar_fresh",
+        "drink_name": "Fresh Milk Black Sugar",
+        "score": 0.7324157894736844,
+        "shop_id": "tigersugar",
+        "price": 6.5,
+        "dimension_scores": {
+          "taste": 0.8962105263157896,
+          "social": 0.7500000000000001,
+          "novelty": 0.6466666666666667,
+          "cost": 0.19999999999999996
+        }
+      },
+      {
+        "drink_id": "sr_hojicha_cream",
+        "drink_name": "Hojicha Cream Tea",
+        "score": 0.6720105263157895,
+        "shop_id": "sunright",
+        "price": 6.75,
+        "dimension_scores": {
+          "taste": 0.8354736842105264,
+          "social": 0.7500000000000001,
+          "novelty": 0.5666666666666667,
+          "cost": 0.09999999999999998
+        }
+      }
+    ],
+    "source": "history"
+  },
+  {
+    "user_id": "andrew",
+    "chosen_drink_id": "bg_classic",
+    "options": [
+      {
+        "drink_id": "bg_classic",
+        "drink_name": "House Milk Tea",
+        "score": 0.6954105263157895,
+        "shop_id": "boba_guys",
+        "price": 5.75,
+        "dimension_scores": {
+          "taste": 0.9234736842105263,
+          "social": 0.75,
+          "novelty": 0.0,
+          "cost": 0.5
+        }
+      },
+      {
+        "drink_id": "ts_matcha_brown",
+        "drink_name": "Matcha Brown Sugar",
+        "score": 0.6785,
+        "shop_id": "tigersugar",
+        "price": 6.75,
+        "dimension_scores": {
+          "taste": 0.9199999999999999,
+          "social": 0.5,
+          "novelty": 0.55,
+          "cost": 0.09999999999999998
+        }
+      },
+      {
+        "drink_id": "sr_hojicha_latte",
+        "drink_name": "Hojicha Latte",
+        "score": 0.6780105263157895,
+        "shop_id": "sunright",
+        "price": 6.5,
+        "dimension_scores": {
+          "taste": 0.8054736842105263,
+          "social": 0.75,
+          "novelty": 0.6166666666666667,
+          "cost": 0.19999999999999996
+        }
+      }
+    ],
+    "source": "history"
+  }
+]

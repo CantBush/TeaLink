@@ -15,6 +15,8 @@ ATTRIBUTES: tuple[str, ...] = (
     "toppings",
 )
 
+DIMENSIONS: tuple[str, ...] = ("taste", "social", "novelty", "cost")
+
 
 class Drink(BaseModel):
     id: str
@@ -82,11 +84,14 @@ class Proposal(BaseModel):
     factors: list[FactorContribution]
     evidence: list[Evidence]
     rationale: str
+    price: float = 0.0
+    dimension: str | None = None
 
 
 class ObjectionKind(str, Enum):
     veto = "veto"
     concern = "concern"
+    neutral = "neutral"
     support = "support"
 
 
@@ -95,6 +100,8 @@ class Objection(BaseModel):
     target_drink_id: str
     kind: ObjectionKind
     reason: str
+    score: float | None = None
+    dimension: str | None = None
 
 
 class AgentSelection(BaseModel):
@@ -107,6 +114,16 @@ class RankedDrink(BaseModel):
     drink_id: str
     drink_name: str
     score: float
+    shop_id: str = ""
+    price: float = 0.0
+    dimension_scores: dict[str, float] = Field(default_factory=dict)
+
+
+class DroppedDrink(BaseModel):
+    drink_id: str
+    drink_name: str
+    reason: str
+    by: str
 
 
 class Decision(BaseModel):
@@ -118,6 +135,26 @@ class Decision(BaseModel):
     question: str | None
     alternatives: list[RankedDrink]
     explanation: str
+    options: list[RankedDrink] = Field(default_factory=list)
+    weights: dict[str, float] = Field(default_factory=dict)
+    dropped: list[DroppedDrink] = Field(default_factory=list)
+
+
+class ChoiceRecord(BaseModel):
+    """One time the user picked a drink from a set of offered options."""
+
+    user_id: str
+    chosen_drink_id: str
+    options: list[RankedDrink]
+    source: Literal["history", "live"] = "live"
+
+
+class PreferenceReport(BaseModel):
+    user_id: str
+    weights: dict[str, float]
+    previous_weights: dict[str, float] | None = None
+    choices_seen: int
+    summary: str
 
 
 class LensEventType(str, Enum):
@@ -126,6 +163,7 @@ class LensEventType(str, Enum):
     objection = "objection"
     decision = "decision"
     status = "status"
+    preference = "preference"
 
 
 class LensEvent(BaseModel):
@@ -137,15 +175,17 @@ class LensEvent(BaseModel):
 
 
 class DeliberationRequest(BaseModel):
-    round: Literal["propose", "object"]
+    round: Literal["propose", "object", "learn"]
     user_id: str
     query: str
     preference_overrides: dict[str, float] = Field(default_factory=dict)
     candidate_drink_ids: list[str] = Field(default_factory=list)
     sold_out_drink_ids: list[str] = Field(default_factory=list)
+    choice: ChoiceRecord | None = None
 
 
 class AgentReply(BaseModel):
     agent_id: str
     proposals: list[Proposal] = Field(default_factory=list)
     objections: list[Objection] = Field(default_factory=list)
+    preference: PreferenceReport | None = None

@@ -15,7 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 bus = ["agntcy-app-sdk", "a2a-sdk"]
-dev = ["pytest"]
+dev = ["pytest", "httpx"]
 
 [build-system]
 requires = ["setuptools>=61"]
