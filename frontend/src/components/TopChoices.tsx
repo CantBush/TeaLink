@@ -79,36 +79,11 @@ function CloseCall({
   );
 }
 
-function ScoreRow({ option }: { option: RankedDrink }) {
-  const scores = option.dimension_scores;
-  if (!scores) return null;
-  return (
-    <ul className="mt-4 grid grid-cols-2 gap-x-5 gap-y-2 @lg:grid-cols-1">
-      {DIMENSIONS.map((dimension) => (
-        <li key={dimension} className="min-w-0 text-xs">
-          <div className="mb-0.5 flex justify-between gap-2 text-mute">
-            <span className="truncate">{dimensionLabel(dimension)}</span>
-            <span>{matchPercent(scores[dimension] ?? 0)}</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-line">
-            <div
-              className="h-full rounded-full bg-moss"
-              style={{ width: `${matchPercent(scores[dimension] ?? 0)}%` }}
-            />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function TopChoices({
-  name,
   decision,
   running,
   onPick,
 }: {
-  name: string;
   decision: Decision | null;
   running: boolean;
   onPick: (option: RankedDrink) => void;
@@ -116,10 +91,10 @@ export function TopChoices({
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="flex items-center gap-2 font-display text-2xl leading-none text-moss"><TeaBowl steaming className="h-7 w-7" />for {name}</p>
+        <p className="flex items-center gap-2 font-display text-2xl leading-none text-moss"><TeaBowl steaming className="h-7 w-7" />just for you</p>
         <h2 className="mt-3 font-display text-3xl text-ink">steeping your top 3…</h2>
         <p className="mt-2 max-w-md text-mute">
-          Taste, Social, Explorer, and Budget are arguing it out, and the shops are checking stock.
+          The agents are weighing in on your picks, and the shops are checking stock.
         </p>
       </article>
     );
@@ -192,7 +167,6 @@ export function TopChoices({
                 {option.offer.percent}% off from {shopLabel(option.offer.shop_id)}
               </p>
             ) : null}
-            <ScoreRow option={option} />
             <div className="mt-auto pt-4">
               <button
                 type="button"

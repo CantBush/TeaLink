@@ -4,10 +4,10 @@
 
 ## Before you start
 
-- **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the timeline header says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
-- Press **Reset demo** on the TeaLink tab (`/`) before every run. It works in both AGNTCY and local mode.
+- **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the badge next to **the team** on **at the counter** says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
+- Press **Reset demo** on the **at the counter** sub-tab (`/counter`) before every run. It works in both AGNTCY and local mode. The TeaLink tab has four sub-tabs: **today's picks** (the top 3), **at the counter** (the agents' chat and the what-if buttons), **why this order**, and **evidence**.
 - Have a second tab on `/evidence`.
-- Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" on the timeline. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
+- Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" next to the team. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
 
 ## 0:00 to 0:20: the problem
 
@@ -15,15 +15,16 @@
 
 ## 0:20 to 0:55: one round, with real disagreement
 
-On the TeaLink tab, tap **See how the agents decided** under **At the counter** (it stays open for the rest of the demo, including after Reset demo), then go top to bottom:
+Start on **at the counter** and go top to bottom:
 
-1. **Team selected:** "The concierge picks agents by capability, and you can open this to see why each one was chosen. Each agent is its own process. The badge up here shows all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
-2. **Andrew's priorities:** "From his last 4 orders, the Preference agent thinks price matters most to him (43%), then taste (41%)."
-3. **Each agent proposes:** "Taste wants Brown Sugar Oolong, a 96% match. Social proposes Hojicha Cream Tea because Sarah, whose taste is almost identical to Andrew's, rated it 5 out of 5. Budget wants the cheapest drinks that still fit. Explorer wants drinks he's never had."
-4. **They argue:** "Then every agent scores *every* candidate on its own objective. Explorer pushes back on drinks he's already had; Budget pushes back on the $6.50-and-up ones. Only the shop agents know inventory."
+1. **The team:** "The concierge picks agents by capability. Each icon is one agent, and every shop agent gets the same storefront icon." Tap **Taste** to show its description, then tap it again to close it. "Each agent is its own process. The green dots and this badge show all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
+2. **They argue, Preference's first message:** "From his last 4 orders, the Preference agent thinks price matters most to him (43%), then taste (41%)."
+3. **Opening picks:** "Taste wants Brown Sugar Oolong, a 96% match. Social proposes Hojicha Cream Tea because Sarah, whose taste is almost identical to Andrew's, rated it 5 out of 5. Budget wants the cheapest drinks that still fit. Explorer wants drinks he's never had."
+4. **Round 1:** "Then every agent scores *every* drink on the shortlist by its own objective. Explorer pushes back on drinks he's already had; Budget pushes back on the $6.50-and-up ones. Only the shop agents know what's in stock."
 5. **Ruled out:** "Lantern Leaf's drinks are ruled out, because no shop agent is online to confirm they're in stock."
+6. **The arbiter decided:** "In this mode the agents get one round, and then the arbiter weighs their scores by Andrew's priorities. It's too close to call, so it hands the choice to him."
 
-Point at the top 3: **Thai Tea 78, Wintermelon Tea 77, Pearl Milk Tea 71**, with the close-call box.
+Switch to **today's picks** and point at the top 3: **Thai Tea 78, Wintermelon Tea 77, Pearl Milk Tea 71**, with the close-call box.
 
 > "Thai Tea and Wintermelon are too close to call, so instead of guessing, the team asks Andrew. And it says why: Thai Tea wins on taste and on what people like him rate highly; Wintermelon wins on price and on being new."
 
@@ -33,29 +34,29 @@ Click **Pick this** on **Pearl Milk Tea** (#3).
 
 > "He skipped both and took the best taste match. The Preference agent learns from that: taste now counts 45% (it was 41%) and price drops to 36%. Pearl Milk Tea climbs from 71 to 73. Every pick from the top 3 is a training signal."
 
-Point at **What Andrew cares about**, where the change since the last pick is shown next to each priority.
+Switch to **at the counter**: the chat now opens with "You picked Pearl Milk Tea", and Preference's message shows the new priorities.
 
 ## 1:20 to 2:15: the world changes, and the team re-plans
 
-Each button starts a fresh deliberation. After each one, point at the new top 3 and the timeline.
+The what-if buttons are at the top of **at the counter**. Each one starts a fresh round. After each one, point at the black note at the top of the chat, the new messages, and the decision at the bottom. Flip to **today's picks** for the new top 3 when it helps.
 
 1. **#1 sells out** (Thai Tea).
-   > "Kung Fu Tea's agent vetoes it, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop. Wintermelon and Pearl are within two points, so it's a close call again, and the team asks rather than guesses."
+   > "Kung Fu Tea's agent vetoes it in the chat, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop. Wintermelon and Pearl are within two points, so it's a close call again, and the team asks rather than guesses."
 2. **Lantern Leaf joins.**
    > "A new shop registers its agent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 81, with Lantern Leaf's Osmanthus Milk Tea right behind it."
 3. **I don't like brown sugar.**
    > "New information from the user. Brown Sugar Hojicha drops out of the top 3, and Osmanthus Milk Tea moves up to #1, in a dead heat with Wintermelon at 75."
-   Click **What changed** in the TeaLink sub-tabs: "Before and after: what moved, what left and why, and notice his priorities didn't change. The world changed, not his taste."
+   Point at Preference's message in the chat: "Notice his priorities didn't change. The world changed, not his taste."
 4. **#1's shop goes offline** (Lantern Leaf).
    > "The shop that just joined drops off the network. Its agent stops responding, so its drinks are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. The team falls back to Wintermelon, Pearl, and Thai Milk Tea."
 
 ## 2:15 to 2:45: why should you trust it
 
-Open **Why this order?** on the top drink.
+Open the **why this order** sub-tab.
 
 > "Nothing here is a black box. Each agent's score, times Andrew's learned weight, adds up to the final number. The numbers are computed in code; an LLM never makes up a score."
 
-Switch to the **Evidence** tab.
+Switch to the **evidence** sub-tab.
 
 > "We tested this against simpler baselines. Three simulated users with hidden priorities each made 8 picks. A hit means the recommender's #1 was that user's true favorite drink, which it never gets to see. Learning hit 7 of 24, fixed priorities 5, and just recommending the most popular drink 2. It also re-suggested drinks they'd already tried half as often. The loyalist's learned priorities land almost exactly on the hidden ones: taste 66% vs 70%."
 

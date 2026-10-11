@@ -5,7 +5,7 @@ import { allDrinks } from "../lib/catalog.ts";
 import { SHOP_IDS, shopLabel } from "../lib/format.ts";
 import { COVERS, type CoverId, coverId, coverPhoto, setCover } from "../lib/images.ts";
 import { ACCENT_COLORS, AVATAR_COLORS } from "../lib/palette.ts";
-import { ALL_STATS, STAT_LABELS } from "../lib/stats.ts";
+import { ALL_STATS, STAT_LABELS, shownStats } from "../lib/stats.ts";
 import { profilesChanged } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
 
@@ -49,7 +49,7 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
   const [accent, setAccent] = useState(profile.accent);
   const [drink, setDrink] = useState(profile.pinned_drink_id ?? "");
   const [shop, setShop] = useState(profile.pinned_shop_id ?? "");
-  const [shown, setShown] = useState<StatKey[]>(profile.visible_stats);
+  const [shown, setShown] = useState<StatKey[]>(shownStats(profile.visible_stats));
   const [cover, setCoverChoice] = useState<CoverId>(coverId(profile));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

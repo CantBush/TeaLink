@@ -171,10 +171,10 @@ export function WhyThis() {
       ) : null}
 
       <Link
-        to="/counterfactual"
+        to="/counter"
         className="inline-flex rounded-full bg-moss px-5 py-2.5 text-sm font-semibold tracking-wide text-cream"
       >
-        WHAT WOULD CHANGE THIS?
+        what would change this?
       </Link>
     </main>
   );

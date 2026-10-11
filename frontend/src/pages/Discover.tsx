@@ -10,8 +10,10 @@ import { SendRec } from "../components/SendRec.tsx";
 import { type CatalogDrink, type DrinkBase, allDrinks, drinkBase, drinkInfo } from "../lib/catalog.ts";
 import { SHOP_IDS, matchPercent, price, shopLabel } from "../lib/format.ts";
 import { drinkPhoto, shopPhoto } from "../lib/images.ts";
+import { drinkMatch, shopMatch } from "../lib/match.ts";
 import { noteLabel } from "../lib/stats.ts";
 import { useMe } from "../state/me.ts";
+import { loadProfile, useSession } from "../state/session.ts";
 import { profilesChanged } from "../state/social.ts";
 
 type Scope = "all" | "drinks" | "shops" | "people";
@@ -30,7 +32,7 @@ const BASES: { id: DrinkBase; label: string }[] = [
 ];
 
 const BASE_LABEL: Record<DrinkBase, string> = { milk: "Milk tea", fruit: "Fruit tea", tea: "Tea-forward" };
-const FLAVORS = ["brown_sugar", "oolong", "matcha", "taro", "thai_tea", "hojicha", "jasmine", "fruit"];
+const FLAVORS = ["brown_sugar", "oolong", "matcha", "taro", "thai_tea", "hojicha", "jasmine"];
 
 function matches(text: string, query: string): boolean {
   return text.toLowerCase().includes(query);
@@ -42,7 +44,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
       type="button"
       onClick={onClick}
       aria-pressed={on}
-      className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold ${
+      className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
         on ? "border-ink bg-ink text-foam" : "border-line bg-foam text-ink/80 hover:border-ink/40"
       }`}
     >
@@ -60,7 +62,7 @@ function SectionTitle({ children, count }: { children: string; count: number }) 
   );
 }
 
-function DrinkRow({ drink, onOpen }: { drink: CatalogDrink; onOpen: () => void }) {
+function DrinkRow({ drink, match, onOpen }: { drink: CatalogDrink; match: number; onOpen: () => void }) {
   return (
     <li>
       <button type="button" onClick={onOpen} className="flex w-full items-center gap-4 py-3 text-left">
@@ -71,7 +73,10 @@ function DrinkRow({ drink, onOpen }: { drink: CatalogDrink; onOpen: () => void }
             {shopLabel(drink.shop_id)} · {BASE_LABEL[drinkBase(drink)]}
           </span>
         </span>
-        <span className="shrink-0 font-semibold">{price(drink.price)}</span>
+        <span className="shrink-0 text-right">
+          <span className="block font-semibold">{price(drink.price)}</span>
+          <span className="block text-xs text-moss">{matchPercent(match)}% for you</span>
+        </span>
       </button>
     </li>
   );
@@ -172,6 +177,7 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
 
 export function Discover() {
   const me = useMe();
+  const { profile: taste, userId } = useSession();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const scope = (params.get("scope") as Scope | null) ?? "all";
@@ -210,6 +216,10 @@ export function Discover() {
     };
   }, [me]);
 
+  useEffect(() => {
+    loadProfile(userId);
+  }, [userId]);
+
   const q = query.trim().toLowerCase();
   const setScope = (next: Scope) => {
     const copy = new URLSearchParams(params);
@@ -230,11 +240,15 @@ export function Discover() {
           (!cheap || drink.price < 5) &&
           (!flavor || drink.flavor_tags.includes(flavor)) &&
           (!shop || drink.shop_id === shop),
-      ),
-    [q, base, cheap, flavor, shop],
+      )
+        .map((drink) => ({ drink, match: drinkMatch(taste, drink) }))
+        .sort((a, b) => b.match - a.match || a.drink.name.localeCompare(b.drink.name)),
+    [q, base, cheap, flavor, shop, taste],
   );
 
-  const shops = SHOP_IDS.filter((id) => !q || matches(shopLabel(id), q) || allDrinks().some((d) => d.shop_id === id && matches(d.name, q)));
+  const shops = SHOP_IDS.filter((id) => !q || matches(shopLabel(id), q) || allDrinks().some((d) => d.shop_id === id && matches(d.name, q)))
+    .map((id) => ({ id, match: shopMatch(taste, allDrinks().filter((drink) => drink.shop_id === id)) }))
+    .sort((a, b) => b.match - a.match);
   const folks = people.filter(
     (person) =>
       !q || matches(person.display_name, q) || matches(person.handle, q) || matches(person.stats.personality ?? "", q),
@@ -301,7 +315,7 @@ export function Discover() {
         <section>
           <SectionTitle count={shops.length}>Shops</SectionTitle>
           <ul className="-mx-5 flex gap-3 overflow-x-auto px-5 pb-1">
-            {shops.map((id) => {
+            {shops.map(({ id, match }) => {
               const menu = allDrinks().filter((drink) => drink.shop_id === id);
               const low = Math.min(...menu.map((drink) => drink.price));
               const high = Math.max(...menu.map((drink) => drink.price));
@@ -320,6 +334,7 @@ export function Discover() {
                     <span className="block px-4 pb-3 text-sm text-mute">
                       {menu.length} drinks · {price(low)}–{price(high)}
                     </span>
+                    <span className="block px-4 pb-3 -mt-2 text-xs text-moss">{matchPercent(match)}% for you</span>
                   </button>
                 </li>
               );
@@ -355,8 +370,8 @@ export function Discover() {
             <p className="py-6 text-center text-[15px] text-mute">No drinks match. Try removing a filter.</p>
           ) : (
             <ul className="divide-y divide-line">
-              {drinks.slice(0, limit(8)).map((drink) => (
-                <DrinkRow key={drink.id} drink={drink} onOpen={() => setOpen(drink)} />
+              {drinks.slice(0, limit(8)).map(({ drink, match }) => (
+                <DrinkRow key={drink.id} drink={drink} match={match} onOpen={() => setOpen(drink)} />
               ))}
             </ul>
           )}

@@ -24,7 +24,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
     <section className="rounded-[28px] border border-line bg-foam p-5 sm:p-6">
       <h2 className="flex items-center gap-2 font-display text-2xl leading-none"><Teapot className="h-6 w-6 shrink-0 text-moss" />what if…</h2>
       <p className="mt-1 text-sm text-mute">
-        Change the world, then watch the agents re-plan. Each button starts a fresh deliberation.
+        Change something, then watch the agents re-plan your order. Each button starts a fresh round.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <button
@@ -62,7 +62,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
           onClick={() =>
             void act(
               () => client.setPreference(getSession().userId, { brown_sugar: 0 }),
-              `${getSession().name} doesn't like brown sugar.`,
+              "You don't like brown sugar.",
             )
           }
         >

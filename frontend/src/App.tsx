@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { CustomerOnly } from "./components/CustomerOnly.tsx";
 import { GardenBackdrop, Vine } from "./components/Doodles.tsx";
 import { NavBar } from "./components/NavBar.tsx";
-import { Counterfactual } from "./pages/Counterfactual.tsx";
+import { Counter } from "./pages/Counter.tsx";
 import { Discover } from "./pages/Discover.tsx";
 import { Evidence } from "./pages/Evidence.tsx";
 import { Home } from "./pages/Home.tsx";
@@ -33,7 +33,8 @@ export default function App() {
             <Route path="/me" element={<MyProfile />} />
             <Route path="/u/:handle" element={<Profile />} />
             <Route path="/why" element={<WhyThis />} />
-            <Route path="/counterfactual" element={<Counterfactual />} />
+            <Route path="/counter" element={<Counter />} />
+            <Route path="/counterfactual" element={<Navigate to="/counter" replace />} />
             <Route path="/evidence" element={<Evidence />} />
             <Route path="/friends" element={<Navigate to="/discover?scope=people" replace />} />
           </Route>

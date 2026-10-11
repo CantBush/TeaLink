@@ -7,7 +7,7 @@ import { Avatar } from "./Avatar.tsx";
 import { BobaMark } from "./BobaMark.tsx";
 
 /** The TeaLink tab owns these pages; see TeaLinkTabs. */
-const TEALINK_PATHS = ["/", "/counterfactual", "/why", "/evidence"];
+const TEALINK_PATHS = ["/", "/counter", "/why", "/evidence"];
 
 const icon = "h-6 w-6";
 

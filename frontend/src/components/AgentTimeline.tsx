@@ -1,100 +1,25 @@
-import { TeaBowl } from "./Doodles.tsx";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { Health, LensEvent } from "../api/types.ts";
-import { agentLabel, price, readableShops } from "../lib/format.ts";
+import { agentInfo, agentKind } from "../lib/agents.ts";
+import { price, readableShops } from "../lib/format.ts";
+import { AgentSymbol } from "./AgentSymbol.tsx";
+import { LeafPair, TeaBowl } from "./Doodles.tsx";
 
 /** Notes the frontend adds itself (e.g. "Thai Tea just sold out.") use seq numbers from here up. */
 const LOCAL_SEQ_START = 100000;
 
-/** Remembered so the timeline stays open across What-if reruns once the presenter opens it. */
-const OPEN_KEY = "tealink.timeline.open";
+type Tone = "plain" | "back" | "doubt" | "veto" | "soften" | "offer" | "priorities";
 
-interface Phases {
-  changes: LensEvent[];
-  selections: LensEvent[];
-  preference: LensEvent | null;
-  proposals: Map<string, LensEvent[]>;
-  candidates: LensEvent | null;
-  debate: LensEvent[];
-  dropped: LensEvent[];
-  offers: LensEvent[];
-  notes: LensEvent[];
-  decision: LensEvent | null;
-}
-
-function split(events: LensEvent[]): Phases {
-  const phases: Phases = {
-    changes: [],
-    selections: [],
-    preference: null,
-    proposals: new Map(),
-    candidates: null,
-    debate: [],
-    dropped: [],
-    offers: [],
-    notes: [],
-    decision: null,
-  };
-  for (const event of events) {
-    switch (event.type) {
-      case "selection":
-        phases.selections.push(event);
-        break;
-      case "preference":
-        phases.preference = event;
-        break;
-      case "proposal": {
-        const agent = event.agent_id ?? "agent";
-        phases.proposals.set(agent, [...(phases.proposals.get(agent) ?? []), event]);
-        break;
-      }
-      case "objection":
-        phases.debate.push(event);
-        break;
-      case "offer":
-        phases.offers.push(event);
-        break;
-      case "decision":
-        phases.decision = event;
-        break;
-      case "status":
-        if (event.seq >= LOCAL_SEQ_START) phases.changes.push(event);
-        else if (event.message.startsWith("Dropped")) phases.dropped.push(event);
-        else if (event.message.includes("candidates")) phases.candidates = event;
-        else if (event.message !== "Starting deliberation.") phases.notes.push(event);
-        break;
-    }
-  }
-  return phases;
-}
-
-function Phase({ step, title, children }: { step: number; title: string; children: ReactNode }) {
-  return (
-    <li className="timeline-in">
-      <p className="mb-2 text-[11px] font-semibold tracking-[0.14em] text-moss lowercase">
-        {step}. {title}
-      </p>
-      {children}
-    </li>
-  );
-}
-
-function debateTone(event: LensEvent): { card: string; tag: string } {
-  if (event.payload.kind === "veto") return { card: "border-[#b4533c]/60 bg-[#fbeee9]", tag: "Veto" };
-  if (event.payload.kind === "concern") return { card: "border-line/80 bg-cream", tag: "Pushback" };
-  return { card: "border-line/80 bg-cream", tag: "Review" };
-}
-
-function proposalLine(event: LensEvent): string {
-  const name = typeof event.payload.drink_name === "string" ? event.payload.drink_name : event.message;
-  const cost = typeof event.payload.price === "number" ? price(event.payload.price) : "";
-  return cost ? `${name} · ${cost}` : name;
-}
+type ChatItem =
+  | { kind: "divider"; key: string; text: string }
+  | { kind: "system"; key: string; text: string; tone: "change" | "dropped" | "note" }
+  | { kind: "message"; key: string; agentId: string; tag: string | null; tone: Tone; text: string; lines?: string[] };
 
 function TransportBadge({ health, busCount, usingMock }: { health: Health | null; busCount: number; usingMock: boolean }) {
   const base = "rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-[0.04em] normal-case";
-  if (usingMock) return <span className={`${base} text-mute`}>Saved round</span>;
-  if (!health) return <span className={`${base} text-mute`}>Live</span>;
+  if (usingMock) return <span className={`${base} bg-sage text-mute`}>Saved round</span>;
+  if (!health) return <span className={`${base} bg-sage text-mute`}>Live</span>;
   if (health.effective === "agntcy" && busCount > 0) {
     return (
       <span className={`${base} bg-ink text-cream`} title="Agents answered over A2A on a NATS bus (Cisco AGNTCY)">
@@ -109,7 +34,283 @@ function TransportBadge({ health, busCount, usingMock }: { health: Health | null
       </span>
     );
   }
-  return <span className={`${base} text-mute`}>In-process agents</span>;
+  return <span className={`${base} bg-sage text-mute`}>In-process agents</span>;
+}
+
+/** Drop the speaker's own name from backend text, since the chat already shows who is talking. */
+function firstPerson(agentId: string, text: string): string {
+  const name = agentInfo(agentId).name;
+  const trimmed = text.replace(/^Veto:\s*/, "");
+  const verb = trimmed.match(/^[^:;]*? (?=(confirms|backs|pushes back|has no) )/);
+  if (verb) return readableShops(trimmed.slice(verb[0].length));
+  if (trimmed.startsWith(`${name} `)) return readableShops(trimmed.slice(name.length + 1));
+  return readableShops(trimmed);
+}
+
+function objectionTone(event: LensEvent): { tone: Tone; tag: string | null } {
+  const payload = event.payload;
+  if (payload.revised_from) return { tone: "soften", tag: "softens" };
+  if (payload.kind === "veto" || event.message.startsWith("Veto:")) return { tone: "veto", tag: "veto" };
+  if (agentKind(event.agent_id ?? "") === "shop") return { tone: "back", tag: null };
+  if (payload.kind === "concern") return { tone: "doubt", tag: null };
+  return { tone: "back", tag: null };
+}
+
+function buildChat(events: LensEvent[]): { items: ChatItem[]; selections: LensEvent[]; decision: LensEvent | null } {
+  const items: ChatItem[] = [];
+  const selections: LensEvent[] = [];
+  let decision: LensEvent | null = null;
+  let round = 0;
+  let opened = false;
+  const picks = new Map<string, Extract<ChatItem, { kind: "message" }>>();
+
+  for (const event of events) {
+    const key = `${event.type}-${event.seq}`;
+    const agentId = event.agent_id ?? "";
+    switch (event.type) {
+      case "selection":
+        selections.push(event);
+        break;
+      case "preference":
+        items.push({ kind: "message", key, agentId: "preference", tag: "your priorities", tone: "priorities", text: event.message });
+        break;
+      case "proposal": {
+        if (!opened) {
+          items.push({ kind: "divider", key: `${key}-open`, text: "opening picks" });
+          opened = true;
+        }
+        const name = typeof event.payload.drink_name === "string" ? event.payload.drink_name : event.message;
+        const cost = typeof event.payload.price === "number" ? price(event.payload.price) : "";
+        const line = cost ? `${name} · ${cost}` : name;
+        const existing = picks.get(agentId);
+        if (existing) {
+          existing.lines = [...(existing.lines ?? []), line];
+        } else {
+          const message: Extract<ChatItem, { kind: "message" }> = {
+            kind: "message",
+            key,
+            agentId,
+            tag: "proposes",
+            tone: "plain",
+            text: typeof event.payload.rationale === "string" ? `${name}: ${event.payload.rationale}` : "",
+            lines: [line],
+          };
+          picks.set(agentId, message);
+          items.push(message);
+        }
+        break;
+      }
+      case "objection": {
+        const eventRound = typeof event.payload.round === "number" ? event.payload.round : 1;
+        if (eventRound !== round) {
+          round = eventRound;
+          items.push({
+            kind: "divider",
+            key: `${key}-round`,
+            text: round === 1 ? "round 1 · everyone weighs in on the shortlist" : `round ${round} · they answer each other`,
+          });
+        }
+        const { tone, tag } = objectionTone(event);
+        items.push({ kind: "message", key, agentId, tag, tone, text: firstPerson(agentId, event.message) });
+        break;
+      }
+      case "offer":
+        items.push({
+          kind: "message",
+          key,
+          agentId,
+          tag: typeof event.payload.percent === "number" ? `${event.payload.percent}% off` : "offer",
+          tone: "offer",
+          text: firstPerson(agentId, event.message),
+        });
+        break;
+      case "decision":
+        decision = event;
+        break;
+      case "status":
+        if (event.seq >= LOCAL_SEQ_START) items.push({ kind: "system", key, text: event.message, tone: "change" });
+        else if (event.message.startsWith("Dropped"))
+          items.push({ kind: "system", key, text: `ruled out: ${readableShops(event.message.replace(/^Dropped /, ""))}`, tone: "dropped" });
+        else if (event.message.includes("candidates")) {
+          const count = Array.isArray(event.payload.candidate_drink_ids) ? event.payload.candidate_drink_ids.length : null;
+          if (count) items.push({ kind: "divider", key, text: `${count} drinks on the shortlist` });
+        } else if (event.message !== "Starting deliberation.") items.push({ kind: "system", key, text: event.message, tone: "note" });
+        break;
+    }
+  }
+  return { items, selections, decision };
+}
+
+const BUBBLE: Record<Tone, string> = {
+  plain: "bg-cream",
+  back: "bg-cream",
+  doubt: "bg-[#f6efe6]",
+  veto: "bg-[#fbeee9] ring-1 ring-[#b4533c]/30",
+  soften: "bg-mist ring-1 ring-moss/30",
+  offer: "bg-[#eef6ef] ring-1 ring-[#3f7d58]/30",
+  priorities: "bg-mist",
+};
+
+const TAG: Record<Tone, string> = {
+  plain: "text-mute",
+  back: "text-moss",
+  doubt: "text-[#9a6a2f]",
+  veto: "text-[#b4533c]",
+  soften: "text-moss",
+  offer: "text-[#3f7d58]",
+  priorities: "text-moss",
+};
+
+function TeamGrid({ selections, overBus }: { selections: LensEvent[]; overBus: Set<string> }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const open = selections.find((event) => event.agent_id === openId) ?? null;
+  const info = open ? agentInfo(open.agent_id ?? "", open.payload) : null;
+
+  return (
+    <div>
+      <ul className="grid grid-cols-4 gap-3 sm:grid-cols-6">
+        {selections.map((event) => {
+          const id = event.agent_id ?? "";
+          const { name } = agentInfo(id, event.payload);
+          const on = id === openId;
+          return (
+            <li key={event.seq} className="timeline-in">
+              <button
+                type="button"
+                onClick={() => setOpenId(on ? null : id)}
+                aria-expanded={on}
+                className="flex w-full flex-col items-center gap-1.5 rounded-2xl p-1.5 text-center normal-case"
+              >
+                <span
+                  className={`relative grid h-12 w-12 place-items-center rounded-full transition-colors ${
+                    on ? "bg-ink text-foam" : "bg-sage text-ink hover:bg-ink/10"
+                  }`}
+                >
+                  <AgentSymbol agentId={id} className="h-6 w-6" />
+                  {overBus.has(id) ? (
+                    <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-foam bg-moss" aria-label="answered over NATS" />
+                  ) : null}
+                </span>
+                <span className="w-full truncate text-xs tracking-[0.04em] text-ink/80 lowercase">{name}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {open && info ? (
+        <div className="timeline-in mt-3 flex gap-4 rounded-2xl bg-mist p-4">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ink text-foam">
+            <AgentSymbol agentId={open.agent_id ?? ""} className="h-6 w-6" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-display text-xl leading-tight">{info.name}</p>
+            <p className="mt-1 text-[15px]">{info.description}</p>
+            {overBus.has(open.agent_id ?? "") ? (
+              <p className="mt-2 text-xs text-mute">Answered this round over the AGNTCY bus.</p>
+            ) : null}
+          </div>
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-mute">
+          Picked by capability. Tap an agent to see what it does.
+          {overBus.size > 0 ? " A green dot means it answered over the AGNTCY bus." : ""}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Chat({ items }: { items: ChatItem[] }) {
+  return (
+    <ol className="space-y-3">
+      {items.map((item) => {
+        if (item.kind === "divider") {
+          return (
+            <li key={item.key} className="timeline-in flex items-center gap-3 pt-2 text-xs tracking-[0.12em] text-mute lowercase">
+              <span className="h-px flex-1 bg-line" />
+              {item.text}
+              <span className="h-px flex-1 bg-line" />
+            </li>
+          );
+        }
+        if (item.kind === "system") {
+          return (
+            <li key={item.key} className="timeline-in flex justify-center">
+              <span
+                className={`rounded-full px-3.5 py-1.5 text-center text-sm ${
+                  item.tone === "change"
+                    ? "bg-ink text-foam"
+                    : item.tone === "dropped"
+                      ? "bg-[#fbeee9] text-[#8a3b2a]"
+                      : "bg-sage text-mute"
+                }`}
+              >
+                {item.text}
+              </span>
+            </li>
+          );
+        }
+        const info = agentInfo(item.agentId);
+        return (
+          <li key={item.key} className="timeline-in flex items-start gap-2.5">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sage text-ink">
+              <AgentSymbol agentId={item.agentId} className="h-[18px] w-[18px]" />
+            </span>
+            <div className="min-w-0 max-w-[36rem]">
+              <p className="mb-0.5 flex flex-wrap items-baseline gap-x-2 text-xs">
+                <span className="font-semibold text-ink lowercase">{info.name}</span>
+                {item.tag ? <span className={`tracking-[0.08em] lowercase ${TAG[item.tone]}`}>{item.tag}</span> : null}
+              </p>
+              <div className={`rounded-2xl rounded-tl-md px-4 py-2.5 text-[15px] leading-snug ${BUBBLE[item.tone]}`}>
+                {item.lines ? (
+                  <ul className="space-y-0.5">
+                    {item.lines.map((line) => (
+                      <li key={line} className="font-semibold">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {item.text ? <p className={item.lines ? "mt-1 text-sm text-mute" : undefined}>{item.text}</p> : null}
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function DecisionCard({ decision }: { decision: LensEvent }) {
+  const payload = decision.payload;
+  const rounds = typeof payload.rounds === "number" ? payload.rounds : 0;
+  const byAgents = payload.decided_by === "agents";
+  const askHuman = payload.ask_human === true;
+  const who = byAgents ? "the agents agreed" : "the arbiter decided";
+  const how = byAgents
+    ? `They settled it themselves after ${rounds} ${rounds === 1 ? "round" : "rounds"} of back-and-forth.`
+    : rounds > 0
+      ? `No agreement after ${rounds} ${rounds === 1 ? "round" : "rounds"}, so the arbiter weighed everyone's final scores by your priorities.`
+      : "It weighed every agent's scores by your priorities and removed anything a shop couldn't confirm.";
+
+  return (
+    <div className="timeline-in rounded-3xl border border-ink/80 bg-foam p-5">
+      <p className="flex items-center gap-2 font-display text-2xl leading-none">
+        <LeafPair className="h-6 w-6 shrink-0 text-moss" />
+        {who}
+      </p>
+      <p className="mt-2 text-sm text-mute">{how}</p>
+      <p className="mt-3 text-[15px] leading-relaxed">{decision.message}</p>
+      {askHuman ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-sage px-4 py-3">
+          <p className="text-[15px] font-semibold">It's too close to call, so you decide.</p>
+          <Link to="/" className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam">
+            Pick on today's picks
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function AgentTimeline({
@@ -118,9 +319,7 @@ export function AgentTimeline({
   started,
   health = null,
   busAgents = [],
-  name = "Andrew",
 }: {
-  name?: string;
   events: LensEvent[];
   usingMock: boolean;
   started: boolean;
@@ -128,214 +327,41 @@ export function AgentTimeline({
   busAgents?: string[];
 }) {
   const overBus = new Set(busAgents);
-  const phases = split(events);
-  const present = {
-    team: phases.selections.length > 0,
-    priorities: phases.preference !== null,
-    proposals: phases.proposals.size > 0,
-    debate: phases.debate.length > 0,
-    dropped: phases.dropped.length > 0,
-    offers: phases.offers.length > 0,
-    decision: phases.decision !== null,
-  };
-  const shown = (Object.keys(present) as (keyof typeof present)[]).filter((key) => present[key]);
-  const stepOf = (key: keyof typeof present) => shown.indexOf(key) + 1;
-  const [open, setOpen] = useState(() => localStorage.getItem(OPEN_KEY) === "1");
-  const toggle = () => {
-    localStorage.setItem(OPEN_KEY, open ? "0" : "1");
-    setOpen(!open);
-  };
-  const proposalCount = [...phases.proposals.values()].reduce((sum, list) => sum + list.length, 0);
-  const summary = [
-    phases.selections.length ? `${phases.selections.length} agents` : null,
-    proposalCount ? `${proposalCount} proposals` : null,
-    phases.debate.length ? `${phases.debate.length} objections` : null,
-    phases.dropped.length ? `${phases.dropped.length} ruled out` : null,
-    phases.offers.length ? "1 shop offer" : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const { items, selections, decision } = buildChat(events);
+
+  if (events.length === 0) {
+    return (
+      <section className="flex items-center gap-3 rounded-[28px] border border-line bg-foam p-6 text-mute">
+        <TeaBowl steaming className="h-7 w-7 shrink-0 text-moss" />
+        {started ? "Calling the agents to the counter…" : "The round has not started."}
+      </section>
+    );
+  }
 
   return (
-    <section className="w-full min-w-0 rounded-[28px] border border-line bg-foam">
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={events.length === 0}
-        aria-expanded={open}
-        className="flex w-full items-center gap-3 px-5 py-4 text-left disabled:cursor-default"
-      >
-        <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="flex items-center gap-2 font-display text-2xl leading-none"><TeaBowl steaming={!started || events.length === 0} className="h-6 w-6 shrink-0 text-moss" />at the counter</span>
-            {started || usingMock ? (
-              <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} />
-            ) : null}
-          </span>
-          <span className="mt-1 block text-[15px] font-semibold">
-            {events.length === 0
-              ? started
-                ? "Asking the counter…"
-                : "The round has not started."
-              : open
-                ? "How the agents decided"
-                : "See how the agents decided"}
-          </span>
-          {!open && summary ? <span className="block truncate text-xs text-mute">{summary}</span> : null}
-        </span>
-        {events.length > 0 ? (
-          <span className="flex shrink-0 items-center gap-1 text-sm tracking-[0.08em] text-ink/70 lowercase">
-            {open ? "hide" : "show"}
-            <svg viewBox="0 0 20 20" className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-              <path d="m5 8 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
+    <div className="space-y-6">
+      {selections.length > 0 ? (
+        <section className="rounded-[28px] border border-line bg-foam p-5 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-2xl leading-none">the team</h2>
+            {started || usingMock ? <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} /> : null}
+          </div>
+          <TeamGrid selections={selections} overBus={overBus} />
+        </section>
+      ) : null}
+
+      <section className="rounded-[28px] border border-line bg-foam p-5 sm:p-6">
+        <h2 className="mb-4 font-display text-2xl leading-none">they argue</h2>
+        <Chat items={items} />
+        {!decision ? (
+          <p className="mt-4 flex items-center gap-2 text-sm text-mute">
+            <TeaBowl steaming className="h-5 w-5 text-moss" />
+            still talking…
+          </p>
         ) : null}
-      </button>
+      </section>
 
-      {phases.changes.length > 0 ? (
-        <div className="space-y-2 px-5 pb-4">
-          {phases.changes.map((event) => (
-            <p key={event.seq} className="timeline-in rounded-2xl bg-sage px-4 py-2.5 text-sm font-semibold">
-              {event.message}
-            </p>
-          ))}
-        </div>
-      ) : null}
-
-      {events.length === 0 || !open ? null : (
-        <ol className="space-y-5 border-t border-line px-5 py-5">
-          {phases.selections.length > 0 ? (
-            <Phase step={stepOf("team")} title="Team selected">
-              <details className="rounded-2xl border border-line/80 bg-cream px-4 py-3">
-                <summary className="cursor-pointer list-none">
-                  <span className="flex flex-wrap gap-1.5">
-                    {phases.selections.map((event) => (
-                      <span
-                        key={event.seq}
-                        className="flex items-center gap-1 rounded-full bg-sage px-2.5 py-0.5 text-xs font-semibold"
-                      >
-                        {overBus.has(event.agent_id ?? "") ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-moss" aria-label="over NATS" />
-                        ) : null}
-                        {agentLabel(event.agent_id ?? "")}
-                      </span>
-                    ))}
-                  </span>
-                  <span className="mt-2 block text-xs text-mute">
-                    Picked by capability.
-                    {overBus.size > 0 ? " A dot means the agent answered over the AGNTCY bus." : ""} Tap to see
-                    why each agent was chosen.
-                  </span>
-                </summary>
-                <ul className="mt-3 space-y-1.5 text-sm text-mute">
-                  {phases.selections.map((event) => (
-                    <li key={event.seq}>{event.message}</li>
-                  ))}
-                </ul>
-              </details>
-            </Phase>
-          ) : null}
-
-          {phases.preference ? (
-            <Phase step={stepOf("priorities")} title={`${name}'s priorities`}>
-              <p className="rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">
-                {phases.preference.message}
-              </p>
-            </Phase>
-          ) : null}
-
-          {phases.proposals.size > 0 ? (
-            <Phase step={stepOf("proposals")} title="Each agent proposes">
-              <ul className="space-y-2">
-                {[...phases.proposals.entries()].map(([agent, proposals]) => (
-                  <li key={agent} className="rounded-2xl border border-line/80 bg-cream px-4 py-3">
-                    <p className="font-semibold">{agentLabel(agent)}</p>
-                    <ul className="mt-1 space-y-1 text-sm">
-                      {proposals.map((event) => (
-                        <li key={event.seq}>
-                          <span className="font-semibold">{proposalLine(event)}</span>
-                          {typeof event.payload.rationale === "string" ? (
-                            <span className="block text-mute">{event.payload.rationale}</span>
-                          ) : null}
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </Phase>
-          ) : null}
-
-          {phases.debate.length > 0 ? (
-            <Phase step={stepOf("debate")} title="They argue">
-              {phases.candidates ? <p className="mb-2 text-sm text-mute">{phases.candidates.message}</p> : null}
-              <ul className="space-y-2">
-                {phases.debate.map((event) => {
-                  const { card, tag } = debateTone(event);
-                  return (
-                    <li key={event.seq} className={`rounded-2xl border px-4 py-3 text-sm ${card}`}>
-                      <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-moss lowercase">
-                        {tag}
-                      </span>
-                      {event.message}
-                    </li>
-                  );
-                })}
-              </ul>
-            </Phase>
-          ) : null}
-
-          {phases.dropped.length > 0 ? (
-            <Phase step={stepOf("dropped")} title="Ruled out">
-              <ul className="space-y-1.5 rounded-2xl border border-[#b4533c]/40 bg-cream px-4 py-3 text-sm">
-                {phases.dropped.map((event) => (
-                  <li key={event.seq}>{readableShops(event.message.replace(/^Dropped /, ""))}</li>
-                ))}
-              </ul>
-            </Phase>
-          ) : null}
-
-          {phases.offers.length > 0 ? (
-            <Phase step={stepOf("offers")} title="A shop makes an offer">
-              <ul className="space-y-2">
-                {phases.offers.map((event) => (
-                  <li key={event.seq} className="rounded-2xl border border-[#3f7d58]/50 bg-[#eef6ef] px-4 py-3 text-sm">
-                    <span className="mr-2 text-[11px] font-semibold tracking-[0.12em] text-[#3f7d58] lowercase">
-                      {typeof event.payload.percent === "number" ? `${event.payload.percent}% off` : "Offer"}
-                    </span>
-                    {readableShops(event.message)}
-                  </li>
-                ))}
-              </ul>
-            </Phase>
-          ) : null}
-
-          {phases.notes.map((event) => (
-            <li key={event.seq} className="timeline-in text-sm text-mute">
-              {event.message}
-            </li>
-          ))}
-
-          {phases.decision ? (
-            <Phase step={stepOf("decision")} title="Decision">
-              <p className="rounded-2xl border border-moss bg-mist px-4 py-3 font-semibold">
-                {phases.decision.message}
-              </p>
-            </Phase>
-          ) : null}
-        </ol>
-      )}
-      {open && events.length > 0 ? (
-        <button
-          type="button"
-          onClick={toggle}
-          aria-expanded
-          className="min-h-11 px-5 pb-4 text-sm tracking-[0.08em] text-mute lowercase hover:text-ink"
-        >
-          hide the details
-        </button>
-      ) : null}
-    </section>
+      {decision ? <DecisionCard decision={decision} /> : null}
+    </div>
   );
 }

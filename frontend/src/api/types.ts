@@ -54,6 +54,9 @@ export interface AgentSelection {
   agent_id: string;
   capabilities: string[];
   reason: string;
+  /** Planned in docs/PLAN.md "UI round 2"; the frontend falls back to its own copy until served. */
+  name?: string;
+  description?: string;
 }
 
 /** A shop's close-call discount. `percent` is whole, so 10 means 10% off. */
@@ -94,6 +97,10 @@ export interface Decision {
   options?: RankedDrink[];
   weights?: DimensionScores;
   dropped?: DroppedDrink[];
+  /** Planned: who settled it. Missing means the arbiter (single-round mode). */
+  decided_by?: "agents" | "arbiter";
+  /** Planned: rebuttal rounds that ran before the decision. */
+  rounds?: number;
 }
 
 export interface PreferenceReport {
@@ -123,6 +130,7 @@ export interface LensEvent {
   type: LensEventType;
   agent_id: string | null;
   message: string;
+  /** Planned extras: `round` (1-based) and `revised_from` on objections that soften in a rebuttal. */
   payload: Record<string, unknown>;
   seq: number;
 }
@@ -160,6 +168,8 @@ export interface Health {
   effective: "local" | "agntcy" | "pending";
   /** Replies received over the bus so far, per agent id. */
   remote_replies: Record<string, number>;
+  /** Planned: "single" (one round + arbiter) or "dialogue" (rebuttal rounds). */
+  deliberation?: "single" | "dialogue";
 }
 
 /* Social layer. Contract in docs/PLAN.md, "Social layer"; served by Track A, mocked in mocks/social/. */
@@ -208,6 +218,8 @@ export interface UserProfile {
   accent: string;
   pinned_drink_id: string | null;
   pinned_shop_id: string | null;
+  /** Planned in docs/PLAN.md "UI round 2": the Boba card background, picked by you. */
+  card_color?: string;
   /** In display order. Hidden stats are left out. */
   visible_stats: StatKey[];
   followers: number;
@@ -222,7 +234,7 @@ export interface UserProfile {
 }
 
 export type ProfilePatch = Partial<
-  Pick<UserProfile, "display_name" | "bio" | "avatar" | "accent" | "pinned_drink_id" | "pinned_shop_id" | "visible_stats">
+  Pick<UserProfile, "display_name" | "bio" | "avatar" | "accent" | "pinned_drink_id" | "pinned_shop_id" | "visible_stats" | "card_color">
 >;
 
 export interface QuizOption {

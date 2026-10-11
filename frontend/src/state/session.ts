@@ -192,9 +192,9 @@ export async function pick(drinkId: string, drinkName: string) {
   try {
     const learned = await client.choose(state.userId, drinkId);
     set({ learned, weights: learned.weights });
-    rerun(`${state.name} picked ${drinkName}. ${learned.summary}`);
+    rerun(`You picked ${drinkName}. ${learned.summary}`);
   } catch {
-    pushStatus(`${state.name} picked ${drinkName}, but the Preference agent did not answer.`);
+    pushStatus(`You picked ${drinkName}, but the Preference agent did not answer.`);
   }
 }
 

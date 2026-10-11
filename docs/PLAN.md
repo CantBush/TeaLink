@@ -467,12 +467,12 @@ Health.deliberation?: "dialogue" | "single";
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ TeaLink: new sub-tabs (today's picks · at the counter · why this order · evidence); remove what changed; move the what-if controls to at the counter; strip the top 3 meters and the three extra sections | Today's picks shows only the top 3, and the demo runs from the at the counter sub-tab |
-| 2 | ⬜ At the counter: agent symbols, team icon grid with tap-to-expand, and "they argue" as a group chat grouped by round, with concessions and who decided | Readable in both `single` and `dialogue` mode (in `single`, it shows one round and "the arbiter decided") |
-| 3 | ⬜ Stats: card color picker, "what matters most to you" without a percentage, trimmed and combined stats, receipt layout | |
-| 4 | ⬜ Discover: deduplicated drink filters, and match ordering for shops and drinks | Your closest match is first in both lists |
-| 5 | ⬜ "You" copy pass across all frontend text, and transition animations everywhere | |
-| 6 | ⬜ Update `docs/demo-script.md` for the new sub-tabs (Reset demo and the what-if buttons now live in at the counter) | The script's clicks match the app |
+| 1 | ✅ TeaLink: new sub-tabs (today's picks · at the counter · why this order · evidence); remove what changed; move the what-if controls to at the counter; strip the top 3 meters and the three extra sections | Today's picks shows only the top 3, and the demo runs from the at the counter sub-tab |
+| 2 | ✅ At the counter: agent symbols, team icon grid with tap-to-expand, and "they argue" as a group chat grouped by round, with concessions and who decided | Readable in both `single` and `dialogue` mode (in `single`, it shows one round and "the arbiter decided") |
+| 3 | ✅ Stats: card color picker, "what matters most to you" without a percentage, trimmed and combined stats, receipt layout | |
+| 4 | ✅ Discover: deduplicated drink filters, and match ordering for shops and drinks | Your closest match is first in both lists |
+| 5 | ✅ "You" copy pass across all frontend text, and transition animations everywhere | |
+| 6 | ✅ Update `docs/demo-script.md` for the new sub-tabs (Reset demo and the what-if buttons now live in at the counter) | The script's clicks match the app |
 
 ### Sync points
 
@@ -489,7 +489,7 @@ If one track finishes early, take the other track's next unstarted task, but say
 
 ## Demo script
 
-See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines, and real numbers, plus answers to likely judge questions. The order is: reset, top 3 with a close call, pick Pearl Milk Tea, #1 sells out, Lantern Leaf joins, no brown sugar (then open What changed), Sunright goes offline, Why this order, Evidence.
+See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines, and real numbers, plus answers to likely judge questions. The order is: reset, top 3 with a close call, pick Pearl Milk Tea, #1 sells out, Lantern Leaf joins, no brown sugar, Lantern Leaf goes offline, Why this order, Evidence. Everything after the pick runs from the at the counter sub-tab.
 
 ## If we fall behind, cut in this order
 
@@ -517,6 +517,10 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **7:40 PM:** Track B finished its UI round 2 rows:
+  - At the counter (`/counter`) has the what-if buttons, the team grid, the group chat, and the decision. `/counterfactual` now redirects there.
+  - The frontend already reads the planned fields (`name`/`description`, `round`/`revised_from`, `decided_by`/`rounds`, `match`, `card_color`). Until they're served, it falls back to its own agent descriptions, round 1, "the arbiter decided," client-side taste matching, and a card color saved in the browser.
+  - Re-check the demo script once Track A reports the `dialogue` numbers.
 - **6:55 PM:** Added "UI round 2 and agent dialogue":
   - TeaLink sub-tabs are now today's picks · at the counter · why this order · evidence. What changed is removed, and the what-if controls move to at the counter.
   - Today's picks is trimmed to the top 3.

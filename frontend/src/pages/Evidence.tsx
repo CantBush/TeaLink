@@ -164,7 +164,7 @@ export function Evidence() {
             </article>
           ))}
         </div>
-        <p className="text-xs text-mute">Grey: the user's hidden priority. Amber: what the agent learned from picks alone.</p>
+        <p className="text-xs text-mute">Grey: each simulated person's hidden priority. Green: what the agent learned from their picks alone.</p>
       </section>
     </main>
   );

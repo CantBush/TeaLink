@@ -12,7 +12,7 @@ import { drinkInfo } from "../lib/catalog.ts";
 import { matchPercent, price, shopLabel } from "../lib/format.ts";
 import { coverPhoto, drinkPhoto } from "../lib/images.ts";
 import { tint } from "../lib/palette.ts";
-import { ALL_STATS } from "../lib/stats.ts";
+import { ALL_STATS, shownStats } from "../lib/stats.ts";
 import { hasChosenAccount, useMe } from "../state/me.ts";
 import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
@@ -78,7 +78,7 @@ export function Profile() {
   const pinned = drinkInfo(profile.pinned_drink_id);
   const reviews = feed.key === `${handle}:${me}` ? feed.items : [];
   const posts = reviews.filter((item) => item.drink_id);
-  const hiddenCount = own ? ALL_STATS.length - profile.visible_stats.length : 0;
+  const hiddenCount = own ? ALL_STATS.length - shownStats(profile.visible_stats).length : 0;
 
   const toggleFollow = () => {
     setBusy(true);
