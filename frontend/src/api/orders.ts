@@ -32,7 +32,7 @@ export const orders = {
       () => orderMock.setStatus(orderId, status),
     ),
 
-  rate: (orderId: string, rating: number) =>
+  rate: (orderId: string, rating: number | null) =>
     withFallback(
       () => request<Order>("PATCH", `/orders/${encodeURIComponent(orderId)}`, { rating }),
       () => orderMock.rate(orderId, rating),

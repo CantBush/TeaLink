@@ -61,7 +61,8 @@ function PriorityMath({ decision }: { decision: Decision }) {
     <section className="rounded-[28px] border border-line bg-foam p-6">
       <h2 className="font-display text-2xl">How your priorities ranked it</h2>
       <p className="mt-1 text-sm text-mute">
-        Each agent scores the drink on its own objective. Your learned weights decide how much each one counts.
+        Each agent scores the drink on its own objective. Your learned weights decide how much each one counts. They
+        come from your quiz and favorites, your orders (recent ones count more), and the ratings you give.
       </p>
       <table className="mt-4 w-full text-sm">
         <thead className="text-left text-mute">
