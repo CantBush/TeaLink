@@ -2,32 +2,36 @@ import { useMemo, useState } from "react";
 import { social } from "../api/social.ts";
 import type { FeedItem } from "../api/types.ts";
 import { allDrinks } from "../lib/catalog.ts";
-import { SHOP_IDS, shopLabel } from "../lib/format.ts";
+import { shopLabel } from "../lib/format.ts";
 import { resizePhoto } from "../lib/photo.ts";
 import { useMe } from "../state/me.ts";
 import { Sheet } from "./Sheet.tsx";
+import { ShopSearch } from "./ShopSearch.tsx";
 
 const MAX = 500;
 
-/** A new post: a photo with a caption, or just a caption, with an optional drink or shop tag. */
+/** A new post: a photo with a caption, or just a caption. The tag is a shop, or a drink picked from that shop. */
 export function PostComposer({ onClose, onPosted }: { onClose: () => void; onPosted: (item: FeedItem) => void }) {
   const me = useMe();
-  const drinks = useMemo(() => [...allDrinks()].sort((a, b) => a.name.localeCompare(b.name)), []);
   const [text, setText] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
-  const [tag, setTag] = useState("");
+  const [shopId, setShopId] = useState<string | null>(null);
+  const [drinkId, setDrinkId] = useState("");
+  const drinks = useMemo(
+    () => (shopId ? allDrinks().filter((drink) => drink.shop_id === shopId).sort((a, b) => a.name.localeCompare(b.name)) : []),
+    [shopId],
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = () => {
     setBusy(true);
     setError(null);
-    const [kind, value] = tag.split(":");
     social
       .createPost(me, {
         text: text.trim(),
         photo_url: photo,
-        ...(kind === "drink" ? { drink_id: value } : kind === "shop" ? { shop_id: value } : {}),
+        ...(drinkId ? { drink_id: drinkId } : shopId ? { shop_id: shopId } : {}),
       })
       .then((item) => {
         onPosted(item);
@@ -87,26 +91,44 @@ export function PostComposer({ onClose, onPosted }: { onClose: () => void; onPos
           </span>
         </label>
 
-        <label className="mt-2 block">
-          <span className="mb-1 block text-sm font-semibold">Tag a drink or shop</span>
-          <select value={tag} onChange={(event) => setTag(event.target.value)} className="min-h-11 w-full rounded-2xl border border-line bg-foam px-3 text-sm">
-            <option value="">No tag</option>
-            <optgroup label="Shops">
-              {SHOP_IDS.map((id) => (
-                <option key={id} value={`shop:${id}`}>
-                  {shopLabel(id)}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="Drinks">
-              {drinks.map((drink) => (
-                <option key={drink.id} value={`drink:${drink.id}`}>
-                  {drink.name} · {shopLabel(drink.shop_id)}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-        </label>
+        <div className="mt-2">
+          <span className="mb-1 block text-sm font-semibold">Tag a shop (optional)</span>
+          {shopId ? (
+            <div className="space-y-2">
+              <p className="flex items-center justify-between gap-3 rounded-2xl bg-sage px-3 py-2 text-sm">
+                <span className="font-semibold">{shopLabel(shopId)}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShopId(null);
+                    setDrinkId("");
+                  }}
+                  className="min-h-9 px-2 font-semibold text-mute"
+                  aria-label={`Remove the ${shopLabel(shopId)} tag`}
+                >
+                  Remove
+                </button>
+              </p>
+              <label className="block">
+                <span className="sr-only">Tag one of its drinks</span>
+                <select
+                  value={drinkId}
+                  onChange={(event) => setDrinkId(event.target.value)}
+                  className="min-h-11 w-full rounded-2xl border border-line bg-foam px-3 text-sm"
+                >
+                  <option value="">Just the shop</option>
+                  {drinks.map((drink) => (
+                    <option key={drink.id} value={drink.id}>
+                      {drink.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          ) : (
+            <ShopSearch label="Tag a shop" onPick={setShopId} />
+          )}
+        </div>
 
         {error ? <p className="mt-3 text-sm text-[#a33]">{error}</p> : null}
         <button
