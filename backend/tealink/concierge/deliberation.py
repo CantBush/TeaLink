@@ -1,16 +1,19 @@
-"""Two-round deliberation streamed as Lens events.
+"""Deliberation streamed as Lens events.
 
-Round 1: objective agents propose drinks; the Preference agent reports the
-user's learned weights. Round 2: every agent scores or vets every candidate.
-The resolver ranks by those weights and returns the top 3.
+Propose, then one objection round. ``DELIBERATION=single`` (the default)
+resolves on those scores. ``dialogue`` relays the objections and lets
+objective agents soften, up to three rebuttals, then resolves on the latest
+complete scores.
 """
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
+from typing import Literal, cast
 
 from tealink.concierge.registry import Registry
-from tealink.concierge.transport import AgentTransport
+from tealink.concierge.transport import AgentTransport, ReviseTimeout
+from tealink.config import get_settings
 from tealink.core.offers import apply_offer
 from tealink.core.preferences import PRIOR, describe_weights
 from tealink.core.resolution import resolve
@@ -24,9 +27,12 @@ from tealink.schemas import (
     ObjectionKind,
     PreferenceReport,
     Proposal,
+    RevisedFrom,
 )
 
 LISTED = 2
+MAX_REBUTTALS = 3
+_SCORE_EPSILON = 1e-9
 
 
 async def deliberate(
@@ -110,10 +116,12 @@ async def deliberate(
 
     proposals = _proposals(propose_replies)
     for proposal in proposals:
+        payload = proposal.model_dump(mode="json")
+        payload["round"] = 0
         yield emit(
             LensEventType.proposal,
             f"{proposal.agent_id.capitalize()} proposes {proposal.drink_name}.",
-            proposal.model_dump(mode="json"),
+            payload,
             proposal.agent_id,
         )
 
@@ -138,22 +146,47 @@ async def deliberate(
         sold_out_drink_ids=sold_out,
     )
     object_replies = await transport.broadcast(cards, object_request)
-    objections = _objections(object_replies)
+    objections = _plain(_objections(object_replies))
     names = {proposal.drink_id: proposal.drink_name for proposal in proposals}
-    for reply in object_replies:
-        for objection in reply.objections:
-            if objection.kind == ObjectionKind.veto:
-                yield emit(
-                    LensEventType.objection,
-                    f"Veto: {objection.reason}",
-                    objection.model_dump(mode="json"),
-                    objection.agent_id,
+    for event in _emit_objections(object_replies, names, registry, 1, {}, emit):
+        yield event
+
+    decided_by: Literal["agents", "arbiter"] = "arbiter"
+    rebuttals = 0
+    if get_settings().deliberation == "dialogue":
+        previous = objections
+        for rebuttal in range(1, MAX_REBUTTALS + 1):
+            event_round = rebuttal + 1
+            try:
+                revise_replies = await transport.broadcast(
+                    cards,
+                    DeliberationRequest(
+                        round="revise",
+                        user_id=user_id,
+                        query=query,
+                        preference_overrides=overrides,
+                        candidate_drink_ids=candidate_ids,
+                        sold_out_drink_ids=sold_out,
+                        peer_objections=previous,
+                    ),
                 )
-        summary = _summarize(reply, names, registry)
-        if summary is not None:
-            yield emit(LensEventType.objection, summary["reason"], summary, reply.agent_id)
+            except ReviseTimeout:
+                objections = previous
+                decided_by = "arbiter"
+                break
+            incoming = _objections(revise_replies)
+            for event in _emit_objections(revise_replies, names, registry, event_round, _index(previous), emit):
+                yield event
+            rebuttals = rebuttal
+            objections = _plain(incoming)
+            if not _changed(previous, objections):
+                decided_by = "agents"
+                break
+            previous = objections
+            decided_by = "arbiter"
 
     decision = resolve(proposals, objections, weights=weights, confirmed_shop_ids=confirmed_shops)
+    decision = decision.model_copy(update={"decided_by": decided_by, "rounds": rebuttals})
     if price_low is not None and price_high is not None:
         offered = await _ask_for_offer(decision, registry, transport, user_id, query)
         if offered is not None:
@@ -181,7 +214,89 @@ async def deliberate(
     )
 
 
-def _summarize(reply: AgentReply, names: dict[str, str], registry: Registry) -> dict | None:
+def _dump_objection(item: Objection, event_round: int) -> dict:
+    data = item.model_dump(mode="json")
+    if data.get("revised_from") is None:
+        data.pop("revised_from", None)
+    data["round"] = event_round
+    return data
+
+
+def _index(objections: list[Objection]) -> dict[tuple[str, str], Objection]:
+    return {(item.agent_id, item.target_drink_id): item for item in objections}
+
+
+def _same_stance(old: Objection, new: Objection) -> bool:
+    if old.kind != new.kind:
+        return False
+    if old.score is None or new.score is None:
+        return old.score is new.score
+    return abs(old.score - new.score) <= _SCORE_EPSILON
+
+
+def _plain(objections: list[Objection]) -> list[Objection]:
+    """Drop revision markers so the next request carries the stance, not the diff."""
+    return [item.model_copy(update={"revised_from": None, "round": None}) for item in objections]
+
+
+def _changed(before: list[Objection], after: list[Objection]) -> bool:
+    prior = _index(before)
+    current = _index(after)
+    if set(prior) != set(current):
+        return True
+    return any(not _same_stance(prior[key], current[key]) for key in prior)
+
+
+def _annotate(reply: AgentReply, prior: dict[tuple[str, str], Objection]) -> AgentReply:
+    """Stamp ``revised_from`` on stances that moved. Vetoes never get one."""
+    updated: list[Objection] = []
+    for item in reply.objections:
+        old = prior.get((item.agent_id, item.target_drink_id))
+        revised = None
+        if (
+            old is not None
+            and item.kind != ObjectionKind.veto
+            and old.kind != ObjectionKind.veto
+            and old.kind in (ObjectionKind.concern, ObjectionKind.neutral, ObjectionKind.support)
+            and not _same_stance(old, item)
+        ):
+            revised = RevisedFrom(
+                kind=cast(Literal["support", "concern", "neutral"], old.kind.value),
+                score=old.score,
+            )
+        updated.append(item.model_copy(update={"revised_from": revised}))
+    return reply.model_copy(update={"objections": updated})
+
+
+def _emit_objections(
+    replies: list[AgentReply],
+    names: dict[str, str],
+    registry: Registry,
+    event_round: int,
+    prior: dict[tuple[str, str], Objection],
+    emit: Callable[..., LensEvent],
+) -> list[LensEvent]:
+    events: list[LensEvent] = []
+    for reply in replies:
+        annotated = _annotate(reply, prior)
+        for objection in annotated.objections:
+            if objection.kind != ObjectionKind.veto:
+                continue
+            events.append(
+                emit(
+                    LensEventType.objection,
+                    f"Veto: {objection.reason}",
+                    _dump_objection(objection, event_round),
+                    objection.agent_id,
+                )
+            )
+        summary = _summarize(annotated, names, registry, event_round)
+        if summary is not None:
+            events.append(emit(LensEventType.objection, summary["reason"], summary, reply.agent_id))
+    return events
+
+
+def _summarize(reply: AgentReply, names: dict[str, str], registry: Registry, event_round: int) -> dict | None:
     """One timeline entry per agent: what it backs and what it pushes back on."""
     rated = [item for item in reply.objections if item.kind != ObjectionKind.veto]
     if not rated:
@@ -201,12 +316,19 @@ def _summarize(reply: AgentReply, names: dict[str, str], registry: Registry) -> 
             parts.append("pushes back on " + _listing(doubts))
         label = card.name if card is not None else reply.agent_id
         reason = f"{label} " + ("; ".join(parts) if parts else "has no strong view on any candidate") + "."
-    return {
+    objections = [_dump_objection(item, event_round) for item in reply.objections]
+    revisions = [item["revised_from"] for item in objections if item.get("revised_from")]
+    payload = {
         "agent_id": reply.agent_id,
         "kind": "concern" if doubts else "support",
         "reason": reason,
-        "objections": [item.model_dump(mode="json") for item in reply.objections],
+        "round": event_round,
+        "objections": objections,
     }
+    # One concession can sit on the event itself. Several stay on each objection.
+    if len(revisions) == 1:
+        payload["revised_from"] = revisions[0]
+    return payload
 
 
 def _listing(items: list[str]) -> str:

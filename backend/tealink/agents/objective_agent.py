@@ -7,7 +7,8 @@ the only ones who can say a drink is sold out.
 
 from __future__ import annotations
 
-from typing import Any
+import statistics
+from typing import Any, Literal, cast
 
 from tealink.agents.base import BaseAgent
 from tealink.agents.cards import CAPABILITIES, AgentCardInfo
@@ -22,10 +23,18 @@ from tealink.schemas import (
     Objection,
     ObjectionKind,
     Proposal,
+    RevisedFrom,
 )
 
 SUPPORT_AT = 0.55
 CONCERN_BELOW = 0.45
+
+# Concern is harder than neutral, which is harder than support. Veto is off this scale.
+_SOFTNESS = {
+    ObjectionKind.concern: 0,
+    ObjectionKind.neutral: 1,
+    ObjectionKind.support: 2,
+}
 
 
 def stance(score: float) -> ObjectionKind:
@@ -34,6 +43,38 @@ def stance(score: float) -> ObjectionKind:
     if score < CONCERN_BELOW:
         return ObjectionKind.concern
     return ObjectionKind.neutral
+
+
+def soften_objection(current: Objection, peer_scores: list[float]) -> Objection:
+    """Move halfway toward the other objective agents, and only in the soft direction.
+
+    Concern and neutral may rise. Support may fall, but not below ``SUPPORT_AT``,
+    so it cannot become a concern. A harder kind is rejected. An unchanged
+    stance omits ``revised_from``. A veto is copied with no ``revised_from``.
+    """
+    unchanged = current.model_copy(update={"revised_from": None})
+    if current.kind == ObjectionKind.veto or current.score is None or current.kind not in _SOFTNESS:
+        return unchanged
+    if not peer_scores:
+        return unchanged
+    halfway = (current.score + statistics.median(peer_scores)) / 2.0
+    if current.kind in (ObjectionKind.concern, ObjectionKind.neutral):
+        new_score = max(current.score, halfway)
+    else:
+        new_score = max(SUPPORT_AT, min(current.score, halfway))
+    new_kind = stance(new_score)
+    if _SOFTNESS[new_kind] < _SOFTNESS[current.kind]:
+        return unchanged
+    if new_kind == current.kind and abs(new_score - current.score) <= 1e-9:
+        return unchanged
+    previous = cast(Literal["support", "concern", "neutral"], current.kind.value)
+    return current.model_copy(
+        update={
+            "kind": new_kind,
+            "score": new_score,
+            "revised_from": RevisedFrom(kind=previous, score=current.score),
+        }
+    )
 
 
 class ObjectiveAgent(BaseAgent):
@@ -73,6 +114,8 @@ class ObjectiveAgent(BaseAgent):
         ctx = self.context(request, catalog)
         if request.round == "object":
             return AgentReply(agent_id=self.agent_id, objections=self._evaluate(request, catalog, ctx))
+        if request.round == "revise":
+            return AgentReply(agent_id=self.agent_id, objections=self._revise(request, catalog, ctx))
         if request.round != "propose":
             return AgentReply(agent_id=self.agent_id)
         return AgentReply(agent_id=self.agent_id, proposals=self._propose(request, catalog, ctx))
@@ -122,4 +165,41 @@ class ObjectiveAgent(BaseAgent):
                     dimension=self.dimension,
                 )
             )
+        return objections
+
+    def _revise(self, request: DeliberationRequest, catalog: Catalog, ctx: Any) -> list[Objection]:
+        """Soften each of this agent's scores toward the other objective agents."""
+        own = {
+            item.target_drink_id: item
+            for item in request.peer_objections
+            if item.agent_id == self.agent_id
+        }
+        peers: dict[str, dict[str, float]] = {}
+        for item in request.peer_objections:
+            if item.agent_id == self.agent_id or item.score is None or item.dimension is None:
+                continue
+            if item.kind == ObjectionKind.veto:
+                continue
+            peers.setdefault(item.target_drink_id, {})[item.agent_id] = float(item.score)
+        drink_ids = list(request.candidate_drink_ids) or list(own)
+        objections: list[Objection] = []
+        for drink_id in drink_ids:
+            old = own.get(drink_id)
+            if old is None:
+                drink = catalog.drink(drink_id)
+                if drink is None:
+                    continue
+                score, detail = self.objective(request, catalog, drink, ctx)
+                objections.append(
+                    Objection(
+                        agent_id=self.agent_id,
+                        target_drink_id=drink_id,
+                        kind=stance(score),
+                        reason=f"{drink.name}: {detail}",
+                        score=score,
+                        dimension=self.dimension,
+                    )
+                )
+                continue
+            objections.append(soften_objection(old, list(peers.get(drink_id, {}).values())))
         return objections

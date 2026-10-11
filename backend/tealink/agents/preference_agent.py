@@ -31,12 +31,14 @@ class PreferenceAgent(BaseAgent):
         return AgentCardInfo(
             id=self.agent_id,
             name="Preference",
-            description="Learns how much the user weighs taste, friends, novelty, and cost from their picks.",
+            description="Learns how much you weigh taste, friends, novelty, and cost from your picks.",
             capabilities=CAPABILITIES["preference"],
         )
 
     def handle(self, request: DeliberationRequest, catalog: Catalog) -> AgentReply:
         prior = request.prior_weights
+        if request.round == "revise":
+            return AgentReply(agent_id=self.agent_id)
         if request.round == "learn" and request.choice is not None:
             return AgentReply(agent_id=self.agent_id, preference=self.learn(request.choice, prior))
         if request.round == "propose":

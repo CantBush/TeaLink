@@ -52,6 +52,7 @@ class ProfilePatch(BaseModel):
     bio: str | None = Field(default=None, max_length=MAX_BIO)
     avatar: Avatar | None = None
     accent: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
+    card_color: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
     pinned_drink_id: str | None = None
     pinned_shop_id: str | None = None
     visible_stats: list[StatKey] | None = None
@@ -172,6 +173,7 @@ async def profile_view(runtime, user_id: str, viewer: str | None) -> UserProfile
         bio=settings.bio,
         avatar=settings.avatar,
         accent=settings.accent,
+        card_color=settings.card_color,
         pinned_drink_id=settings.pinned_drink_id,
         pinned_shop_id=settings.pinned_shop_id,
         visible_stats=list(settings.visible_stats),

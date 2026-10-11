@@ -18,7 +18,8 @@ def _recommend(client: TestClient) -> tuple[list[dict], dict]:
     return events, decision
 
 
-def test_demo_flow():
+def test_demo_flow(monkeypatch):
+    monkeypatch.setenv("DELIBERATION", "single")
     write_dataset()
     client = TestClient(app)
     client.post("/events/reset")

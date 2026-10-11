@@ -1,7 +1,9 @@
 """Shop agent: the only agent that knows its own inventory.
 
 It does not propose drinks. In the objection round it confirms its own
-candidates are in stock, or vetoes the ones that are sold out.
+candidates are in stock, or vetoes the ones that are sold out. On a revise
+round it repeats those objections. A veto is copied verbatim and is never
+softened.
 """
 
 from __future__ import annotations
@@ -34,6 +36,8 @@ class ShopAgent(BaseAgent):
     def handle(self, request: DeliberationRequest, catalog: Catalog) -> AgentReply:
         if request.round == "offer":
             return AgentReply(agent_id=self.agent_id, offer=self._offer(request, catalog))
+        if request.round == "revise":
+            return AgentReply(agent_id=self.agent_id, objections=self._echo(request))
         if request.round != "object":
             return AgentReply(agent_id=self.agent_id)
         shop = self.shop_name.rstrip(".")
@@ -52,6 +56,15 @@ class ShopAgent(BaseAgent):
                 Objection(agent_id=self.agent_id, target_drink_id=drink_id, kind=kind, reason=reason)
             )
         return AgentReply(agent_id=self.agent_id, objections=objections)
+
+    def _echo(self, request: DeliberationRequest) -> list[Objection]:
+        """Repeat this shop's latest objections. Nothing here is softened."""
+        echoed: list[Objection] = []
+        for item in request.peer_objections:
+            if item.agent_id != self.agent_id:
+                continue
+            echoed.append(item.model_copy(update={"revised_from": None, "round": None}))
+        return echoed
 
     def _offer(self, request: DeliberationRequest, catalog: Catalog) -> Offer | None:
         """Up to 10% off, and never more than this shop's promo budget."""

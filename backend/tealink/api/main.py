@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from tealink.agents.roster import default_agents
-from tealink.agents.scoring import user_profile
+from tealink.agents.scoring import score_drink, user_profile
 from tealink.agents.shop_agent import ShopAgent
 from tealink.api import social
 from tealink.concierge.deliberation import deliberate
@@ -135,10 +135,33 @@ def _require_user(runtime: Runtime, user_id: str) -> None:
         raise HTTPException(status_code=404, detail="user not found")
 
 
+def _taste_matches(runtime: Runtime, user_id: str | None) -> dict[str, float] | None:
+    """Taste match per drink for ``user_id``, or None when the caller omitted the user.
+
+    Same profile and live preference overrides the Taste agent uses. Lists stay
+    in catalog order; an unknown user is a 404.
+    """
+    if user_id is None:
+        return None
+    _require_user(runtime, user_id)
+    profile = user_profile(runtime.catalog, user_id)
+    overrides = runtime.preferences.get(user_id, {})
+    matches: dict[str, float] = {}
+    for drink in runtime.catalog.drinks:
+        score, _factors = score_drink(profile, drink, overrides)
+        matches[drink.id] = max(0.0, min(1.0, score))
+    return matches
+
+
 @app.get("/drinks")
-def drinks() -> list[dict]:
-    """The menu Discover searches. photo_url stays null until real photos exist."""
+def drinks(user: str | None = None) -> list[dict]:
+    """The menu Discover searches. photo_url stays null until real photos exist.
+
+    ``match`` is null when ``user`` is omitted, and that user's 0–1 taste match
+    when it is set. The list stays in catalog order.
+    """
     runtime = get_runtime()
+    matches = _taste_matches(runtime, user)
     return [
         {
             "id": drink.id,
@@ -147,21 +170,35 @@ def drinks() -> list[dict]:
             "price": drink.price,
             "flavor_tags": drink.flavor_tags,
             "photo_url": None,
+            "match": None if matches is None else matches[drink.id],
         }
         for drink in runtime.catalog.drinks
     ]
 
 
 @app.get("/shops")
-def shops() -> list[dict]:
-    """Shops for Discover. Includes shops that have not joined yet. photo_url stays null."""
+def shops(user: str | None = None) -> list[dict]:
+    """Shops for Discover. Includes shops that have not joined yet. photo_url stays null.
+
+    ``match`` is null without ``user``. With a user it is the shop's best drink.
+    The list stays in catalog order.
+    """
     runtime = get_runtime()
+    matches = _taste_matches(runtime, user)
+    best: dict[str, float] = {}
+    if matches is not None:
+        for drink in runtime.catalog.drinks:
+            score = matches[drink.id]
+            current = best.get(drink.shop_id)
+            if current is None or score > current:
+                best[drink.shop_id] = score
     return [
         {
             "id": shop.id,
             "name": shop.name,
             "neighborhood": shop.neighborhood,
             "photo_url": None,
+            "match": None if matches is None else best.get(shop.id, 0.0),
         }
         for shop in runtime.catalog.shops
     ]
@@ -198,6 +235,7 @@ def health() -> dict:
         "transport": settings.transport,
         "effective": effective,
         "remote_replies": remote_replies,
+        "deliberation": settings.deliberation,
     }
 
 
