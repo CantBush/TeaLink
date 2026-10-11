@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { logOut } from "../state/logout.ts";
+import { useRole } from "../state/role.ts";
 import { useProfile } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
 import { BobaMark } from "./BobaMark.tsx";
@@ -52,7 +53,8 @@ export function NavBar() {
     navigate("/welcome");
   };
   const profilePath = profile ? `/u/${profile.handle}` : "/me";
-  const store = pathname === "/shop" || pathname.startsWith("/shop/");
+  const role = useRole();
+  const store = role === "store" || pathname === "/shop" || pathname.startsWith("/shop/");
   const hideTabs = pathname === "/welcome" || store;
 
   const tabs: Tab[] = [
