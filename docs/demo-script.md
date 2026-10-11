@@ -29,13 +29,13 @@ Switch to **today's picks** and point at the top 3: **Thai Tea 78, Wintermelon T
 
 > "Thai Tea and Wintermelon are too close to call, so instead of guessing, the team asks Andrew. And it says why: Thai Tea wins on taste and on what people like him rate highly; Wintermelon wins on price and on being new."
 
-## 0:55 to 1:20: it learns from the pick
+## 0:55 to 1:20: it learns from the order
 
-Click **Pick this** on **Pearl Milk Tea** (#3).
+Click **Order for pickup** on **Pearl Milk Tea** (#3), then **Place order** (pay at pickup is already selected) and **Done**.
 
-> "He skipped both and took the best taste match. The Preference agent learns from that: taste now counts 45% (it was 41%) and price drops to 36%. Pearl Milk Tea climbs from 71 to 73. Every pick from the top 3 is a training signal."
+> "He skipped both and ordered the best taste match. The order is the pick: the Preference agent learns from it, so taste now counts 45% (it was 41%) and price drops to 36%. Pearl Milk Tea climbs from 71 to 73. Every order from the top 3 is a training signal, and it stays private: nothing gets posted to his profile."
 
-Switch to **at the counter**: the chat now opens with "You picked Pearl Milk Tea", and Preference's message shows the new priorities.
+Switch to **at the counter**: the chat now opens with "You ordered Pearl Milk Tea", and Preference's message shows the new priorities.
 
 ## 1:20 to 2:15: the world changes, and the team re-plans
 
@@ -69,19 +69,20 @@ Switch to the **evidence** sub-tab.
 
 AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every agent is a separate service talking A2A over NATS on Cisco's AGNTCY, and if the bus goes down, the same agents answer in-process, so the demo never breaks."
 
-## Optional, if there's time: the shop side and ordering (about 30 seconds)
+## Optional, if there's time: besteas, the shop side, and checkout (about 40 seconds)
 
-Only do this after the close, or if a judge asks how shops fit in. It doesn't change the numbers above.
+Only do this after the close, or if a judge asks how shops fit in. It comes after every number above, so it can't change them.
 
-1. On **today's picks**, click **Order for pickup** on Wintermelon Tea. Choose pearls and **Place order**. "Checkout shows the price, any close-call offer, and the pickup fee. Card payments go through Stripe on the server; the browser never sees a key."
-2. **Log out**, then click **Shop: Sunright Tea Studio**. Open **Orders**: the order is there. Click **Accept**, **Mark ready**, **Picked up**.
-3. Open **Offers**: "The four platform rules are locked, so a shop can never buy a win outside a close call. Shops can only narrow when an offer goes out, for example weekdays only."
-4. Open **Demand** and toggle **past year**: "Shops see taste trends, anonymized, with groups under 5 people hidden."
+1. Click the **bell** in the header: "Hana is Andrew's bestea, so he hears when she orders, and Sarah has asked to be one too." Click **Accept** on Sarah's request. Her profile now says **besteas ♥**.
+2. On **Discover**, open Hojicha Cream Tea (Sunright Tea Studio) and click **Order for pickup**. Choose pearls and **Place order**. "Checkout shows the price, any close-call offer, and the pickup fee. Card payments go through Stripe on the server; the browser never sees a key. An order from outside his top 3 nudges his taste profile but not his priorities, because there's nothing passed over to compare it with."
+3. **Log out**, then click **Shop: Sunright Tea Studio**. Open **Orders**: both orders are there. Click **Accept**, **Mark ready**, **Picked up** on one.
+4. Open **Offers**: "The four platform rules are locked, so a shop can never buy a win outside a close call. Shops can only narrow when an offer goes out, for example weekdays only."
+5. Open **Demand** and toggle **past year**: "Shops see taste trends, anonymized, with groups under 5 people hidden."
 
 ## Likely judge questions
 
 - **"Why not let one LLM decide?"** One model hides the trade-off. Separate agents make the disagreement visible and auditable, and the shop agents hold information nobody else has (inventory).
-- **"How does it learn?"** Each pick from the top 3 is compared with the drinks passed over. Weight moves toward the priorities where the pick scored higher. A minimum weight of 5% means no priority is ever ignored completely.
+- **"How does it learn?"** Each order from the top 3 is compared with the drinks passed over. Weight moves toward the priorities where the pick scored higher. A minimum weight of 5% means no priority is ever ignored completely.
 - **"What if everything is ruled out?"** The team says so and asks the user instead of recommending something unavailable.
 - **"What's the human-in-the-loop rule?"** If the top two are within 0.02, or nothing survives, the team asks.
 - **"Can a shop pay to win?"** No. An offer only goes out in a close call that passes the four locked platform rules, it's capped at 10% or $1, it's computed in code, and it's labelled on the card. A shop's own rules can only make offers rarer.

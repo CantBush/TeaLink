@@ -12,6 +12,14 @@ export function profilesChanged() {
   listeners.forEach((listener) => listener());
 }
 
+/** Runs `listener` after every `profilesChanged()`. Returns the unsubscribe. */
+export function onProfilesChanged(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
 /** A user's profile as the current user sees it. `handle` defaults to the current user. */
 export function useProfile(handle?: string): { profile: UserProfile | null; error: string | null } {
   const me = useMe();

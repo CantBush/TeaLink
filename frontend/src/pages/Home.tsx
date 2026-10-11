@@ -5,6 +5,7 @@ import { social } from "../api/social.ts";
 import type { FeedItem, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { FeedCard } from "../components/FeedCard.tsx";
+import { PostComposer } from "../components/PostComposer.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { matchPercent } from "../lib/format.ts";
 import { tint } from "../lib/palette.ts";
@@ -51,6 +52,7 @@ export function Home() {
   const [feed, setFeed] = useState<FeedItem[] | null>(null);
   const [people, setPeople] = useState<UserProfile[]>([]);
   const [tick, setTick] = useState(0);
+  const [composing, setComposing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -97,9 +99,14 @@ export function Home() {
             <TeaBowl steaming className="h-8 w-8 shrink-0 text-moss" />
           </h1>
         </div>
-        <Link to="/" className="hidden shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam sm:block">
-          Get a rec
-        </Link>
+        <div className="flex shrink-0 gap-2">
+          <Link to="/" className="hidden rounded-full border border-ink px-4 py-2 text-sm font-semibold sm:block">
+            Get a rec
+          </Link>
+          <button type="button" onClick={() => setComposing(true)} className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam">
+            New post
+          </button>
+        </div>
       </header>
 
       {newcomer ? (
@@ -122,6 +129,9 @@ export function Home() {
           feed.slice(0, 40).map((item) => <FeedCard key={item.id} item={item} />)
         )}
       </section>
+      {composing ? (
+        <PostComposer onClose={() => setComposing(false)} onPosted={(item) => setFeed((list) => [item, ...(list ?? [])])} />
+      ) : null}
     </main>
   );
 }

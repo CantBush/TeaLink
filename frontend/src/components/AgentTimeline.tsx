@@ -326,7 +326,7 @@ function DecisionCard({ decision }: { decision: LensEvent }) {
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-sage px-4 py-3">
           <p className="text-[15px] font-semibold">It's too close to call, so you decide.</p>
           <Link to="/" className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam">
-            Pick on today's picks
+            Order from today's picks
           </Link>
         </div>
       ) : null}

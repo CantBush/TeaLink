@@ -1,9 +1,15 @@
 import type {
+  AppNotification,
   Author,
+  BesteaState,
   BobaStats,
   FeedComment,
   DimensionScores,
   FeedItem,
+  NotificationKind,
+  Notifications,
+  PastOrder,
+  PostInput,
   ProfilePatch,
   QuizAnswers,
   QuizQuestion,
@@ -16,6 +22,7 @@ import feedRaw from "./social/feed.json";
 import personalityRaw from "./social/personality.json";
 import profilesRaw from "./social/profiles.json";
 import quizRaw from "./social/quiz.json";
+import { orderMock } from "./orderStore.ts";
 
 /**
  * In-browser stand-in for Track A's social endpoints (contract in docs/PLAN.md),
@@ -33,9 +40,22 @@ interface StoredFeedItem extends Omit<FeedItem, "likes" | "liked_by_me" | "autho
   comments: Omit<FeedComment, "author">[];
 }
 
+interface StoredBestea {
+  from: string;
+  to: string;
+  status: "requested" | "bestea";
+}
+
+interface StoredNotification extends Omit<AppNotification, "from"> {
+  to: string;
+  from: string;
+}
+
 interface Store {
   users: StoredUser[];
   feed: StoredFeedItem[];
+  besteas: StoredBestea[];
+  notifications: StoredNotification[];
 }
 
 const KEY = "tealink.social.v1";
@@ -46,17 +66,35 @@ const personality = personalityRaw as {
   traits: Record<TasteAttribute, string>;
 };
 
+/** Sarah has asked Andrew to be besteas, so the bell has something to show in the demo account. */
 function seed(): Store {
   return structuredClone({
     users: profilesRaw as unknown as StoredUser[],
     feed: feedRaw as unknown as StoredFeedItem[],
+    besteas: [
+      { from: "sarah", to: "andrew", status: "requested" },
+      { from: "andrew", to: "hana", status: "bestea" },
+    ],
+    notifications: [
+      { id: "n_seed_sarah", to: "andrew", from: "sarah", kind: "bestea_request", created_at: new Date().toISOString(), read: false },
+      {
+        id: "n_seed_hana",
+        to: "andrew",
+        from: "hana",
+        kind: "bestea_order",
+        drink_id: "sr_pearl_milk",
+        shop_id: "sunright",
+        created_at: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+        read: false,
+      },
+    ],
   });
 }
 
 function load(): Store {
   try {
     const saved = localStorage.getItem(KEY);
-    if (saved) return JSON.parse(saved) as Store;
+    if (saved) return { besteas: [], notifications: [], ...(JSON.parse(saved) as Partial<Store>) } as Store;
   } catch {
     /* Fall back to the seed. */
   }
@@ -110,7 +148,8 @@ function find(idOrHandle: string): StoredUser {
 function view(user: StoredUser, viewerId: string): UserProfile {
   const own = user.user_id === viewerId;
   const viewer = store.users.find((item) => item.user_id === viewerId);
-  const stats: Partial<BobaStats> = own ? { ...user.stats } : { personality: user.stats.personality };
+  const full: BobaStats = { ...user.stats, past_orders: pastOrders(user.user_id) };
+  const stats: Partial<BobaStats> = own ? full : { personality: user.stats.personality };
   if (!own) {
     const keyed: Record<string, (keyof BobaStats)[]> = {
       fav_drink: ["fav_drink_id"],
@@ -126,7 +165,7 @@ function view(user: StoredUser, viewerId: string): UserProfile {
       past_orders: ["past_orders"],
     };
     for (const stat of user.visible_stats) {
-      for (const field of keyed[stat] ?? []) Object.assign(stats, { [field]: user.stats[field] });
+      for (const field of keyed[stat] ?? []) Object.assign(stats, { [field]: full[field] });
     }
   }
   const { following, taste: _taste, stats: _stats, ...rest } = user;
@@ -135,11 +174,44 @@ function view(user: StoredUser, viewerId: string): UserProfile {
     followers: store.users.filter((item) => item.following.includes(user.user_id)).length,
     following: following.length,
     followed_by_me: viewer?.following.includes(user.user_id) ?? false,
+    bestea: own ? "none" : besteaState(viewerId, user.user_id),
+    besteas: store.besteas.filter((link) => link.status === "bestea" && (link.from === user.user_id || link.to === user.user_id)).length,
     taste_match: own || !viewer ? null : similarity(viewer.taste, user.taste),
     stats,
-    bestea: "none",
-    besteas: 0,
   };
+}
+
+function besteaLink(a: string, b: string): StoredBestea | undefined {
+  return store.besteas.find((link) => (link.from === a && link.to === b) || (link.from === b && link.to === a));
+}
+
+function besteaState(viewerId: string, userId: string): BesteaState {
+  const link = besteaLink(viewerId, userId);
+  if (!link) return "none";
+  if (link.status === "bestea") return "bestea";
+  return link.from === viewerId ? "requested" : "incoming";
+}
+
+/** Orders placed in this browser, newest first. Seeded history lives in Track A's data. */
+function pastOrders(userId: string): PastOrder[] {
+  return orderMock
+    .list({ user_id: userId })
+    .filter((order) => order.status !== "cancelled" && order.items[0])
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, 10)
+    .map((order) => ({ drink_id: order.items[0].drink_id, shop_id: order.shop_id, ordered_at: order.created_at }));
+}
+
+function notify(to: string, from: string, kind: NotificationKind, extra: { drink_id?: string; shop_id?: string } = {}) {
+  store.notifications.unshift({
+    id: `n_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    to,
+    from,
+    kind,
+    ...extra,
+    created_at: new Date().toISOString(),
+    read: false,
+  });
 }
 
 function author(userId: string): Author {
@@ -248,7 +320,7 @@ export const socialMock = {
     const viewer = store.users.find((user) => user.user_id === viewerId);
     const circle = new Set([viewerId, ...(viewer?.following ?? [])]);
     return store.feed
-      .filter((item) => circle.has(item.user_id) || item.to_user_id === viewerId)
+      .filter((item) => item.kind !== "pick" && (circle.has(item.user_id) || item.to_user_id === viewerId))
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .map((item) => feedView(item, viewerId));
   },
@@ -256,7 +328,7 @@ export const socialMock = {
   getUserFeed(idOrHandle: string, viewerId: string): FeedItem[] {
     const user = find(idOrHandle);
     return store.feed
-      .filter((item) => item.user_id === user.user_id)
+      .filter((item) => item.kind !== "pick" && item.user_id === user.user_id)
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .map((item) => feedView(item, viewerId));
   },
@@ -279,6 +351,78 @@ export const socialMock = {
     });
     save();
     return feedView(item, viewerId);
+  },
+
+  createPost(viewerId: string, input: PostInput): FeedItem {
+    const text = input.text.trim();
+    if (!text) throw new Error("Write a caption first.");
+    const item: StoredFeedItem = {
+      id: `f_post_${Date.now()}`,
+      user_id: viewerId,
+      kind: "post",
+      drink_id: input.drink_id ?? null,
+      shop_id: input.shop_id ?? null,
+      rating: null,
+      text: text.slice(0, 500),
+      photo_url: input.photo_url ?? null,
+      created_at: new Date().toISOString(),
+      liked_by: [],
+      comments: [],
+    };
+    store.feed.unshift(item);
+    save();
+    return feedView(item, viewerId);
+  },
+
+  deletePost(viewerId: string, itemId: string) {
+    const item = feedItem(itemId);
+    if (item.user_id !== viewerId || item.kind !== "post") throw new Error("You can only delete your own posts.");
+    store.feed = store.feed.filter((entry) => entry.id !== itemId);
+    save();
+  },
+
+  bestea(viewerId: string, target: string, action: "request" | "accept" | "decline" | "end"): UserProfile {
+    const user = find(target);
+    const link = besteaLink(viewerId, user.user_id);
+    if (action === "request" && !link) {
+      store.besteas.push({ from: viewerId, to: user.user_id, status: "requested" });
+      notify(user.user_id, viewerId, "bestea_request");
+    } else if (action === "accept" && link?.status === "requested" && link.to === viewerId) {
+      link.status = "bestea";
+      notify(user.user_id, viewerId, "bestea_accepted");
+    } else if ((action === "decline" || action === "end") && link) {
+      store.besteas = store.besteas.filter((item) => item !== link);
+    }
+    if (action !== "request") {
+      store.notifications = store.notifications.filter(
+        (note) => !(note.kind === "bestea_request" && note.to === viewerId && note.from === user.user_id) || action === "end",
+      );
+    }
+    save();
+    return view(user, viewerId);
+  },
+
+  notifications(viewerId: string): Notifications {
+    const items = store.notifications
+      .filter((note) => note.to === viewerId)
+      .map(({ to: _to, from, ...rest }) => ({ ...rest, from: author(from) }));
+    return { items, unread: items.filter((item) => !item.read).length };
+  },
+
+  readNotifications(viewerId: string, ids?: string[]) {
+    for (const note of store.notifications) {
+      if (note.to === viewerId && (!ids || ids.includes(note.id))) note.read = true;
+    }
+    save();
+  },
+
+  /** A placed order tells every bestea. */
+  notifyOrder(userId: string, drinkId: string, shopId: string) {
+    for (const link of store.besteas) {
+      if (link.status !== "bestea" || (link.from !== userId && link.to !== userId)) continue;
+      notify(link.from === userId ? link.to : link.from, userId, "bestea_order", { drink_id: drinkId, shop_id: shopId });
+    }
+    save();
   },
 
   sendRec(from: string, to: string, drinkId: string, text: string): FeedItem {

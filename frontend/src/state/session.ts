@@ -191,14 +191,27 @@ export function rerun(note?: string) {
 }
 
 /** The user picked one of the top 3: teach the Preference agent, then re-rank. */
-export async function pick(drinkId: string, drinkName: string) {
+export async function pick(drinkId: string, drinkName: string, verb = "picked") {
   try {
     const learned = await client.choose(state.userId, drinkId);
     set({ learned, weights: learned.weights });
-    rerun(`You picked ${drinkName}. ${learned.summary}`);
+    rerun(`You ${verb} ${drinkName}. ${learned.summary}`);
   } catch {
-    pushStatus(`You picked ${drinkName}, but the Preference agent did not answer.`);
+    pushStatus(`You ${verb} ${drinkName}, but the Preference agent did not answer.`);
   }
+}
+
+/**
+ * You ordered a drink from your top 3, which is the pick. A server that learns on placement sends
+ * `learned` (or `null` when it didn't count); an older one sends neither, so the pick goes to /choices.
+ */
+export async function orderedFromTop3(drinkId: string, drinkName: string, learned: PreferenceReport | null | undefined) {
+  if (learned === undefined) {
+    await pick(drinkId, drinkName, "ordered");
+    return;
+  }
+  if (learned) set({ learned, weights: learned.weights });
+  rerun(`You ordered ${drinkName}.${learned ? ` ${learned.summary}` : ""}`);
 }
 
 /** The signed-in account changed (sign-up, quiz, or reset): forget the old user's rounds. */

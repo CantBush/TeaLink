@@ -6,6 +6,7 @@ import { useRole } from "../state/role.ts";
 import { useProfile } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
 import { BobaMark } from "./BobaMark.tsx";
+import { NotificationBell } from "./NotificationBell.tsx";
 
 /** The TeaLink tab owns these pages; see TeaLinkTabs. */
 const TEALINK_PATHS = ["/", "/counter", "/why", "/evidence"];
@@ -77,7 +78,7 @@ export function NavBar() {
   return (
     <>
       <header className="sticky top-0 z-20 border-b border-line bg-foam/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-x-8 px-5 py-3 md:py-4">
+        <div className="mx-auto flex max-w-6xl items-center gap-x-3 px-5 py-3 sm:gap-x-6 md:gap-x-8 md:py-4">
           <NavLink
             to={store ? "/shop" : "/"}
             className="flex items-center gap-2 text-ink"
@@ -112,6 +113,7 @@ export function NavBar() {
               Orders
             </NavLink>
           )}
+          {store || hideTabs ? null : <NotificationBell />}
           {store || hideTabs ? null : (
             <NavLink to={profilePath} className="flex items-center gap-2 text-[15px] tracking-[0.04em] text-ink">
               <span className="hidden lowercase md:inline">{profile?.display_name ?? "profile"}</span>

@@ -42,12 +42,12 @@ function CloseCall({
   a,
   b,
   running,
-  onPick,
+  onOrder,
 }: {
   a: RankedDrink;
   b: RankedDrink;
   running: boolean;
-  onPick: (option: RankedDrink) => void;
+  onOrder: (option: RankedDrink) => void;
 }) {
   return (
     <div className="mt-4 rounded-3xl bg-sage p-4 sm:p-5">
@@ -55,8 +55,8 @@ function CloseCall({
         Close call: {a.drink_name} {matchPercent(a.score)} vs {b.drink_name} {matchPercent(b.score)}.
       </p>
       <p className="mt-1 text-[15px] text-mute">
-        The agents can't separate these two, so they're asking you. Your pick also teaches the Preference agent
-        which priority matters more.
+        The agents can't separate these two, so they're asking you. Ordering one also teaches the Preference
+        agent which priority matters more.
       </p>
       <div className="mt-3 grid gap-3 @lg:grid-cols-2">
         {[
@@ -69,10 +69,10 @@ function CloseCall({
             <button
               type="button"
               disabled={running}
-              onClick={() => onPick(winner)}
+              onClick={() => onOrder(winner)}
               className="mt-3 min-h-10 self-start rounded-full bg-ink px-4 py-2 text-left text-sm font-semibold text-foam disabled:opacity-40"
             >
-              I'd take {winner.drink_name}
+              Order {winner.drink_name}
             </button>
           </div>
         ))}
@@ -81,15 +81,7 @@ function CloseCall({
   );
 }
 
-export function TopChoices({
-  decision,
-  running,
-  onPick,
-}: {
-  decision: Decision | null;
-  running: boolean;
-  onPick: (option: RankedDrink) => void;
-}) {
+export function TopChoices({ decision, running }: { decision: Decision | null; running: boolean }) {
   const [ordering, setOrdering] = useState<string | null>(null);
   if (!decision) {
     return (
@@ -129,7 +121,7 @@ export function TopChoices({
         </Link>
       </div>
       {decision.ask_human && options.length >= 2 ? (
-        <CloseCall a={options[0]} b={options[1]} running={running} onPick={onPick} />
+        <CloseCall a={options[0]} b={options[1]} running={running} onOrder={(option) => setOrdering(option.drink_id)} />
       ) : decision.ask_human && decision.question ? (
         <p className="mt-3 rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">{decision.question}</p>
       ) : null}
@@ -174,15 +166,8 @@ export function TopChoices({
               <button
                 type="button"
                 disabled={running}
-                onClick={() => onPick(option)}
-                className="min-h-10 w-full rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam disabled:opacity-40"
-              >
-                Pick this
-              </button>
-              <button
-                type="button"
                 onClick={() => setOrdering(option.drink_id)}
-                className="mt-2 min-h-10 w-full rounded-full border border-ink px-4 py-2 text-sm font-semibold text-ink"
+                className="min-h-10 w-full rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam disabled:opacity-40"
               >
                 Order for pickup
               </button>

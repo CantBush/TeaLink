@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { social } from "../api/social.ts";
-import type { FeedItem } from "../api/types.ts";
+import type { BesteaState, FeedItem } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaStatsGrid } from "../components/BobaStats.tsx";
 import { EditProfile } from "../components/EditProfile.tsx";
 import { FeedCard } from "../components/FeedCard.tsx";
+import { PostComposer } from "../components/PostComposer.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { SendRec } from "../components/SendRec.tsx";
 import { drinkInfo } from "../lib/catalog.ts";
@@ -29,6 +30,47 @@ function Count({ value, label }: { value: number; label: string }) {
   );
 }
 
+const BESTEA_LABEL: Record<BesteaState, string> = {
+  none: "Request bestea",
+  requested: "Requested",
+  incoming: "Accept bestea",
+  bestea: "Besteas",
+};
+
+/** Besteas see each other's orders. Requested cancels on tap; besteas ends after a confirm. */
+function BesteaButton({
+  state,
+  busy,
+  onAction,
+}: {
+  state: BesteaState;
+  busy: boolean;
+  onAction: (action: "request" | "accept" | "decline" | "end") => void;
+}) {
+  const action = state === "none" ? "request" : state === "incoming" ? "accept" : "end";
+  return (
+    <>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => onAction(action)}
+        title={state === "none" ? "Besteas get a notification when the other orders" : undefined}
+        className={`rounded-full px-4 py-2 text-sm font-semibold ${
+          state === "incoming" ? "bg-moss text-foam" : state === "bestea" ? "bg-sage text-ink" : "border border-line text-ink"
+        }`}
+      >
+        {BESTEA_LABEL[state]}
+        {state === "bestea" ? " ♥" : ""}
+      </button>
+      {state === "incoming" ? (
+        <button type="button" disabled={busy} onClick={() => onAction("decline")} className="rounded-full px-2 py-2 text-sm font-semibold text-mute">
+          Decline
+        </button>
+      ) : null}
+    </>
+  );
+}
+
 /** `/me` → your own profile. */
 export function MyProfile() {
   const { profile } = useProfile();
@@ -48,6 +90,8 @@ export function Profile() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [recOpen, setRecOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [composing, setComposing] = useState(false);
+  const [posted, setPosted] = useState<FeedItem[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,8 +123,10 @@ export function Profile() {
 
   const own = profile.user_id === me;
   const pinned = drinkInfo(profile.pinned_drink_id);
-  const reviews = feed.key === `${handle}:${me}` ? feed.items : [];
-  const posts = reviews.filter((item) => item.kind === "post" || item.drink_id);
+  const loaded = feed.key === `${handle}:${me}` ? feed.items : [];
+  const reviews = [...posted.filter((item) => !loaded.some((entry) => entry.id === item.id)), ...loaded];
+  const posts = reviews.filter((item) => item.kind === "post" || (item.kind === "review" && item.drink_id));
+  const gridPosts = posts.filter((item) => item.photo_url || (item.kind === "review" && drinkPhoto(item.drink_id, item.photo_url)));
   const sharedCard = !own && shownStats(profile.visible_stats).some((key) => key === "top_notes" || key === "priorities" || key === "past_orders");
   const hiddenCount = own ? ALL_STATS.length - shownStats(profile.visible_stats).length : 0;
 
@@ -88,6 +134,15 @@ export function Profile() {
     setBusy(true);
     social
       .follow(profile.user_id, me, !profile.followed_by_me)
+      .then(() => profilesChanged())
+      .finally(() => setBusy(false));
+  };
+
+  const besteaAction = (action: "request" | "accept" | "decline" | "end") => {
+    if (action === "end" && !window.confirm(`Stop being besteas with ${profile.display_name}?`)) return;
+    setBusy(true);
+    social
+      .bestea(me, profile.user_id, action)
       .then(() => profilesChanged())
       .finally(() => setBusy(false));
   };
@@ -106,15 +161,15 @@ export function Profile() {
         <div className="px-5 pb-5 sm:px-7">
           <div className="-mt-12 flex items-end justify-between gap-3 sm:-mt-14">
             <Avatar avatar={profile.avatar} size="xl" ring={tint(profile.accent)} />
-            <div className="flex gap-2 pb-1">
+            <div className="flex flex-wrap justify-end gap-2 pb-1">
               {own ? (
                 <>
                   <button type="button" onClick={() => setEditing(true)} className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam">
                     Edit profile
                   </button>
-                  <Link to="/welcome" className="rounded-full border border-line px-4 py-2 text-sm font-semibold">
-                    Retake quiz
-                  </Link>
+                  <button type="button" onClick={() => setComposing(true)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold">
+                    New post
+                  </button>
                 </>
               ) : (
                 <>
@@ -136,6 +191,7 @@ export function Profile() {
                   >
                     {profile.followed_by_me ? "Following" : "Follow"}
                   </button>
+                  <BesteaButton state={profile.bestea ?? "none"} busy={busy} onAction={besteaAction} />
                 </>
               )}
             </div>
@@ -157,11 +213,17 @@ export function Profile() {
           </div>
           {profile.bio ? <p className="mt-3 max-w-prose">{profile.bio}</p> : null}
 
-          <div className="mt-5 grid grid-cols-3 rounded-2xl bg-cream py-3">
-            <Count value={reviews.filter((item) => item.kind === "review").length} label="reviews" />
+          <div className={`mt-5 grid rounded-2xl bg-cream py-3 ${profile.besteas !== undefined ? "grid-cols-4" : "grid-cols-3"}`}>
+            <Count value={posts.length} label="posts" />
             <Count value={profile.followers} label="followers" />
             <Count value={profile.following} label="following" />
+            {profile.besteas !== undefined ? <Count value={profile.besteas} label="besteas" /> : null}
           </div>
+          {own ? (
+            <Link to="/welcome" className="mt-3 inline-block text-sm font-semibold text-moss">
+              Retake the taste quiz
+            </Link>
+          ) : null}
         </div>
       </section>
 
@@ -240,11 +302,11 @@ export function Profile() {
         </div>
         {posts.length === 0 ? (
           <p className="rounded-3xl border border-dashed border-line p-6 text-center text-[15px] text-mute">
-            {own ? "Pick a drink on TeaLink and it shows up here." : "Nothing posted yet."}
+            {own ? "Share a photo or a thought with New post." : "Nothing posted yet."}
           </p>
-        ) : view === "grid" ? (
+        ) : view === "grid" && gridPosts.length > 0 ? (
           <ul className="grid grid-cols-3 gap-1 overflow-hidden rounded-2xl">
-            {posts.map((item) => (
+            {gridPosts.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
@@ -253,13 +315,14 @@ export function Profile() {
                     requestAnimationFrame(() => document.getElementById(`post-${item.id}`)?.scrollIntoView({ block: "start" }));
                   }}
                   className="relative block aspect-square w-full"
-                  aria-label={`${drinkInfo(item.drink_id)?.name ?? "Drink"}${item.rating ? `, ${item.rating} stars` : ""}`}
+                  aria-label={item.kind === "post" ? (item.text ?? "Post") : `${drinkInfo(item.drink_id)?.name ?? "Drink"}${item.rating ? `, ${item.rating} stars` : ""}`}
                 >
-                  {drinkPhoto(item.drink_id, item.photo_url) ? (
-                    <img src={drinkPhoto(item.drink_id, item.photo_url) ?? ""} alt="" loading="lazy" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="flex h-full items-center justify-center bg-cream p-2 text-center text-xs text-ink">{item.text}</span>
-                  )}
+                  <img
+                    src={(item.kind === "post" ? item.photo_url : drinkPhoto(item.drink_id, item.photo_url)) ?? ""}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
                   {item.rating ? (
                     <span className="absolute right-1.5 bottom-1.5 rounded-full bg-ink/75 px-2 py-0.5 text-xs font-semibold text-foam">
                       ★ {item.rating}
@@ -273,7 +336,7 @@ export function Profile() {
           <div className="space-y-3">
             {posts.map((item) => (
               <div key={item.id} id={`post-${item.id}`} className="scroll-mt-24">
-                <FeedCard item={item} />
+                <FeedCard item={item} onDeleted={() => setPosted((list) => list.filter((entry) => entry.id !== item.id))} />
               </div>
             ))}
           </div>
@@ -282,6 +345,15 @@ export function Profile() {
 
       {editing ? <EditProfile profile={profile} onClose={() => setEditing(false)} /> : null}
       {recOpen ? <SendRec to={profile} onClose={() => setRecOpen(false)} /> : null}
+      {composing ? (
+        <PostComposer
+          onClose={() => setComposing(false)}
+          onPosted={(item) => {
+            setPosted((list) => [item, ...list]);
+            setView(item.photo_url ? "grid" : "list");
+          }}
+        />
+      ) : null}
     </main>
   );
 }
