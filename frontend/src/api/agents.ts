@@ -1,4 +1,5 @@
 import { agentKind } from "../lib/agents.ts";
+import type { TraceSpan } from "./types.ts";
 import { client } from "./client.ts";
 import { Unavailable, request } from "./http.ts";
 
@@ -24,6 +25,15 @@ export async function stopAgent(agentId: string): Promise<StopMode> {
     return "server";
   }
   return "browser";
+}
+
+/** The latest round's trace, or null until `GET /trace/{session_id}` is served. The user id is the session. */
+export async function getTrace(userId: string): Promise<TraceSpan[] | null> {
+  try {
+    return await request<TraceSpan[]>("GET", `/trace/${encodeURIComponent(userId)}`);
+  } catch {
+    return null;
+  }
 }
 
 export async function startAgent(agentId: string): Promise<StopMode> {

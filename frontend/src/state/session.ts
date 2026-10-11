@@ -56,7 +56,19 @@ export interface SessionState {
   stopped: string[];
   /** The subset the API can't stop yet, so the browser leaves them out of each round. */
   browserStopped: string[];
+  /** When each phase of the latest round first reached the browser, in ms after the round started. */
+  phases: { phase: Phase; ms: number }[];
 }
+
+export type Phase = "selected" | "proposed" | "scored" | "decided";
+
+const PHASE_OF: Partial<Record<LensEvent["type"], Phase>> = {
+  selection: "selected",
+  proposal: "proposed",
+  objection: "scored",
+  decision: "decided",
+};
+let roundStartedAt = 0;
 
 let state: SessionState = {
   userId: getMe(),
@@ -79,6 +91,7 @@ let state: SessionState = {
   round: 0,
   stopped: [],
   browserStopped: [],
+  phases: [],
 };
 
 const listeners = new Set<() => void>();
@@ -125,6 +138,10 @@ export function pushEvent(event: LensEvent) {
     event = { ...event, payload: { ...event.payload, missing_agents: state.stopped } };
   }
   const patch: Partial<SessionState> = { events: [...state.events, event] };
+  const phase = PHASE_OF[event.type];
+  if (phase && !state.phases.some((item) => item.phase === phase)) {
+    patch.phases = [...state.phases, { phase, ms: Math.round(performance.now() - roundStartedAt) }];
+  }
   if (event.type === "proposal") {
     patch.proposals = [...state.proposals, event.payload as unknown as Proposal];
   }
@@ -162,8 +179,10 @@ function run(note?: string) {
   const forThisRound = (event: LensEvent) => {
     if (state.round === round) pushEvent(event);
   };
+  roundStartedAt = performance.now();
   set({
     round,
+    phases: [],
     events: [],
     proposals: [],
     previousDecision: state.decision ?? state.previousDecision,

@@ -165,6 +165,16 @@ export interface EvalResult {
 }
 
 /** GET /health. `effective` is what is actually answering: "pending" means AGNTCY is configured but not connected. */
+/** One agent's part in one round (planned GET /trace/{session_id}, from AGNTCY observability). */
+export interface TraceSpan {
+  round: number;
+  agent_id: string;
+  transport: "agntcy" | "local";
+  ms: number;
+  retries: number;
+  fell_back: boolean;
+}
+
 export interface Health {
   status: string;
   transport: "local" | "agntcy";
