@@ -38,7 +38,7 @@ function roundLabel(round: number, last: number, hasOffer: boolean): string {
   return `rebuttal ${round - 1}`;
 }
 
-/** Inside the latest round: how long each agent took and how it was reached, for the AGNTCY story. */
+/** Inside the latest round: how long each teagent took and how it was reached, for the AGNTCY story. */
 export function RoundTrace() {
   const session = useSession();
   const [trace, setTrace] = useState<{ sessionId: string; spans: TraceSpan[] } | null>(null);
@@ -66,7 +66,7 @@ export function RoundTrace() {
         {session.usingMock ? <span className="text-xs text-mute">saved round</span> : null}
       </div>
       <p className="mt-1 text-sm text-mute">
-        Every call from the concierge to an agent, traced: how long it took, how many retries, and whether it went over
+        Every call from the concierge to a teagent, traced: how long it took, how many retries, and whether it went over
         Cisco's AGNTCY bus or fell back to in-process.
       </p>
 
@@ -97,7 +97,7 @@ function SpanView({ spans, hasOffer, stopped }: { spans: TraceSpan[]; hasOffer: 
     <>
       <dl className="mt-5 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
         {[
-          [`${agents.size}`, "agents"],
+          [`${agents.size}`, "teagents"],
           [`${overBus} of ${spans.length}`, "calls over AGNTCY"],
           [`${retries}`, retries === 1 ? "retry" : "retries"],
           [`${fellBack}`, fellBack === 1 ? "fallback" : "fallbacks"],
@@ -146,7 +146,7 @@ function SpanView({ spans, hasOffer, stopped }: { spans: TraceSpan[]; hasOffer: 
             {TRANSPORT_LABEL[tone]}
           </span>
         ))}
-        <span>· {time(total)} of agent time in all</span>
+        <span>· {time(total)} of teagent time in all</span>
         {stopped.length ? (
           <span className="text-[#8a3b2a]">· not called: {stopped.map((id) => agentInfo(id).name.toLowerCase()).join(", ")}</span>
         ) : null}

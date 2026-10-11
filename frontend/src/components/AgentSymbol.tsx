@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { type AgentKind, agentKind } from "../lib/agents.ts";
 
-/** One minimal line symbol per agent; every shop agent shares the storefront. */
+/** One minimal line symbol per teagent; every shop teagent shares the storefront. */
 const PATHS: Record<AgentKind, ReactNode> = {
   taste: (
     <>

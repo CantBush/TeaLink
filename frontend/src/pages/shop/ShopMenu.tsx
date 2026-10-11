@@ -114,7 +114,7 @@ function DrinkEditor({
         </label>
         <fieldset>
           <legend className="mb-1 text-sm font-semibold">How it tastes</legend>
-          <p className="mb-2 text-xs text-mute">The Taste agent matches these against what each customer likes.</p>
+          <p className="mb-2 text-xs text-mute">The Taste teagent matches these against what each customer likes.</p>
           {TASTE_ORDER.map((key) => (
             <label key={key} className="flex items-center gap-3 py-1 text-sm">
               <span className="w-24 shrink-0 text-mute">{attributeLabel(key)}</span>
@@ -210,7 +210,7 @@ export function ShopMenu() {
         <p className="text-xs font-semibold tracking-[0.16em] text-moss">menu</p>
         <h1 className="mt-1 font-display text-4xl">your drinks</h1>
         <p className="mt-1 text-mute">
-          Edit drinks and sections here. Marking a drink sold out tells the agents right away.
+          Edit drinks and sections here. Marking a drink sold out tells the teagents right away.
           {preview ? " Other edits are saved in this browser until the API serves menus." : ""}
         </p>
       </header>

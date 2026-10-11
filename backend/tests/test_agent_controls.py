@@ -1,4 +1,4 @@
-"""Demo-safe agent stop/start controls and per-round transport traces."""
+"""Demo-safe teagent stop/start controls and per-round transport traces."""
 
 import json
 

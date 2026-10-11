@@ -1,7 +1,7 @@
 """Apply structured what-if changes, and turn typed text into those changes.
 
 The keyword matcher is the no-LLM fallback. It only emits known kinds with real
-ids. Scores stay in the agents; this module never ranks a drink.
+ids. Scores stay in the teagents; this module never ranks a drink.
 """
 
 from __future__ import annotations

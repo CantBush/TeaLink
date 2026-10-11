@@ -1,4 +1,4 @@
-"""Budget agent: the cheapest drinks the user would still enjoy."""
+"""Budget teagent: the cheapest drinks the user would still enjoy."""
 
 from __future__ import annotations
 

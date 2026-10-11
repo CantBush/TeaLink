@@ -130,7 +130,7 @@ class AgentSelection(BaseModel):
     agent_id: str
     capabilities: list[str]
     reason: str
-    # Copied from the agent card so a team grid can render without another request.
+    # Copied from the teagent card so a team grid can render without another request.
     name: str | None = None
     description: str | None = None
 
@@ -187,8 +187,8 @@ class Decision(BaseModel):
     decided_by: Literal["agents", "arbiter"] | None = None
     # Rebuttal rounds that finished. 0 in single mode. A discarded timeout does not count.
     rounds: int | None = None
-    # Agents intentionally stopped for this deliberation. The arbiter still
-    # returns a decision using the agents that remained available.
+    # Teagents intentionally stopped for this deliberation. The arbiter still
+    # returns a decision using the teagents that remained available.
     missing_agents: list[str] = Field(default_factory=list)
     # Present only when the optional Critic review was enabled for this round.
     critique: Critique | None = None
@@ -235,7 +235,7 @@ class LensEvent(BaseModel):
 
 
 class TraceRecord(BaseModel):
-    """One gateway-to-agent attempt, recorded for the Evidence trace view."""
+    """One gateway-to-teagent attempt, recorded for the Evidence trace view."""
 
     round: int
     agent_id: str
@@ -255,7 +255,7 @@ class DeliberationRequest(BaseModel):
     choice: ChoiceRecord | None = None
     # Starting weights from the onboarding quiz. Picks are learned on top of them.
     prior_weights: dict[str, float] | None = None
-    # Latest objections from every agent. Revise is stateless, so the prior stance travels here.
+    # Latest objections from every teagent. Revise is stateless, so the prior stance travels here.
     peer_objections: list[Objection] = Field(default_factory=list)
     # This order only. Drinks above it are not proposed.
     max_price: float | None = None

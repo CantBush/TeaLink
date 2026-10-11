@@ -1,6 +1,6 @@
-"""Serve one agent over A2A on NATS.
+"""Serve one teagent over A2A on NATS.
 
-Local mode does not use this module. The API calls agent classes in-process.
+Local mode does not use this module. The API calls teagent classes in-process.
 If agntcy-app-sdk is missing, NATS is down, or the SDK startup API does not
 match, this process prints the reason and exits 1.
 
@@ -29,7 +29,7 @@ from tealink.schemas import DeliberationRequest
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Serve one TeaLink agent over A2A/NATS")
+    parser = argparse.ArgumentParser(description="Serve one TeaLink teagent over A2A/NATS")
     parser.add_argument("--agent", required=True, choices=list(AGENT_KINDS))
     parser.add_argument("--shop-id", default=None)
     parser.add_argument(
@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     if args.agent == "shop" and not args.shop_id:
-        print("--shop-id is required for the shop agent", file=sys.stderr)
+        print("--shop-id is required for the shop teagent", file=sys.stderr)
         return 1
     try:
         catalog = load_catalog()
@@ -142,7 +142,7 @@ async def _serve(agent: BaseAgent, catalog: Catalog, standby: bool) -> None:
                 reply = agent.handle(request, catalog)
                 body = reply.model_dump_json()
             except Exception as exc:
-                body = f"TeaLink agent {agent.agent_id} could not handle the message: {exc}"
+                body = f"TeaLink teagent {agent.agent_id} could not handle the message: {exc}"
             await event_queue.enqueue_event(new_agent_text_message(body))
 
         async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:

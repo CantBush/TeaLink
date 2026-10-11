@@ -174,7 +174,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
     <section className="rounded-[28px] border border-line bg-foam p-5 sm:p-6">
       <h2 className="flex items-center gap-2 font-display text-2xl leading-none"><Teapot className="h-6 w-6 shrink-0 text-moss" />what if…</h2>
       <p className="mt-1 text-sm text-mute">
-        Change something, then watch the agents re-plan your order. Each button starts a fresh round.
+        Change something, then watch the teagents re-plan your order. Each button starts a fresh round.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <button
@@ -192,7 +192,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
           className={button}
           disabled={busy || !topShop}
           onClick={() =>
-            void act(() => client.shopOffline(topShop), `${shopLabel(topShop)}'s agent went offline.`)
+            void act(() => client.shopOffline(topShop), `${shopLabel(topShop)}'s teagent went offline.`)
           }
         >
           #1's shop goes offline
@@ -270,7 +270,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
 
         {pending.length ? (
           <div className="space-y-3 rounded-3xl bg-sage p-4">
-            <p className="text-sm">Check these before the agents re-plan. Nothing runs until you press the button.</p>
+            <p className="text-sm">Check these before the teagents re-plan. Nothing runs until you press the button.</p>
             <ul className="flex flex-wrap gap-2">
               {pending.map((change, index) => (
                 <li key={index} className="flex items-center gap-1 rounded-full bg-foam py-1 pr-1 pl-3 text-sm font-semibold">

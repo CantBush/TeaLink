@@ -1,1 +1,1 @@
-"""Specialist agents. Local mode calls them in-process."""
+"""Specialist teagents. Local mode calls them in-process."""

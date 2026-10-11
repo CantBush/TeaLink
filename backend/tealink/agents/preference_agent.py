@@ -1,4 +1,4 @@
-"""Preference agent: learns how much each user weighs taste, friends, novelty, and cost.
+"""Preference teagent: learns how much each user weighs taste, friends, novelty, and cost.
 
 Its private data is the user's choice log: past picks (seeded history) plus
 every pick made from a top 3 in this session. It never sees reviews or menus.

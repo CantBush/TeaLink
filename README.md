@@ -1,6 +1,6 @@
 # TeaLink
 
-Explainable multi-agent boba recommender for the Cisco Cloud AI track (Level 2). Taste, Social, Explorer, and Budget agents each argue for a different objective, shop agents confirm stock or veto, and a Preference agent learns what each user cares about from their picks. The user gets a top 3. Match scores, factor contributions, weights, and vetoes are computed in code. LiteLLM is only used for wording, and only when `LLM_MODEL` and a provider key are set. Without a key, templates keep the demo moving.
+Explainable multi-teagent boba recommender for the Cisco Cloud AI track (Level 2). Taste, Social, Explorer, and Budget teagents each argue for a different objective, shop teagents confirm stock or veto, and a Preference teagent learns what each user cares about from their picks. The user gets a top 3. Match scores, factor contributions, weights, and vetoes are computed in code. LiteLLM is only used for wording, and only when `LLM_MODEL` and a provider key are set. Without a key, templates keep the demo moving.
 
 ## Run locally
 
@@ -17,7 +17,7 @@ make seed
 make api
 ```
 
-`make api` serves FastAPI on port 8000. In another terminal, `make web` starts the Vite app (the `frontend/` tree). `.env` should keep `TRANSPORT=local`, which runs every agent in-process. No NATS broker and no API key are required.
+`make api` serves FastAPI on port 8000. In another terminal, `make web` starts the Vite app (the `frontend/` tree). `.env` should keep `TRANSPORT=local`, which runs every teagent in-process. No NATS broker and no API key are required.
 
 Useful calls:
 
@@ -36,12 +36,12 @@ The team plan is in [`docs/PLAN.md`](docs/PLAN.md). Progress and to-dos are in [
 
 ## Level 2 mapping
 
-- **Agents with competing objectives.** Taste (fit to the user's reviews), Social (what similar users loved), Explorer (new but plausible), and Budget (price) each propose drinks, then score every candidate by their own objective. Shop agents only confirm stock or veto.
-- **Capability-based selection.** The registry reads agent cards, and the concierge logs a one-sentence reason for each agent it selects.
+- **Teagents with competing objectives.** Taste (fit to the user's reviews), Social (what similar users loved), Explorer (new but plausible), and Budget (price) each propose drinks, then score every candidate by their own objective. Shop teagents only confirm stock or veto.
+- **Capability-based selection.** The registry reads teagent cards, and the concierge logs a one-sentence reason for each teagent it selects.
 - **Unexpected change.** A sold-out event triggers a shop veto. A shop going offline (`/events/shop-offline`, or a stale heartbeat) drops its drinks, because nobody can confirm them.
-- **Dynamic discovery.** Lantern Leaf has no agent at startup. `/events/shop-join` registers one mid-session.
-- **Conflict resolution.** The resolver blends every agent's score using weights the Preference agent learned for this user, and returns a top 3. It sets `ask_human` when the top two are within 0.02, or when everything was ruled out.
-- **Learning from the user.** `/choices` records a pick from the top 3. The Preference agent updates how much the user weighs taste, price, novelty, and friends, starting from seeded past picks.
+- **Dynamic discovery.** Lantern Leaf has no teagent at startup. `/events/shop-join` registers one mid-session.
+- **Conflict resolution.** The resolver blends every teagent's score using weights the Preference teagent learned for this user, and returns a top 3. It sets `ask_human` when the top two are within 0.02, or when everything was ruled out.
+- **Learning from the user.** `/choices` records a pick from the top 3. The Preference teagent updates how much the user weighs taste, price, novelty, and friends, starting from seeded past picks.
 - **Explaining the choice.** Selection, preference, proposal, objection, and decision are all Lens events. Why This shows each objective's score times the user's weight.
 
 ## Evidence
@@ -50,14 +50,14 @@ The team plan is in [`docs/PLAN.md`](docs/PLAN.md). Progress and to-dos are in [
 
 ## AGNTCY transport
 
-With `TRANSPORT=agntcy`, every agent runs as its own process and speaks A2A over a NATS bus through `agntcy-app-sdk`. The HTTP API and the frontend are the same in both modes. If the broker or an agent is down, that call is answered in-process.
+With `TRANSPORT=agntcy`, every teagent runs as its own process and speaks A2A over a NATS bus through `agntcy-app-sdk`. The HTTP API and the frontend are the same in both modes. If the broker or a teagent is down, that call is answered in-process.
 
 ```bash
 cd backend && pip install -e ".[dev,bus]" && cd ..   # the AGNTCY SDK is an optional extra
 make bus            # NATS in Docker on 4222. Without Docker: brew install nats-server && nats-server -p 4222
-TRANSPORT=agntcy make agents   # serves all 11 agents (Lantern Leaf waits on standby until it joins)
+TRANSPORT=agntcy make agents   # serves all 11 teagents (Lantern Leaf waits on standby until it joins)
 TRANSPORT=agntcy make api
 make web
 ```
 
-`curl localhost:8000/health` shows `"effective": "agntcy"` and a per-agent count of replies received over the bus. The timeline header in the app shows the same: "AGNTCY · N agents over NATS", with a dot on each agent that answered over the bus. A SLIM broker is optional under the compose profile `slim` and is not started by `make bus`.
+`curl localhost:8000/health` shows `"effective": "agntcy"` and a per-teagent count of replies received over the bus. The timeline header in the app shows the same: "AGNTCY · N teagents over NATS", with a dot on each teagent that answered over the bus. A SLIM broker is optional under the compose profile `slim` and is not started by `make bus`.

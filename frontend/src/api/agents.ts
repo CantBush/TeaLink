@@ -3,14 +3,14 @@ import type { TraceSpan } from "./types.ts";
 import { client } from "./client.ts";
 import { Unavailable, request } from "./http.ts";
 
-/** Who carries out a stop or restart: the API, or the browser re-scoring the round without the agent. */
+/** Who carries out a stop or restart: the API, or the browser re-scoring the round without the teagent. */
 export type StopMode = "server" | "browser";
 
 const shopId = (agentId: string) => agentId.replace(/^shop[_:]/, "");
 
 /**
- * Take an agent out of the team with `POST /agents/{id}/stop`. An older API without the route
- * takes a shop offline through the shop event route instead, and the browser leaves a core agent
+ * Take a teagent out of the team with `POST /agents/{id}/stop`. An older API without the route
+ * takes a shop offline through the shop event route instead, and the browser leaves a core teagent
  * out of the next round.
  */
 export async function stopAgent(agentId: string): Promise<StopMode> {

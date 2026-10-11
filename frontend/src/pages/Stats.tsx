@@ -14,7 +14,7 @@ import { loadProfile, useSession } from "../state/session.ts";
 import { useProfile } from "../state/social.ts";
 import { Loading } from "../components/Loading.tsx";
 
-/** Your own numbers: the shareable card, every stat (public or not), and the taste profile the agents use. */
+/** Your own numbers: the shareable card, every stat (public or not), and the taste profile the teagents use. */
 export function Stats() {
   const role = useRole();
   const { profile } = useProfile();
@@ -50,68 +50,64 @@ export function Stats() {
       </header>
 
       <div className="grid items-start gap-8 md:grid-cols-2">
-        <section aria-label="Boba card" className="mx-auto w-full max-w-sm">
-          <BobaCard
-            name={profile.display_name}
-            handle={profile.handle}
-            avatar={profile.avatar}
-            accent={profile.accent}
-            color={color}
-            stats={profile.stats}
-          />
-          <div className="mt-5">
-            <p className="text-center text-xs tracking-[0.14em] text-mute">card color</p>
-            <div className="mt-2 flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="Card color">
-              {CARD_COLORS.map((swatch) => (
-                <button
-                  key={swatch.color}
-                  type="button"
-                  role="radio"
-                  aria-checked={swatch.color === color}
-                  aria-label={swatch.name}
-                  title={swatch.name}
-                  onClick={() => setCardColor(profile.user_id, swatch.color)}
-                  className={`h-8 w-8 rounded-full transition-transform hover:scale-110 ${
-                    swatch.color === color ? "ring-2 ring-ink ring-offset-2 ring-offset-cream" : ""
-                  }`}
-                  style={{ background: swatch.color }}
-                />
-              ))}
-              <label
-                className="relative grid h-8 w-8 cursor-pointer place-items-center rounded-full border border-dashed border-ink/40 text-sm text-mute transition-transform hover:scale-110"
-                title="Pick any color"
-              >
-                +
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(event) => setCardColor(profile.user_id, event.target.value)}
-                  className="absolute inset-0 cursor-pointer opacity-0"
-                  aria-label="Pick any card color"
-                />
-              </label>
+        <div className="mx-auto w-full max-w-sm space-y-8">
+          <section aria-label="Boba card">
+            <BobaCard
+              name={profile.display_name}
+              handle={profile.handle}
+              avatar={profile.avatar}
+              accent={profile.accent}
+              color={color}
+              stats={profile.stats}
+            />
+            <div className="mt-5">
+              <p className="text-center text-xs tracking-[0.14em] text-mute">card color</p>
+              <div className="mt-2 flex flex-wrap justify-center gap-2" role="radiogroup" aria-label="Card color">
+                {CARD_COLORS.map((swatch) => (
+                  <button
+                    key={swatch.color}
+                    type="button"
+                    role="radio"
+                    aria-checked={swatch.color === color}
+                    aria-label={swatch.name}
+                    title={swatch.name}
+                    onClick={() => setCardColor(profile.user_id, swatch.color)}
+                    className={`h-8 w-8 rounded-full transition-transform hover:scale-110 ${
+                      swatch.color === color ? "ring-2 ring-ink ring-offset-2 ring-offset-cream" : ""
+                    }`}
+                    style={{ background: swatch.color }}
+                  />
+                ))}
+                <label
+                  className="relative grid h-8 w-8 cursor-pointer place-items-center rounded-full border border-dashed border-ink/40 text-sm text-mute transition-transform hover:scale-110"
+                  title="Pick any color"
+                >
+                  +
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(event) => setCardColor(profile.user_id, event.target.value)}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    aria-label="Pick any card color"
+                  />
+                </label>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="mx-auto w-full max-w-sm">
-          <div className="mb-3 flex items-baseline justify-between gap-3">
-            <h2 className="font-display text-2xl">your receipt</h2>
-            <p className="text-sm text-mute">
-              {visible.length} on your profile{hidden.length ? `, ${hidden.length} only you can see` : ""}
+          <section className="rounded-[28px] border border-line bg-foam p-6">
+            <h2 className="font-display text-2xl">Your taste profile</h2>
+            <p className="mt-1 mb-5 text-[15px] text-mute">
+              What the Taste teagent scores drinks against for you. It shifts every time you rate a drink.
             </p>
-          </div>
+            <TasteBars profile={session.profile} />
+          </section>
+        </div>
+
+        <section aria-label="Your receipt" className="mx-auto w-full max-w-sm">
           <StatsReceipt stats={profile.stats} order={[...visible, ...hidden]} hidden={hidden} />
         </section>
       </div>
-
-      <section className="rounded-[28px] border border-line bg-foam p-6">
-        <h2 className="font-display text-2xl">Your taste profile</h2>
-        <p className="mt-1 mb-5 text-[15px] text-mute">
-          What the Taste agent scores drinks against for you. It shifts every time you rate a drink.
-        </p>
-        <TasteBars profile={session.profile} />
-      </section>
 
       <p className="text-center text-[15px] text-mute">
         Want today's picks from these numbers?{" "}

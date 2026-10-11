@@ -5,12 +5,12 @@ have a true favorite every round: the in-stock drink with the best score under
 those hidden weights. Three recommenders name a top 3:
 
 - popularity: most-reviewed drink this user has not tried
-- fixed weights: the agent team, stuck on the default priorities
+- fixed weights: the teagent team, stuck on the default priorities
 - learning: the same team, updating after every pick
 
 A hit means the recommender's #1 is that favorite. Top-3 rate means the
 favorite appears anywhere in the three. The user can only pick inside the
-learning team's top 3, and that pick is what the Preference agent learns from.
+learning team's top 3, and that pick is what the Preference teagent learns from.
 """
 
 from __future__ import annotations

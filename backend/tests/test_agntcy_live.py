@@ -1,4 +1,4 @@
-"""Opt-in check that a Taste agent answers over NATS.
+"""Opt-in check that a Taste teagent answers over NATS.
 
 ``make test`` skips this. Run it with NATS up:
 
@@ -99,7 +99,7 @@ def test_recommend_uses_remote_taste():
         pytest.skip("NATS is not running on port 4222")
     """One /recommend with TRANSPORT=agntcy gets a Taste reply over NATS.
 
-    The other agents are not running, so they stay on the in-process fallback.
+    The other teagents are not running, so they stay on the in-process fallback.
     That is the seam: the HTTP response is still a full deliberation.
     """
     write_dataset()
@@ -132,7 +132,7 @@ def test_recommend_uses_remote_taste():
 
 
 def test_roster_is_importable_for_launch():
-    """Launch starts one process per default agent plus standby shops."""
+    """Launch starts one process per default teagent plus standby shops."""
     write_dataset()
     catalog = load_catalog()
     online = [agent.card().id for agent in default_agents(catalog)]

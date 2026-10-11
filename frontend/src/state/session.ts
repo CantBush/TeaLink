@@ -29,7 +29,7 @@ function guessName(userId: string): string {
 }
 
 export interface SessionState {
-  /** Who the agents are recommending for, and how to address them. */
+  /** Who the teagents are recommending for, and how to address them. */
   userId: string;
   name: string;
   profile: TasteProfile;
@@ -42,18 +42,18 @@ export interface SessionState {
   change: string | null;
   weights: DimensionScores | null;
   preferenceSummary: string | null;
-  /** What the last pick taught the Preference agent. */
+  /** What the last pick taught the Preference teagent. */
   learned: PreferenceReport | null;
   similar: SimilarUser[];
   /** Which transport answered, from /health after each round. */
   health: Health | null;
-  /** Agents whose replies arrived over the AGNTCY bus during the latest round. */
+  /** Teagents whose replies arrived over the AGNTCY bus during the latest round. */
   busAgents: string[];
   usingMock: boolean;
   started: boolean;
   running: boolean;
   round: number;
-  /** Agents taken out with "kill an agent", in the order they were stopped. */
+  /** Teagents taken out with "kill a teagent", in the order they were stopped. */
   stopped: string[];
   /** The subset the API can't stop yet, so the browser leaves them out of each round. */
   browserStopped: string[];
@@ -257,14 +257,14 @@ export function rerun(note?: string) {
   run(note);
 }
 
-/** The user picked one of the top 3: teach the Preference agent, then re-rank. */
+/** The user picked one of the top 3: teach the Preference teagent, then re-rank. */
 export async function pick(drinkId: string, drinkName: string, verb = "picked") {
   try {
     const learned = await client.choose(state.userId, drinkId);
     set({ learned, weights: learned.weights });
     rerun(`You ${verb} ${drinkName}. ${learned.summary}`);
   } catch {
-    pushStatus(`You ${verb} ${drinkName}, but the Preference agent did not answer.`);
+    pushStatus(`You ${verb} ${drinkName}, but the Preference teagent did not answer.`);
   }
 }
 
@@ -306,8 +306,8 @@ export function switchUser() {
 }
 
 /**
- * "Kill an agent": take it out of the team, or bring it back, and re-plan. Stopping during a round
- * abandons that round and starts the next one without the agent.
+ * "Kill a teagent": take it out of the team, or bring it back, and re-plan. Stopping during a round
+ * abandons that round and starts the next one without the teagent.
  */
 export async function toggleAgent(agentId: string) {
   const name = agentInfo(agentId).name;

@@ -2,7 +2,7 @@
 
 *Last updated: Sun Oct 11, 11:35 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
-The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
+The full plan, with phases, the teagent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
 ## Target
 
@@ -10,15 +10,15 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## What the demo shows
 
-1. Four agents with **different objectives** each propose three drinks:
+1. Four teagents with **different objectives** each propose three drinks:
    - **Taste**: fit to the user's own reviews.
    - **Social**: what the user's most similar people rated highly.
    - **Explorer**: something new that the user would still plausibly like.
    - **Budget**: the cheapest drinks that still fit.
-2. Every agent then scores **every** candidate by its own objective, so the timeline shows real support and pushback.
-3. **Shop agents** are the only ones that know inventory. They confirm stock or veto sold-out drinks. If a shop has no online agent, its drinks are dropped with a reason.
+2. Every teagent then scores **every** candidate by its own objective, so the timeline shows real support and pushback.
+3. **Shop teagents** are the only ones that know inventory. They confirm stock or veto sold-out drinks. If a shop has no online teagent, its drinks are dropped with a reason.
 4. The user gets a **top 3** and picks one.
-5. The **Preference agent** learns how much this user weighs taste, price, novelty, and friends' picks. It starts from **past decisions** (Andrew's seeded choice history) and updates on **every current pick**. The resolver ranks by those learned weights, and the app explains each shift. For example: "You picked Pearl Milk Tea over Thai Tea, so taste match now counts for 43% (was 39%)."
+5. The **Preference teagent** learns how much this user weighs taste, price, novelty, and friends' picks. It starts from **past decisions** (Andrew's seeded choice history) and updates on **every current pick**. The resolver ranks by those learned weights, and the app explains each shift. For example: "You picked Pearl Milk Tea over Thai Tea, so taste match now counts for 43% (was 39%)."
 6. Adaptation buttons, each of which starts a fresh deliberation: **#1 sells out**, **#1's shop goes offline**, **Lantern Leaf joins** (its $4.95 Brown Sugar Hojicha Milk jumps to #1), and **I don't like brown sugar** (that drink drops back out).
 7. The app asks the human when the top two are within 0.02 of each other, or when every candidate was ruled out.
 
@@ -30,12 +30,12 @@ Browser-checked over AGNTCY. Demo numbers unchanged: ordering Pearl from the top
 
 - **Ordering from the top 3.** The order sheet now lives outside the top 3 cards, so the round that re-runs after an order no longer unmounts it. "Order placed" stays up through the re-run, and **Done** closes the sheet.
 - **Past orders on the profile.** Highlights took the first 3 visible stats before dropping retired ones, so past orders never showed on your own profile. Past orders now have their own "recent orders" section on any profile that shares them, newest first, with the drink photo, shop, and date. Track A row 1 is already served: an order placed in the app comes back first in `stats.past_orders`.
-- **Loading animation.** `components/Loading.tsx`: the logo's cups swing apart and clink, with sparks on contact. It's used for every page, sheet, and shop loading state, the top 3 while it steeps, the chat while the agents are called, and the quiz. With reduced motion, it rests on the static logo.
+- **Loading animation.** `components/Loading.tsx`: the logo's cups swing apart and clink, with sparks on contact. It's used for every page, sheet, and shop loading state, the top 3 while it steeps, the chat while the teagents are called, and the quiz. With reduced motion, it rests on the static logo.
 - **Post tags.** `components/ShopSearch.tsx`: type a shop name, and suggestions come up ranked by name match (starts with, then a word starts with, then contains, then the letters in order). After picking a shop, you can tag one of its drinks or leave it at the shop. `GET /shops` now includes `popularity`, so a tie can break on that. `ShopSearch` is also meant for the quiz's favorites question.
 
 ### Ordering fixes, full quiz, favorites, and ratings (Andrew, Track A of the Sun 10:55 AM plan)
 
-Backend only, on `a/ordering-quiz`. `frontend/src/**` is untouched. After Reset demo the opening is still Thai Tea 78, Wintermelon 77, Pearl 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73. Recency and ratings apply to orders placed in the app. An unrated order counts as it does today: a top-3 order teaches the Preference agent and does not add a taste review; any other order is a 4/5 taste signal and does not move the priority weights.
+Backend only, on `a/ordering-quiz`. `frontend/src/**` is untouched. After Reset demo the opening is still Thai Tea 78, Wintermelon 77, Pearl 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73. Recency and ratings apply to orders placed in the app. An unrated order counts as it does today: a top-3 order teaches the Preference teagent and does not add a taste review; any other order is a 4/5 taste signal and does not move the priority weights.
 
 **Seam for Track B.** Mirror these in `frontend/src/api/types.ts`. The screens stay yours. `GET /quiz` with no `kind` is still the six questions.
 
@@ -53,8 +53,8 @@ Full-quiz flavors marked "skip" are stored as tag overrides of 0, the same mecha
 
 Browser-checked over AGNTCY against Andrew's stop, start, and trace routes. Off by default; after Reset demo the round still opens at Thai Tea 78, Wintermelon 77, Pearl 71.
 
-- **Kill an agent.** Tap an agent in the team grid on at the counter, then **Stop** or **Bring back** (`POST /agents/{id}/stop|start`). A stopped agent is greyed out with a slash, the chat shows "You stopped Budget." and the server's `agent_lost` line, and the decision says "without budget" plus what it cost ("Nobody spoke for price, so it counted for nothing this round", or "Kung Fu Tea couldn't confirm stock, so its drinks were ruled out"). Checked: stopping Budget makes Pearl #1 at 0.49 (price scores 0), bringing it back restores Thai Tea 0.78, stopping Kung Fu Tea makes Wintermelon #1 at 0.77, and Reset demo brings everyone back. Against an older API without the routes, a shop uses shop-offline and a core agent is left out in the browser by `lib/withoutAgents.ts`, which now scores the same way as the server.
-- **Trace.** "Inside the last round" on the Evidence page reads `GET /trace/{session_id}`, using the `session_id` on the round's events. It shows the call count over AGNTCY, retries, and fallbacks, then one bar per call grouped by round (opening picks, round 1, rebuttals, the close-call offer), and which stopped agents weren't called. A saved round, or an API without traces, shows browser-measured phase times and each agent's transport from `/health` instead.
+- **Kill a teagent.** Tap a teagent in the team grid on at the counter, then **Stop** or **Bring back** (`POST /agents/{id}/stop|start`). A stopped teagent is greyed out with a slash, the chat shows "You stopped Budget." and the server's `agent_lost` line, and the decision says "without budget" plus what it cost ("Nobody spoke for price, so it counted for nothing this round", or "Kung Fu Tea couldn't confirm stock, so its drinks were ruled out"). Checked: stopping Budget makes Pearl #1 at 0.49 (price scores 0), bringing it back restores Thai Tea 0.78, stopping Kung Fu Tea makes Wintermelon #1 at 0.77, and Reset demo brings everyone back. Against an older API without the routes, a shop uses shop-offline and a core teagent is left out in the browser by `lib/withoutAgents.ts`, which now scores the same way as the server.
+- **Trace.** "Inside the last round" on the Evidence page reads `GET /trace/{session_id}`, using the `session_id` on the round's events. It shows the call count over AGNTCY, retries, and fallbacks, then one bar per call grouped by round (opening picks, round 1, rebuttals, the close-call offer), and which stopped teagents weren't called. A saved round, or an API without traces, shows browser-measured phase times and each teagent's transport from `/health` instead.
 - **Critic.** A switch under the what-if buttons calls Andrew's `POST /critic/enable|disable` and re-runs. The chat shows the Critic's line ("Thai Tea's weakest case is something new: 56%.") and the arbiter's answer ("Keeping the pick, since it still has the highest combined score."). Reset demo switches it off. Against an older API without the routes, `lib/critic.ts` plays the Critic in the browser from the decision's scores.
 - **Demo and write-up.** An optional 30-second Cisco segment in `demo-script.md` (kill Budget, the Critic, the trace), judge Q&A for failure, identity, directory, observability, and the Critic, and three Level 3 rows in `writeup.md`. The Q&A says plainly which parts run in the browser for now.
 
@@ -86,17 +86,17 @@ Track B mirrors this in `frontend/src/api/types.ts`. Demo scores are unchanged (
 
 ### On main (Andrew, through 12:43 PM)
 
-- Repo skeleton: FastAPI gateway with SSE streaming, agent cards and a registry with heartbeats, two-round deliberation, an in-process transport, and a Vite React frontend.
+- Repo skeleton: FastAPI gateway with SSE streaming, teagent cards and a registry with heartbeats, two-round deliberation, an in-process transport, and a Vite React frontend.
 - Seed data, taste math (profile, match score, factor contributions), and review retrieval as evidence.
 - Discover, Why This, Counterfactual, and Friends pages, working against mock data.
 
 ### Branch `feature/top3-preference-learning` (Emily, 12:50 to 1:15 PM)
 
-- **Separate objectives.** One scoring function per agent in `core/objectives.py`. There's a new Budget agent and a shared `ObjectiveAgent` base class.
-- **Real Social agent.** Centered-cosine user similarity replaces the hard-coded Andrew-to-Sarah link. Unrated drinks count as neutral, so new shops aren't penalized.
-- **Preference agent** (`agents/preference_agent.py`, `core/preferences.py`). A pairwise update learns from each pick out of the top 3. It's seeded with 4 past picks for Andrew (`data/choices.json`).
-- **Resolver** ranks candidates by the learned weights and returns the top 3 with per-objective scores. It also lists ruled-out drinks and why. No agent gets a casting vote.
-- **Shop agents** only confirm stock or veto. Vetoes and dropped drinks show up in the timeline.
+- **Separate objectives.** One scoring function per teagent in `core/objectives.py`. There's a new Budget teagent and a shared `ObjectiveAgent` base class.
+- **Real Social teagent.** Centered-cosine user similarity replaces the hard-coded Andrew-to-Sarah link. Unrated drinks count as neutral, so new shops aren't penalized.
+- **Preference teagent** (`agents/preference_agent.py`, `core/preferences.py`). A pairwise update learns from each pick out of the top 3. It's seeded with 4 past picks for Andrew (`data/choices.json`).
+- **Resolver** ranks candidates by the learned weights and returns the top 3 with per-objective scores. It also lists ruled-out drinks and why. No teagent gets a casting vote.
+- **Shop teagents** only confirm stock or veto. Vetoes and dropped drinks show up in the timeline.
 - **Fixed:** shops no longer drop offline 30 seconds after startup. The new API endpoints are `/events/shop-offline`, `/events/reset`, `/choices`, and `/preferences/{user}`, and `/users/similar` is now real.
 - **Lantern Leaf** is seeded offline, so the "joins mid-session" event is real.
 - **"I don't like brown sugar" works.** A flavor-tag override marks down drinks with that tag and reports it as its own factor.
@@ -115,8 +115,8 @@ Track B mirrors this in `frontend/src/api/types.ts`. Demo scores are unchanged (
 | Method | #1 was the favorite | Favorite in the top 3 | Already tried |
 |---|---|---|---|
 | Most popular untried drink | 2/24 | 2/24 | 0% |
-| Agent team, fixed priorities | 5/24 | 8/24 | 14% |
-| Agent team, learned priorities | 7/24 | 11/24 | 7% |
+| Teagent team, fixed priorities | 5/24 | 8/24 | 14% |
+| Teagent team, learned priorities | 7/24 | 11/24 | 7% |
 
 | User | Learned vs hidden |
 |---|---|
@@ -132,9 +132,9 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 **Both:** ⬜ Merge `feature/top3-preference-learning` into main (1:15)
 
-**Track A (backend, agents, evidence):**
-- ✅ AGNTCY spike. Go. `TRANSPORT=agntcy` gets Taste (and the rest of the roster) over NATS. `TRANSPORT=local` is still the default, and a down broker falls back to in-process agents. HTTP shapes are unchanged, so Track B does not need a types change.
-- ✅ Serve all agents over NATS, shop heartbeats, `make agents`, startup fallback to local. Demo flow (pick, sold out, Lantern Leaf join, shop offline, reset) passes on the bus.
+**Track A (backend, teagents, evidence):**
+- ✅ AGNTCY spike. Go. `TRANSPORT=agntcy` gets Taste (and the rest of the roster) over NATS. `TRANSPORT=local` is still the default, and a down broker falls back to in-process teagents. HTTP shapes are unchanged, so Track B does not need a types change.
+- ✅ Serve all teagents over NATS, shop heartbeats, `make agents`, startup fallback to local. Demo flow (pick, sold out, Lantern Leaf join, shop offline, reset) passes on the bus.
 - ✅ Popularity baseline, three-way eval, `GET /eval`. Learning 7/24, fixed weights 5/24, popularity 2/24. No schema change; the Evidence page picks this up on its own.
 - ✅ Sarah seed fix. `/users/similar?user_id=andrew` returns Sarah first (about 100% similar).
 - ✅ Shop offers. In a near-tie between two shops, the trailing shop offers up to 10% off, and only when its drink is losing on price. The cost score is recomputed and can move that drink to #1. An `offer` Lens event is emitted. The scripted demo never hits this case (the runner-up is already the cheaper drink, or both drinks are from the same shop), so Thai Tea 78, Wintermelon 77, Pearl 71, and the Lantern Leaf join are unchanged.
@@ -146,9 +146,9 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ✅ Mocks refreshed from a real run (`node frontend/scripts/capture-mock.mjs` re-records them), `RecommendationCard` removed, Friends on `/users/similar` with a taste comparison
 - ✅ Evidence page at `/evidence`. It uses `mocks/eval.json` with a "preview" label and switches to `GET /eval` automatically when A ships it.
 - ✅ Ask-the-human prompt: names both drinks, shows what each wins on with scores, and has a button to pick each
-- ✅ Timeline grouped into numbered steps: team selected (collapsible), priorities, proposals by agent, the argument, ruled out, decision
+- ✅ Timeline grouped into numbered steps: team selected (collapsible), priorities, proposals by teagent, the argument, ruled out, decision
 - 🟡 `docs/demo-script.md`: a 3-minute script with real numbers from a verified run, re-checked over AGNTCY (identical results), plus AGNTCY setup. Dry runs are still needed.
-- ✅ AGNTCY badge on the timeline ("AGNTCY · N agents over NATS", or "In-process fallback"), read from `/health`, with a dot on each agent that answered over the bus
+- ✅ AGNTCY badge on the timeline ("AGNTCY · N teagents over NATS", or "In-process fallback"), read from `/health`, with a dot on each teagent that answered over the bus
 - ✅ An empty result now shows a clear "Nothing survived" card instead of a blank #1 card
 - ✅ README covers AGNTCY mode (the `bus` extra, running NATS without Docker)
 - 🟡 `docs/writeup.md` drafted: overview, Level 2 mapping, results (now Track A's three-way eval), lessons. Track A's architecture and implementation sections are still to come.
@@ -159,7 +159,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 - ⬜ Write-up and backup video
 
 **Social layer (new, 2:55 PM; full spec and contracts in [`PLAN.md`](PLAN.md#social-layer-added-255-pm)):**
-- Track A: ✅ social schemas and seed · ✅ boba stats and quiz mapping (seeds the Preference agent) · ✅ profile, follow, feed, like, comment, and rec endpoints · ⬜ optional follow boost in the Social agent
+- Track A: ✅ social schemas and seed · ✅ boba stats and quiz mapping (seeds the Preference teagent) · ✅ profile, follow, feed, like, comment, and rec endpoints · ⬜ optional follow boost in the Social teagent
 - Track B:
   - ✅ Types, sample data built from the seed (`node frontend/scripts/build-social-mocks.mjs`), and client calls that fall back to an in-browser mock until A's routes exist.
   - ✅ App shell: bottom tabs on phones, top nav on desktop.
@@ -176,7 +176,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 **UI cleanup and five tabs (new, 3:30 PM; spec in [`PLAN.md`](PLAN.md#ui-cleanup-and-five-tabs-added-330-pm)):**
 - Track A: ✅ `GET /drinks` (all 43 drinks, `photo_url: null`) · ✅ `GET /shops` (all 6, including Lantern Leaf, `photo_url: null`) · ✅ reserved `photo_url` on feed items and `cover_url` on profiles (both `null`) · ✅ shop offers · ⬜ stretch, after the freeze: photo uploads
-- Track B: ✅ five tabs and routes (Home, Discover, TeaLink at `/`, Stats, Profile), with Friends folded in (`/friends` now opens Discover's People view) · ✅ Discover with search, filters, and the drink detail sheet · ✅ Stats tab · ✅ placeholder images: 10 drink styles, 6 shops, and 6 covers in `frontend/public/img/` (generated; each drink maps to a style by name and flavor tags, and any real `photo_url` / `cover_url` replaces the placeholder) · ✅ photos on feed cards, top 3 cards, Discover rows, shop cards, and the drink sheet, plus a profile cover and an Instagram-style grid/list of posts · ✅ cover picker in Edit profile · 🟡 readability pass: the new screens use 15px body text and 44px targets; the older pages still need a pass · ✅ visual refresh mixing HEYTEA and Molly Tea in a tea-green palette (rice-paper background, deep green ink, moss accent, sage surfaces, pill buttons, lowercase wide-tracked nav, hand-lettered section titles; same layout and screens) · ✅ quieter tea-house type: Jost, light and lowercase for headings, buttons, and labels · ✅ line-drawn tea and plant doodles (`components/Doodles.tsx`): sprig, leaf, sprout, leaf pair, teapot, steaming tea bowl on section and page titles and the loading state; faint tea branches in the page margins on wide screens; a vine footer · ✅ new logo: two hands clinking boba cups, with a light lowercase "tealink" wordmark in Jost, matching the rest of the type · warm avatar and profile colors from the API are shown as matching greens (`lib/palette.ts`), so no data change is needed · ✅ TeaLink tab: top 3 cards size to their container, so long names wrap inside the card at any width; "at the counter" collapses to one short row instead of stretching to the column's height · ✅ UI round 2 (7:40 PM): TeaLink sub-tabs are today's picks (top 3 only, no meters) · at the counter (`/counter`: what-if buttons and Reset demo, a team icon grid with one symbol per core agent and a shared shop symbol, tap to expand, and "they argue" as a group chat grouped by round, ending with who decided) · why this order · evidence. What changed is gone, and `/counterfactual` redirects to `/counter` · ✅ Stats: you pick the card color, "what matters most to you" with no percentage, sweetness / milk vs fruit / toppings removed, streak + shops + drinks tried combined into "your boba run", and a receipt below the card · ✅ Discover: no duplicate "fruit" filter, and drinks and shops are ordered by how well they match you · ✅ "you" wording in frontend copy, and page, sheet, and button transitions (off for reduced motion) · ✅ demo script updated for the new sub-tabs; Thai Tea 78 / Wintermelon 77 / Pearl 71 re-checked after Reset demo
+- Track B: ✅ five tabs and routes (Home, Discover, TeaLink at `/`, Stats, Profile), with Friends folded in (`/friends` now opens Discover's People view) · ✅ Discover with search, filters, and the drink detail sheet · ✅ Stats tab · ✅ placeholder images: 10 drink styles, 6 shops, and 6 covers in `frontend/public/img/` (generated; each drink maps to a style by name and flavor tags, and any real `photo_url` / `cover_url` replaces the placeholder) · ✅ photos on feed cards, top 3 cards, Discover rows, shop cards, and the drink sheet, plus a profile cover and an Instagram-style grid/list of posts · ✅ cover picker in Edit profile · 🟡 readability pass: the new screens use 15px body text and 44px targets; the older pages still need a pass · ✅ visual refresh mixing HEYTEA and Molly Tea in a tea-green palette (rice-paper background, deep green ink, moss accent, sage surfaces, pill buttons, lowercase wide-tracked nav, hand-lettered section titles; same layout and screens) · ✅ quieter tea-house type: Jost, light and lowercase for headings, buttons, and labels · ✅ line-drawn tea and plant doodles (`components/Doodles.tsx`): sprig, leaf, sprout, leaf pair, teapot, steaming tea bowl on section and page titles and the loading state; faint tea branches in the page margins on wide screens; a vine footer · ✅ new logo: two hands clinking boba cups, with a light lowercase "tealink" wordmark in Jost, matching the rest of the type · warm avatar and profile colors from the API are shown as matching greens (`lib/palette.ts`), so no data change is needed · ✅ TeaLink tab: top 3 cards size to their container, so long names wrap inside the card at any width; "at the counter" collapses to one short row instead of stretching to the column's height · ✅ UI round 2 (7:40 PM): TeaLink sub-tabs are today's picks (top 3 only, no meters) · at the counter (`/counter`: what-if buttons and Reset demo, a team icon grid with one symbol per core teagent and a shared shop symbol, tap to expand, and "they argue" as a group chat grouped by round, ending with who decided) · why this order · evidence. What changed is gone, and `/counterfactual` redirects to `/counter` · ✅ Stats: you pick the card color, "what matters most to you" with no percentage, sweetness / milk vs fruit / toppings removed, streak + shops + drinks tried combined into "your boba run", and a receipt below the card · ✅ Discover: no duplicate "fruit" filter, and drinks and shops are ordered by how well they match you · ✅ "you" wording in frontend copy, and page, sheet, and button transitions (off for reduced motion) · ✅ demo script updated for the new sub-tabs; Thai Tea 78 / Wintermelon 77 / Pearl 71 re-checked after Reset demo
 
 **Accounts, store tools, and ordering (new, 8:15 PM; spec in [`PLAN.md`](PLAN.md#accounts-store-tools-and-ordering-added-815-pm)):**
 - Track A: ✅ all six rows. Sessions are an httpOnly cookie (`tealink_session`). Demo accounts are `andrew@tealink.demo` and `sunright@tealink.demo`, password `boba`. Private routes return 401 with detail `sign in required`. A real missing drink is `drink not found`, not `Not Found`. Pay at pickup is the default; card checkout runs only when `STRIPE_SECRET_KEY` is set, and otherwise the order is still placed as pay at pickup. Reset demo reloads menus, rules, sold-out marks, and orders, and leaves accounts in `backend/data/accounts.sqlite`.
@@ -207,9 +207,9 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 **Track A social backend (branch `a/social-backend`, 3:35 PM).** All Track A blocks from 3:00 to 6:00 are done, and 36 backend tests pass. The demo is unchanged: Thai Tea 78, Wintermelon 77, Pearl Milk Tea 71, with the close-call prompt, and `eval_results.json` is byte-identical.
 - **Seed:** `make seed` also writes `backend/data/social.json`: a profile for each of the 15 users (handle = user id, emoji avatar, bio, accent), follows (Andrew follows Sarah, Hana, Nora, Chris, and Marco), and 177 feed items. Every seeded review is a feed item, plus Andrew's 4 past picks, a "joined" item per user, likes, 3 comments, and Sarah's rec of Hojicha Cream Tea to Andrew (the newest item in his feed). Reset demo reloads all of it and drops users created since.
-- **Quiz (`core/quiz.py`):** the six questions from the frontend mock. Sweetness, base, and toppings set the taste profile. Budget and adventurousness nudge the default priorities, then the usual 5% floor is applied. Chosen flavors become the starting top notes. The quiz profile counts as three five-star reviews, and the weights are the Preference agent's prior. Picks are learned on top.
+- **Quiz (`core/quiz.py`):** the six questions from the frontend mock. Sweetness, base, and toppings set the taste profile. Budget and adventurousness nudge the default priorities, then the usual 5% floor is applied. Chosen flavors become the starting top notes. The quiz profile counts as three five-star reviews, and the weights are the Preference teagent's prior. Picks are learned on top.
 - **Stats (`core/stats.py`):** favorite drink and shop, sweetness, milk vs fruit, toppings as a 0–1 level, drinks tried and shops visited, weekly streak, top flavor notes, current learned priorities, and a personality ("Brown Sugar Deal Hunter" for Andrew, "Brown Sugar Loyalist" for Sarah).
-- **Demo safety:** the Social agent only takes neighbors who have rated something, so a new user never pushes Sarah out of Andrew's top 3 neighbors (tested). In AGNTCY mode, requests for users created or re-profiled at runtime are answered in-process, because the agent processes loaded the catalog at startup.
+- **Demo safety:** the Social teagent only takes neighbors who have rated something, so a new user never pushes Sarah out of Andrew's top 3 neighbors (tested). In AGNTCY mode, requests for users created or re-profiled at runtime are answered in-process, because the teagent processes loaded the catalog at startup.
 
 **Seam for Track B (3:45 PM).** Backend only. Mirror these in `types.ts`; the screens stay yours.
 
@@ -237,14 +237,14 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession text is per drink on `objections[].revised_from` inside each summary objection event.
 
-**Seam for Track B.** Mirror these; `types.ts` stays yours. `round` on a proposal event is `0`. The first objection round is `1`. Rebuttals are `2`, `3`, then `4`. `Decision.rounds` counts finished rebuttals only (`0` in `single`). A summary objection event carries `round` and `objections[]`. A softened objection has `revised_from: { kind: "support" \| "concern" \| "neutral", score: number \| null }` on that objection. The summary payload also has top-level `revised_from` when that agent softened exactly one drink in the round; several softenings live only on the objections. Veto events never have `revised_from`. `GET /health` adds `deliberation: "single" \| "dialogue"`. `GET /drinks?user=` and `GET /shops?user=` add `match` (`null` when `user` is omitted; a 0–1 taste match when it is set; a shop's match is its best drink; unknown user 404; lists stay in catalog order). `UserProfile.card_color` and `PATCH /users` accept `#RRGGBB`; it is in memory only and Reset demo clears it. `AgentSelection` adds `name` and `description` from the agent card.
+**Seam for Track B.** Mirror these; `types.ts` stays yours. `round` on a proposal event is `0`. The first objection round is `1`. Rebuttals are `2`, `3`, then `4`. `Decision.rounds` counts finished rebuttals only (`0` in `single`). A summary objection event carries `round` and `objections[]`. A softened objection has `revised_from: { kind: "support" \| "concern" \| "neutral", score: number \| null }` on that objection. The summary payload also has top-level `revised_from` when that teagent softened exactly one drink in the round; several softenings live only on the objections. Veto events never have `revised_from`. `GET /health` adds `deliberation: "single" \| "dialogue"`. `GET /drinks?user=` and `GET /shops?user=` add `match` (`null` when `user` is omitted; a 0–1 taste match when it is set; a shop's match is its best drink; unknown user 404; lists stay in catalog order). `UserProfile.card_color` and `PATCH /users` accept `#RRGGBB`; it is in memory only and Reset demo clears it. `AgentSelection` adds `name` and `description` from the teagent card.
 
 ## Known issues and decisions to revisit
 
 - **For Emily (Track B rows 4, 5, 7, 8, and the rest of 6).** The routes you were waiting on are on main. Shapes are in the Track A section above: `GET /quiz?kind=full`, `POST /quiz` with `kind` and `favorites`, `PATCH /orders/{id}` with `rating` 0–5, `PastOrder.rating` on your own profile, and `Shop.popularity` on `GET /shops`. Newest in-app orders keep full weight and each older one weighs half as much. Ratings of 4–5 pull toward that drink, and 0–1 push away. Demo scores are unchanged.
 - **For Andrew (Cisco rows, from Track B Sun 10:35 AM).** Your stop, start, `agent_lost`, `missing_agents`, and trace routes are wired in and browser-checked. Notes:
-  - Trace times look queued: in one round they climb 4, 9, 13 … 23 ms in call order, so `started` is probably taken before `AgntcyTransport._send_lock` is acquired. Starting the timer inside the lock would show each agent's own time. The frontend just draws what you send.
-  - The browser fallback for stopping a core agent now matches your scoring (the missing priority scores 0, weights unchanged), so both give Pearl 0.49 with Budget stopped.
+  - Trace times look queued: in one round they climb 4, 9, 13 … 23 ms in call order, so `started` is probably taken before `AgntcyTransport._send_lock` is acquired. Starting the timer inside the lock would show each teagent's own time. The frontend just draws what you send.
+  - The browser fallback for stopping a core teagent now matches your scoring (the missing priority scores 0, weights unchanged), so both give Pearl 0.49 with Budget stopped.
   - The Critic switch now uses `/critic/enable|disable`, and the frontend no longer sends `critic: true`. The chat shows `weakest_reason` with the dimension id swapped for its label ("novelty" reads "something new"); sending the label in `weakest_reason` would make that unnecessary.
 - **For Track A (accounts, store tools, and ordering, from Track B 8:50 PM).** The frontend calls the contract routes in `PLAN.md` first, with `credentials: "include"` (CORS already allows credentials from :5173). It falls back to its mock only when a route answers 404 with detail exactly "Not Found", or 405, so return a different `detail` for a real 404 such as an unknown drink. Small differences from the contract it already expects:
   - **Auth:** seed `andrew@tealink.demo` (user `andrew`) and `sunright@tealink.demo` (shop `sunright`), both with password `boba`; the buttons on `/welcome` use these. Responses include `email`. Customer sign-up first creates the profile with `POST /users`, then sends `user_id` in `POST /auth/signup`.
@@ -280,23 +280,23 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Plan change log
 
-- **Sun 11:35 AM:** Added "Location, a closer-store agent, a logo clink, and quiz back" to the plan. Track A rows 1-3 store an optional location, seed shop coordinates, and add a Location agent that joins only when a location is set. Track B rows 1-4 are the question, the team-grid symbol, the logo clink, and quiz Back on the first question. Spec is in [`PLAN.md`](PLAN.md). Demo scores stay 78 / 77 / 71.
+- **Sun 11:35 AM:** Added "Location, a closer-store teagent, a logo clink, and quiz back" to the plan. Track A rows 1-3 store an optional location, seed shop coordinates, and add a Location teagent that joins only when a location is set. Track B rows 1-4 are the question, the team-grid symbol, the logo clink, and quiz Back on the first question. Spec is in [`PLAN.md`](PLAN.md). Demo scores stay 78 / 77 / 71.
 - **Sun 11:30 AM:** Track A finished rows 1-6 of "Ordering fixes, a full quiz, favorites, and order ratings". The seam for Track B is in the Done section above. Demo scores stay 78 / 77 / 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73.
 - **Sun 11:20 AM:** Track B finished rows 1, 2, 3, and the shop-name half of row 6 (ordering confirmation, past orders, the clinking loader, and post tags). Popularity tie-breaks waited on Track A, which is now on main.
 - **1:20 AM:** Track B finished the eight profile-layout rows from 12:55 AM. Details are in the Done section above. Track A's photo and rec routes from 1:10 AM are on main, and the frontend uses them.
 - **Evening:** Track A on `a/dialogue`: second-person selection copy, the round-2 contract fields, and `DELIBERATION=dialogue|single` (default `single`). Single-mode demo numbers are unchanged. Dialogue top-3 numbers are in the Track A section above. Track B: mirror the seam before editing `types.ts`, and update `demo-script.md` from the dialogue table. `options[2]` of the dialogue opening is Osmanthus Oolong, not Pearl.
-- **3:35 PM:** Track A: the social backend is in on `a/social-backend`, covering the quiz, boba stats, profiles, follows, feed, likes, comments, and recs. The quiz seeds the Preference agent's prior and the taste profile. The demo numbers and the eval are unchanged. Track B: see "where the API differs from the contract" above before mirroring `types.ts`.
+- **3:35 PM:** Track A: the social backend is in on `a/social-backend`, covering the quiz, boba stats, profiles, follows, feed, likes, comments, and recs. The quiz seeds the Preference teagent's prior and the taste profile. The demo numbers and the eval are unchanged. Track B: see "where the API differs from the contract" above before mirroring `types.ts`.
 - **2:10 PM:** Track A: popularity baseline and `GET /eval` are in, and Sarah is Andrew's closest match. Demo order is unchanged (Thai Tea, Wintermelon, Pearl Milk Tea). Priorities are now price 43% and taste 41% (were 42% and 39%), and Wintermelon scores 77 rather than 76.
 - **1:45 PM:** Track A: AGNTCY transport is in. Local remains the default. Next up is the popularity baseline and `GET /eval`.
 - **1:15 PM:** Progress tracking moved to this file. The Google Doc can't be edited by the coding assistant, so the doc stays as the original brief.
-- **12:50 PM:** Replaced the single recommendation with a **top 3** that the user picks from. Added the **Preference agent**, which learns priorities from past and current picks, and the **Budget agent** for cost. Shop agents no longer propose drinks; they only confirm stock or veto.
-- **12:45 PM:** Reviewed main and found that every agent scored drinks by taste (so Taste always won), "ask the human" fired on every run, shops went offline after 30 seconds, sold-out drinks disappeared silently, and the brown sugar and shop-join buttons didn't do anything. All of these are fixed on the branch.
+- **12:50 PM:** Replaced the single recommendation with a **top 3** that the user picks from. Added the **Preference teagent**, which learns priorities from past and current picks, and the **Budget teagent** for cost. Shop teagents no longer propose drinks; they only confirm stock or veto.
+- **12:45 PM:** Reviewed main and found that every teagent scored drinks by taste (so Taste always won), "ask the human" fired on every run, shops went offline after 30 seconds, sold-out drinks disappeared silently, and the brown sugar and shop-join buttons didn't do anything. All of these are fixed on the branch.
 
 ## Phase timeline (from the team plan)
 
 - Phase 0, 12:00 to 12:45: skeleton and contracts. **Done.**
 - Phase 1, 12:45 to 3:00: foundations. **Done.** The AGNTCY transport is in, and local mode stays the default.
-- Phase 2, 3:00 to 6:00: agent team. **Largely done early on the branch.** The 6:00 checkpoint, real disagreement on screen, is already met.
+- Phase 2, 3:00 to 6:00: teagent team. **Largely done early on the branch.** The 6:00 checkpoint, real disagreement on screen, is already met.
 - Phase 3, 6:30 to 9:00: adaptation. Sold out, offline, shop joins, and the preference flip all work. What's left is polish and the counterfactual page.
 - Phase 4, 9:00 to 10:00: baseline and evaluation, with a feature freeze at 9:30.
 - Phase 5, Sunday 9:00 to 1:00: polish, write-ups, rehearsal. **Submit by 12:30.**

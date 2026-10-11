@@ -1,4 +1,4 @@
-"""Pickup orders. Placing an order for a top-3 drink is the pick the Preference agent learns from.
+"""Pickup orders. Placing an order for a top-3 drink is the pick the Preference teagent learns from.
 
 Card checkout uses Stripe test mode when STRIPE_SECRET_KEY is set. Otherwise
 the order is pay at pickup, which is what the demo uses.

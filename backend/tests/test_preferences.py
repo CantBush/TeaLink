@@ -1,4 +1,4 @@
-"""The Preference agent learns priorities from picks and explains each shift."""
+"""The Preference teagent learns priorities from picks and explains each shift."""
 
 from tealink.agents.preference_agent import PreferenceAgent
 from tealink.core.preferences import PRIOR, fit, update

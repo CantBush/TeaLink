@@ -1,7 +1,7 @@
 """Apply a shop's close-call discount and rank again.
 
 The new price changes only the cost score. Every other dimension stays as
-the agents scored it. A price below the cheapest drink on the menu scores 1.
+the teagents scored it. A price below the cheapest drink on the menu scores 1.
 """
 
 from __future__ import annotations

@@ -49,9 +49,11 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string, shown: StatKe
       ].filter((row): row is { key: StatKey; value: number; unit: string } => row.value !== undefined && shown.includes(row.key as StatKey));
       if (rows.length === 0) return null;
       return (
-        <div className="mt-1 flex flex-wrap gap-x-5 gap-y-2">
+        <div className="mt-1 flex gap-4">
           {rows.map((row) => (
-            <Big key={row.unit} value={row.value} unit={row.unit} />
+            <div key={row.key} className="min-w-0 flex-1">
+              <Big value={row.value} unit={row.unit} />
+            </div>
           ))}
         </div>
       );
@@ -91,8 +93,8 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string, shown: StatKe
   }
 }
 
-/** On a narrow window every stat spans the whole row, including favorite shop. */
-const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", "fav_shop", "past_orders", ...RUN_STATS];
+/** On a narrow window these stats span the whole row, including favorite shop. */
+const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", "fav_shop", "past_orders"];
 
 /** The stats a profile chose to show, in the order it chose. Keys in `hidden` are marked as private. */
 export function BobaStatsGrid({
@@ -116,9 +118,9 @@ export function BobaStatsGrid({
       {cards.map((card) => (
         <li
           key={card.key}
-          className={`rounded-3xl border p-4 ${WIDE.includes(card.key) ? "col-span-2 sm:col-span-1" : ""} ${
-            hidden.includes(card.key) ? "border-dashed border-line bg-cream" : "border-line bg-foam"
-          }`}
+          className={`rounded-3xl border p-4 ${
+            RUN_STATS.includes(card.key) ? "col-span-2 sm:col-span-3" : WIDE.includes(card.key) ? "col-span-2 sm:col-span-1" : ""
+          } ${hidden.includes(card.key) ? "border-dashed border-line bg-cream" : "border-line bg-foam"}`}
         >
           <p className="flex justify-between gap-2 text-[11px] font-semibold tracking-[0.12em] text-mute lowercase">
             {RUN_STATS.includes(card.key) ? "Boba run" : STAT_LABELS[card.key]}

@@ -1,4 +1,4 @@
-"""Start the whole agent roster as child processes.
+"""Start the whole teagent roster as child processes.
 
 Online shops heartbeat immediately. Shops seeded offline (Lantern Leaf) start
 in standby and heartbeat only after ``POST /events/shop-join``. This process

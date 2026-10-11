@@ -1,7 +1,7 @@
-"""One scoring function per agent objective. Every score is 0-1, higher is better.
+"""One scoring function per teagent objective. Every score is 0-1, higher is better.
 
-Each agent owns exactly one of these. The resolver blends them with the
-weights the Preference agent learned for the user.
+Each teagent owns exactly one of these. The resolver blends them with the
+weights the Preference teagent learned for the user.
 """
 
 from __future__ import annotations

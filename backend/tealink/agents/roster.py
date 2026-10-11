@@ -1,4 +1,4 @@
-"""Default in-process agent team."""
+"""Default in-process teagent team."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ AGENT_KINDS = ("taste", "social", "explorer", "budget", "preference", "shop")
 
 
 def default_agents(catalog: Catalog, history: list[ChoiceRecord] | None = None) -> list[BaseAgent]:
-    """Core agents plus one agent per shop that is online at startup.
+    """Core teagents plus one teagent per shop that is online at startup.
 
     Shops seeded with ``online=False`` join later through ``/events/shop-join``.
     """
@@ -46,6 +46,6 @@ def make_agent(kind: str, shop_id: str | None = None, shop_name: str | None = No
         return PreferenceAgent(load_choices())
     if kind == "shop":
         if not shop_id:
-            raise ValueError("shop agent requires shop_id")
+            raise ValueError("shop teagent requires shop_id")
         return ShopAgent(shop_id, shop_name)
     raise ValueError(f"unknown agent kind {kind}")

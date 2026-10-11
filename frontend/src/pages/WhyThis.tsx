@@ -61,12 +61,12 @@ function PriorityMath({ decision }: { decision: Decision }) {
     <section className="rounded-[28px] border border-line bg-foam p-6">
       <h2 className="font-display text-2xl">How your priorities ranked it</h2>
       <p className="mt-1 text-sm text-mute">
-        Each agent scores the drink on its own objective. Your learned weights decide how much each one counts.
+        Each teagent scores the drink on its own objective. Your learned weights decide how much each one counts.
       </p>
       <table className="mt-4 w-full text-sm">
         <thead className="text-left text-mute">
           <tr>
-            <th className="py-1 font-semibold">Agent's objective</th>
+            <th className="py-1 font-semibold">Teagent's objective</th>
             <th className="py-1 text-right font-semibold">Score</th>
             <th className="py-1 text-right font-semibold">Your weight</th>
             <th className="py-1 text-right font-semibold">Adds</th>

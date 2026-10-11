@@ -1,7 +1,7 @@
-"""Base for agents that each optimize one objective (taste, social, novelty, cost).
+"""Base for teagents that each optimize one objective (taste, social, novelty, cost).
 
-These agents know nothing about inventory. They propose drinks they like by
-their own objective, then score every candidate the same way. Shop agents are
+These teagents know nothing about inventory. They propose drinks they like by
+their own objective, then score every candidate the same way. Shop teagents are
 the only ones who can say a drink is sold out.
 """
 
@@ -46,7 +46,7 @@ def stance(score: float) -> ObjectionKind:
 
 
 def soften_objection(current: Objection, peer_scores: list[float]) -> Objection:
-    """Move halfway toward the other objective agents, and only in the soft direction.
+    """Move halfway toward the other objective teagents, and only in the soft direction.
 
     Concern and neutral may rise. Support may fall, but not below ``SUPPORT_AT``,
     so it cannot become a concern. A harder kind is rejected. An unchanged
@@ -170,7 +170,7 @@ class ObjectiveAgent(BaseAgent):
         return objections
 
     def _revise(self, request: DeliberationRequest, catalog: Catalog, ctx: Any) -> list[Objection]:
-        """Soften each of this agent's scores toward the other objective agents."""
+        """Soften each of this teagent's scores toward the other objective teagents."""
         own = {
             item.target_drink_id: item
             for item in request.peer_objections

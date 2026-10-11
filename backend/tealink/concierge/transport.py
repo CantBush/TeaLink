@@ -4,7 +4,7 @@
 ``AgentCard`` so local mode does not import the SDK.
 
 ``TRANSPORT=local`` (the default) never touches NATS. ``TRANSPORT=agntcy``
-sends each deliberation message to that agent's process. Agents that are not
+sends each deliberation message to that teagent's process. Teagents that are not
 heartbeating are answered by the in-process fallback, so the HTTP API Emily's
 frontend calls stays the same either way.
 """
@@ -87,7 +87,7 @@ class AgntcyTransport:
 
     One shared NATS connection carries A2A. A second connection watches
     ``tealink.heartbeat`` and publishes ``tealink.control``. ``local_only``
-    is the set of agent ids served by ``fallback`` because they never
+    is the set of teagent ids served by ``fallback`` because they never
     heartbeated, or a remote call failed.
     """
 
@@ -130,7 +130,7 @@ class AgntcyTransport:
         return seen is not None and (time.monotonic() - seen) <= window
 
     def reset_routes(self) -> None:
-        """Forget which agents answered remotely. Used by the demo reset."""
+        """Forget which teagents answered remotely. Used by the demo reset."""
         self._local_only.clear()
         self._beats.clear()
 
@@ -166,7 +166,7 @@ class AgntcyTransport:
             except ImportError:
                 self.failure = (
                     "agntcy-app-sdk is not installed, so A2A over NATS cannot start. "
-                    "Using in-process agents."
+                    "Using in-process teagents."
                 )
                 return False
             try:
@@ -177,13 +177,13 @@ class AgntcyTransport:
             except Exception as exc:
                 self.failure = (
                     "NATS is not available "
-                    f"({type(exc).__name__}: {exc}). Using in-process agents."
+                    f"({type(exc).__name__}: {exc}). Using in-process teagents."
                 )
                 await self._close_quiet()
                 return False
             self._factory = AgntcyFactory("tealink-gateway", log_level="WARNING")
             # One JSON reply per deliberation message. Streaming keeps a NATS
-            # subscription open and the next call to that agent then hangs.
+            # subscription open and the next call to that teagent then hangs.
             self._config = ClientConfig(
                 streaming=False,
                 nats_config=NatsTransportConfig(endpoint=self.nats_url),
@@ -194,7 +194,7 @@ class AgntcyTransport:
             return True
 
     async def listen(self, on_heartbeat) -> None:
-        """Subscribe to heartbeats. ``on_heartbeat`` is called with an agent id."""
+        """Subscribe to heartbeats. ``on_heartbeat`` is called with a teagent id."""
         if self._listening or self._nc is None:
             return
 
@@ -217,10 +217,10 @@ class AgntcyTransport:
         await self._nc.flush()
 
     async def reconcile(self, registry, offline: set[str]) -> None:
-        """After a short listen, remote-route agents that heartbeated.
+        """After a short listen, remote-route teagents that heartbeated.
 
-        Everyone else stays selected, but ``send`` uses the in-process agent.
-        ``offline`` agents are marked offline and are not routed at all.
+        Everyone else stays selected, but ``send`` uses the in-process teagent.
+        ``offline`` teagents are marked offline and are not routed at all.
         """
         self._beats.clear()
         await asyncio.sleep(self.reconcile_wait)
@@ -268,7 +268,7 @@ class AgntcyTransport:
             )
             raise ReviseTimeout(card.id)
         print(
-            f"{card.id} did not answer over NATS ({type(last_error).__name__}). Using the in-process agent.",
+            f"{card.id} did not answer over NATS ({type(last_error).__name__}). Using the in-process teagent.",
             file=sys.stderr,
         )
         reply = await self._local(card, msg)

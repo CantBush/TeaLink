@@ -1,29 +1,29 @@
 # TeaLink demo script (3 minutes)
 
-*Owner: Track B. The numbers below come from a real run of this exact sequence over AGNTCY on Sat 2:25 PM, after Track A's re-seed (Sarah as Andrew's closest match). In-process mode gives identical results. If the seed data or the agents change, re-run the sequence and update the numbers. Lines in quotes are what the presenter says.*
+*Owner: Track B. The numbers below come from a real run of this exact sequence over AGNTCY on Sat 2:25 PM, after Track A's re-seed (Sarah as Andrew's closest match). In-process mode gives identical results. If the seed data or the teagents change, re-run the sequence and update the numbers. Lines in quotes are what the presenter says.*
 
 ## Before you start
 
-- **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the badge next to **the team** on **at the counter** says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
+- **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the badge next to **the team** on **at the counter** says **"AGNTCY · 10 teagents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
 - **Sign in first.** The app shows only the sign-in page until you have an account. On `/welcome`, click **Customer: Andrew** under "demo accounts" (or type `andrew@tealink.demo`, password `boba`). Don't sign up a fresh account for the demo: the numbers below are Andrew's.
-- Press **Reset demo** on the **at the counter** sub-tab (`/counter`) before every run. Reset clears menu edits, discount rules, orders, and sold-out marks, but keeps accounts, so you stay signed in. It works in both AGNTCY and local mode. The TeaLink tab has four sub-tabs: **today's picks** (the top 3), **at the counter** (the agents' chat and the what-if buttons), **why this order**, and **evidence**.
+- Press **Reset demo** on the **at the counter** sub-tab (`/counter`) before every run. Reset clears menu edits, discount rules, orders, and sold-out marks, but keeps accounts, so you stay signed in. It works in both AGNTCY and local mode. The TeaLink tab has four sub-tabs: **today's picks** (the top 3), **at the counter** (the teagents' chat and the what-if buttons), **why this order**, and **evidence**.
 - Have a second tab on `/evidence`.
 - Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" next to the team. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
 
 ## 0:00 to 0:20: the problem
 
-> "Picking boba sounds simple, but you're trading off things that pull in different directions: what you usually like, what people like you love, trying something new, and price. TeaLink gives each of those to its own AI agent, lets them argue, and learns which ones *you* actually care about."
+> "Picking boba sounds simple, but you're trading off things that pull in different directions: what you usually like, what people like you love, trying something new, and price. TeaLink gives each of those to its own AI teagent, lets them argue, and learns which ones *you* actually care about."
 
 ## 0:20 to 0:55: one round, with real disagreement
 
 Start on **at the counter** and go top to bottom:
 
-1. **The team:** "The concierge picks agents by capability. Each icon is one agent, and every shop agent gets the same storefront icon." Tap **Taste** to show its description, then tap it again to close it. "Each agent is its own process. The green dots and this badge show all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no agent yet."
-2. **They argue, Preference's first message:** "From his last 4 orders, the Preference agent thinks price matters most to him (43%), then taste (41%)."
+1. **The team:** "The concierge picks teagents by capability. Each icon is one teagent, and every shop teagent gets the same storefront icon." Tap **Taste** to show its description, then tap it again to close it. "Each teagent is its own process. The green dots and this badge show all of them answered over Cisco's AGNTCY, A2A on a NATS bus. Note that Lantern Leaf has no teagent yet."
+2. **They argue, Preference's first message:** "From his last 4 orders, the Preference teagent thinks price matters most to him (43%), then taste (41%)."
 3. **Opening picks:** "Taste wants Brown Sugar Oolong, a 96% match. Social proposes Hojicha Cream Tea because Sarah, whose taste is almost identical to Andrew's, rated it 5 out of 5. Budget wants the cheapest drinks that still fit. Explorer wants drinks he's never had."
-4. **Round 1:** "Then every agent scores *every* drink on the shortlist by its own objective. Explorer pushes back on drinks he's already had; Budget pushes back on the $6.50-and-up ones. Only the shop agents know what's in stock."
-5. **Ruled out:** "Lantern Leaf's drinks are ruled out, because no shop agent is online to confirm they're in stock."
-6. **The arbiter decided:** "In this mode the agents get one round, and then the arbiter weighs their scores by Andrew's priorities. It's too close to call, so it hands the choice to him."
+4. **Round 1:** "Then every teagent scores *every* drink on the shortlist by its own objective. Explorer pushes back on drinks he's already had; Budget pushes back on the $6.50-and-up ones. Only the shop teagents know what's in stock."
+5. **Ruled out:** "Lantern Leaf's drinks are ruled out, because no shop teagent is online to confirm they're in stock."
+6. **The arbiter decided:** "In this mode the teagents get one round, and then the arbiter weighs their scores by Andrew's priorities. It's too close to call, so it hands the choice to him."
 
 Switch to **today's picks** and point at the top 3: **Thai Tea 78% match, Wintermelon Tea 77% match, Pearl Milk Tea 71% match**, with the close-call box. The scores are unchanged.
 
@@ -33,7 +33,7 @@ Switch to **today's picks** and point at the top 3: **Thai Tea 78% match, Winter
 
 Click **Order for pickup** on **Pearl Milk Tea** (#3), then **Place order** (pay at pickup is already selected) and **Done**.
 
-> "He skipped both and ordered the best taste match. The order is the pick: the Preference agent learns from it, so taste now counts 45% (it was 41%) and price drops to 36%. Pearl Milk Tea climbs from 71 to 73. Every order from the top 3 is a training signal, and it stays private: nothing gets posted to his profile."
+> "He skipped both and ordered the best taste match. The order is the pick: the Preference teagent learns from it, so taste now counts 45% (it was 41%) and price drops to 36%. Pearl Milk Tea climbs from 71 to 73. Every order from the top 3 is a training signal, and it stays private: nothing gets posted to his profile."
 
 Switch to **at the counter**: the chat now opens with "You ordered Pearl Milk Tea", and Preference's message shows the new priorities.
 
@@ -42,20 +42,20 @@ Switch to **at the counter**: the chat now opens with "You ordered Pearl Milk Te
 The what-if buttons are at the top of **at the counter**. Each one starts a fresh round. After each one, point at the black note at the top of the chat, the new messages, and the decision at the bottom. Flip to **today's picks** for the new top 3 when it helps.
 
 1. **#1 sells out** (Thai Tea).
-   > "Kung Fu Tea's agent vetoes it in the chat, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop. Wintermelon and Pearl are within two points, so it's a close call again, and the team asks rather than guesses."
+   > "Kung Fu Tea's teagent vetoes it in the chat, 'Thai Tea is sold out at Kung Fu Tea Co.', and the team re-ranks: Wintermelon, Pearl, Thai Milk Tea from another shop. Wintermelon and Pearl are within two points, so it's a close call again, and the team asks rather than guesses."
 2. **Lantern Leaf joins.**
-   > "A new shop registers its agent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 81, with Lantern Leaf's Osmanthus Milk Tea right behind it."
+   > "A new shop registers its teagent partway through the session. Its $4.95 Brown Sugar Hojicha Milk was invisible a second ago; now it's #1 at 81, with Lantern Leaf's Osmanthus Milk Tea right behind it."
 3. **I don't like brown sugar.**
    > "New information from the user. Brown Sugar Hojicha drops out of the top 3, and Osmanthus Milk Tea moves up to #1, in a dead heat with Wintermelon at 75."
    Point at Preference's message in the chat: "Notice his priorities didn't change. The world changed, not his taste."
 4. **#1's shop goes offline** (Lantern Leaf).
-   > "The shop that just joined drops off the network. Its agent stops responding, so its drinks are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. The team falls back to Wintermelon, Pearl, and Thai Milk Tea."
+   > "The shop that just joined drops off the network. Its teagent stops responding, so its drinks are ruled out. Nobody can confirm they're in stock, and we never recommend something we can't confirm. The team falls back to Wintermelon, Pearl, and Thai Milk Tea."
 
 ## 2:15 to 2:45: why should you trust it
 
 Open the **why this order** sub-tab.
 
-> "Nothing here is a black box. Each agent's score, times Andrew's learned weight, adds up to the final number. The numbers are computed in code; an LLM never makes up a score."
+> "Nothing here is a black box. Each teagent's score, times Andrew's learned weight, adds up to the final number. The numbers are computed in code; an LLM never makes up a score."
 
 Switch to the **evidence** sub-tab.
 
@@ -65,22 +65,22 @@ Switch to the **evidence** sub-tab.
 
 ## 2:45 to 3:00: close
 
-> "Agents with competing objectives, real-time adaptation when shops sell out, join, or go offline, a human in the loop when it's close, and a team that learns who you are. That's TeaLink."
+> "Teagents with competing objectives, real-time adaptation when shops sell out, join, or go offline, a human in the loop when it's close, and a team that learns who you are. That's TeaLink."
 
-AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every agent is a separate service talking A2A over NATS on Cisco's AGNTCY, and if the bus goes down, the same agents answer in-process, so the demo never breaks."
+AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every teagent is a separate service talking A2A over NATS on Cisco's AGNTCY, and if the bus goes down, the same teagents answer in-process, so the demo never breaks."
 
-## Optional, if there's time: agents that fail, get traced, and get challenged (about 30 seconds)
+## Optional, if there's time: teagents that fail, get traced, and get challenged (about 30 seconds)
 
 Do this after the close, or if a judge asks about failure or observability. Press **Reset demo** first, so the round opens at Thai Tea 78. Everything here is off by default.
 
-1. **Kill an agent.** In **the team** on **at the counter**, tap **Budget**, then **Stop Budget**. Its icon greys out with a slash, and the server stops it.
-   > "Agents fail. Budget just went down, and the team re-plans without it: the chat says Budget is unavailable, and the decision is marked 'without budget'. Nobody speaks for price now, so it counts for nothing, every score drops, and Pearl Milk Tea, the best taste match, moves up to #1."
+1. **Kill a teagent.** In **the team** on **at the counter**, tap **Budget**, then **Stop Budget**. Its icon greys out with a slash, and the server stops it.
+   > "Teagents fail. Budget just went down, and the team re-plans without it: the chat says Budget is unavailable, and the decision is marked 'without budget'. Nobody speaks for price now, so it counts for nothing, every score drops, and Pearl Milk Tea, the best taste match, moves up to #1."
    Tap **Budget** again, then **Bring Budget back**: Thai Tea is back at 78.
 2. **The Critic.** Flip the **Critic** switch under the what-if buttons.
-   > "Before the pick is final, a Critic agent attacks it: Thai Tea's weakest case is that it isn't new to him, only 56%. The arbiter has to answer in the open, and here it keeps the pick, because Thai Tea still has the highest combined score." Flip the switch off again.
+   > "Before the pick is final, a Critic teagent attacks it: Thai Tea's weakest case is that it isn't new to him, only 56%. The arbiter has to answer in the open, and here it keeps the pick, because Thai Tea still has the highest combined score." Flip the switch off again.
 3. **The trace.** Open **evidence** and scroll to **inside the last round**.
-   > "Every call from the concierge to an agent is traced: how long it took, retries, and whether it went over Cisco's AGNTCY bus or fell back to in-process. Here all 20 calls went over the bus, with no retries and no fallbacks."
-   If Budget was still stopped for the last round, the trace shows 9 agents and "not called: budget".
+   > "Every call from the concierge to a teagent is traced: how long it took, retries, and whether it went over Cisco's AGNTCY bus or fell back to in-process. Here all 20 calls went over the bus, with no retries and no fallbacks."
+   If Budget was still stopped for the last round, the trace shows 9 teagents and "not called: budget".
 
 ## Optional, if there's time: besteas, the shop side, and checkout (about 40 seconds)
 
@@ -94,14 +94,14 @@ Only do this after the close, or if a judge asks how shops fit in. It comes afte
 
 ## Likely judge questions
 
-- **"Why not let one LLM decide?"** One model hides the trade-off. Separate agents make the disagreement visible and auditable, and the shop agents hold information nobody else has (inventory).
+- **"Why not let one LLM decide?"** One model hides the trade-off. Separate teagents make the disagreement visible and auditable, and the shop teagents hold information nobody else has (inventory).
 - **"How does it learn?"** Each order from the top 3 is compared with the drinks passed over. Weight moves toward the priorities where the pick scored higher. A minimum weight of 5% means no priority is ever ignored completely.
 - **"What if everything is ruled out?"** The team says so and asks the user instead of recommending something unavailable.
 - **"What's the human-in-the-loop rule?"** If the top two are within 0.02, or nothing survives, the team asks.
-- **"What happens when an agent fails?"** The server takes it out of the next round, the chat says it's unavailable, and the decision names who the arbiter decided without. A missing agent never blocks a round: its priority just counts for nothing. Stopping a shop agent rules out its drinks, because nobody can confirm stock.
-- **"How do you know which agents are trustworthy?"** Only a shop's own agent can confirm its stock, and a drink with no confirming agent is dropped. Signed identities, so a fake shop agent gets rejected, are next on the plan, not built yet.
-- **"Is the team discovered or hard-coded?"** The concierge picks agents by capability from their agent cards, and a new shop agent joins mid-session (Lantern Leaf). Publishing the cards to an AGNTCY directory is planned, not built yet.
-- **"Can you see what the agents are doing?"** Yes: the evidence page shows the server's trace of the last round, with every call's time, retries, and whether it went over AGNTCY or fell back to in-process.
+- **"What happens when a teagent fails?"** The server takes it out of the next round, the chat says it's unavailable, and the decision names who the arbiter decided without. A missing teagent never blocks a round: its priority just counts for nothing. Stopping a shop teagent rules out its drinks, because nobody can confirm stock.
+- **"How do you know which teagents are trustworthy?"** Only a shop's own teagent can confirm its stock, and a drink with no confirming teagent is dropped. Signed identities, so a fake shop teagent gets rejected, are next on the plan, not built yet.
+- **"Is the team discovered or hard-coded?"** The concierge picks teagents by capability from their teagent cards, and a new shop teagent joins mid-session (Lantern Leaf). Publishing the cards to an AGNTCY directory is planned, not built yet.
+- **"Can you see what the teagents are doing?"** Yes: the evidence page shows the server's trace of the last round, with every call's time, retries, and whether it went over AGNTCY or fell back to in-process.
 - **"Isn't the Critic just another scorer?"** It doesn't vote or score. It runs after scoring, names the #1's weakest case, and the arbiter has to answer it in the chat. It's deterministic and off by default.
 - **"Can a shop pay to win?"** No. An offer only goes out in a close call that passes the four locked platform rules, it's capped at 10% or $1, it's computed in code, and it's labelled on the card. A shop's own rules can only make offers rarer.
 

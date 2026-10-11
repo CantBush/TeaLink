@@ -112,7 +112,7 @@ export function Home() {
 
       {newcomer ? (
         <Link to="/" className="block rounded-[28px] bg-ink p-5 text-foam">
-          <p className="font-display text-2xl">Your agents are ready</p>
+          <p className="font-display text-2xl">Your teagents are ready</p>
           <p className="mt-1 text-sm text-foam/80">Your quiz answers set your starting priorities. Open TeaLink to get your first top 3.</p>
         </Link>
       ) : null}

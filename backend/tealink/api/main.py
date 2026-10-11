@@ -1,7 +1,7 @@
 """TeaLink gateway. SSE deliberation uses LocalTransport unless TRANSPORT says otherwise.
 
-``TRANSPORT=agntcy`` talks to agent processes over NATS. If the broker is
-down, or an agent is not heartbeating, that call is answered in-process.
+``TRANSPORT=agntcy`` talks to teagent processes over NATS. If the broker is
+down, or a teagent is not heartbeating, that call is answered in-process.
 The HTTP routes and JSON shapes stay the same, so the frontend does not
 branch on transport.
 """
@@ -102,7 +102,7 @@ class Runtime:
     offer_log: list = field(default_factory=list)
     orders: list = field(default_factory=list)
     max_price: dict[str, float] = field(default_factory=dict)
-    # Demo controls intentionally stop agents without unregistering their cards,
+    # Demo controls intentionally stop teagents without unregistering their cards,
     # so a later start or reset can bring the exact same team member back.
     stopped_agents: set[str] = field(default_factory=set)
     traces: dict[str, list[TraceRecord]] = field(default_factory=dict)
@@ -141,7 +141,7 @@ def _build_runtime() -> Runtime:
 
 
 def _refresh_heartbeats(runtime: Runtime) -> None:
-    """In-process agents are alive unless a demo event took them offline."""
+    """In-process teagents are alive unless a demo event took them offline."""
     if not isinstance(runtime.transport, LocalTransport):
         return
     for agent_id in runtime.transport.agents:
@@ -157,7 +157,7 @@ def _require_user(runtime: Runtime, user_id: str) -> None:
 def _taste_matches(runtime: Runtime, user_id: str | None) -> dict[str, float] | None:
     """Taste match per drink for ``user_id``, or None when the caller omitted the user.
 
-    Same profile and live preference overrides the Taste agent uses. Lists stay
+    Same profile and live preference overrides the Taste teagent uses. Lists stay
     in catalog order; an unknown user is a 404.
     """
     if user_id is None:
@@ -373,19 +373,19 @@ async def preferences(user_id: str) -> dict:
     _require_user(runtime, user_id)
     card = runtime.registry.get("preference")
     if card is None:
-        raise HTTPException(status_code=503, detail="preference agent is not registered")
+        raise HTTPException(status_code=503, detail="preference teagent is not registered")
     request = DeliberationRequest(
         round="propose", user_id=user_id, query="", prior_weights=social.prior_weights(runtime, user_id)
     )
     reply = await runtime.transport.send(card, request)
     if reply.preference is None:
-        raise HTTPException(status_code=503, detail="preference agent did not answer")
+        raise HTTPException(status_code=503, detail="preference teagent did not answer")
     return reply.preference.model_dump(mode="json")
 
 
 @app.post("/choices")
 async def choose(body: ChoiceRequest) -> dict:
-    """The user picked one of the top 3. The Preference agent learns from it."""
+    """The user picked one of the top 3. The Preference teagent learns from it."""
     runtime = get_runtime()
     await _prepare(runtime)
     _require_user(runtime, body.user_id)
@@ -394,7 +394,7 @@ async def choose(body: ChoiceRequest) -> dict:
         raise HTTPException(status_code=409, detail="pick one of the options from the latest recommendation")
     card = runtime.registry.get("preference")
     if card is None:
-        raise HTTPException(status_code=503, detail="preference agent is not registered")
+        raise HTTPException(status_code=503, detail="preference teagent is not registered")
     choice = ChoiceRecord(user_id=body.user_id, chosen_drink_id=body.drink_id, options=decision.options)
     request = DeliberationRequest(
         round="learn",
@@ -405,7 +405,7 @@ async def choose(body: ChoiceRequest) -> dict:
     )
     reply = await runtime.transport.send(card, request)
     if reply.preference is None:
-        raise HTTPException(status_code=503, detail="preference agent did not answer")
+        raise HTTPException(status_code=503, detail="preference teagent did not answer")
     runtime.social.remember_choice(body.user_id, body.drink_id)
     return reply.preference.model_dump(mode="json")
 
@@ -419,11 +419,11 @@ def sold_out(body: SoldOutEvent) -> dict:
 
 @app.post("/agents/{agent_id}/stop")
 async def stop_agent(agent_id: str) -> dict:
-    """Take a registered agent out of the next deliberation without deleting it."""
+    """Take a registered teagent out of the next deliberation without deleting it."""
     runtime = get_runtime()
     await _prepare(runtime)
     if runtime.registry.get(agent_id) is None:
-        raise HTTPException(status_code=404, detail="agent not registered")
+        raise HTTPException(status_code=404, detail="teagent not registered")
     runtime.stopped_agents.add(agent_id)
     runtime.offline.add(agent_id)
     runtime.registry.mark_offline(agent_id)
@@ -434,11 +434,11 @@ async def stop_agent(agent_id: str) -> dict:
 
 @app.post("/agents/{agent_id}/start")
 async def start_agent(agent_id: str) -> dict:
-    """Restore an agent stopped by the demo control without changing its card."""
+    """Restore a teagent stopped by the demo control without changing its card."""
     runtime = get_runtime()
     await _prepare(runtime)
     if runtime.registry.get(agent_id) is None:
-        raise HTTPException(status_code=404, detail="agent not registered")
+        raise HTTPException(status_code=404, detail="teagent not registered")
     runtime.stopped_agents.discard(agent_id)
     runtime.offline.discard(agent_id)
     runtime.registry.heartbeat(agent_id)
@@ -453,7 +453,7 @@ async def shop_offline(body: ShopEvent) -> dict:
     await _prepare(runtime)
     agent_id = f"shop_{body.shop_id}"
     if runtime.registry.get(agent_id) is None:
-        raise HTTPException(status_code=404, detail="shop agent not registered")
+        raise HTTPException(status_code=404, detail="shop teagent not registered")
     runtime.offline.add(agent_id)
     runtime.registry.mark_offline(agent_id)
     if isinstance(runtime.transport, AgntcyTransport):
@@ -521,7 +521,7 @@ async def reset() -> dict:
 
 
 async def _prepare(runtime: Runtime) -> None:
-    """Connect the bus once. If that fails, stay on the in-process agents."""
+    """Connect the bus once. If that fails, stay on the in-process teagents."""
     transport = runtime.transport
     if isinstance(transport, LocalTransport):
         _refresh_heartbeats(runtime)
@@ -531,7 +531,7 @@ async def _prepare(runtime: Runtime) -> None:
     if not transport.connected:
         ok = await transport.connect()
         if not ok:
-            print(transport.failure or "AGNTCY transport unavailable. Using in-process agents.", file=sys.stderr)
+            print(transport.failure or "AGNTCY transport unavailable. Using in-process teagents.", file=sys.stderr)
             runtime.transport = transport.fallback
             _refresh_heartbeats(runtime)
             return

@@ -8,7 +8,7 @@ export type TasteAttribute =
 /** The five taste attributes, each a 0–1 number. */
 export type TasteProfile = Record<TasteAttribute, number>;
 
-/** What each objective agent argues for. Weights over these are learned per user. */
+/** What each objective teagent argues for. Weights over these are learned per user. */
 export type Dimension = "taste" | "social" | "novelty" | "cost";
 
 export type DimensionScores = Record<Dimension, number>;
@@ -101,7 +101,7 @@ export interface Decision {
   decided_by?: "agents" | "arbiter";
   /** Planned: rebuttal rounds that ran before the decision. */
   rounds?: number;
-  /** Agents stopped for this round; the arbiter decided without them. */
+  /** Teagents stopped for this round; the arbiter decided without them. */
   missing_agents?: string[];
   /** Only when the Critic is switched on (POST /critic/enable). */
   critique?: Critique | null;
@@ -178,7 +178,7 @@ export interface EvalResult {
 }
 
 /**
- * One gateway-to-agent call (GET /trace/{session_id}). `round` is 0 for opening picks, 1 for the
+ * One gateway-to-teagent call (GET /trace/{session_id}). `round` is 0 for opening picks, 1 for the
  * first scores, then rebuttals; the close-call offer comes last.
  */
 export interface TraceSpan {
@@ -195,7 +195,7 @@ export interface Health {
   status: string;
   transport: "local" | "agntcy";
   effective: "local" | "agntcy" | "pending";
-  /** Replies received over the bus so far, per agent id. */
+  /** Replies received over the bus so far, per teagent id. */
   remote_replies: Record<string, number>;
   /** Planned: "single" (one round + arbiter) or "dialogue" (rebuttal rounds). */
   deliberation?: "single" | "dialogue";
@@ -527,7 +527,7 @@ export interface OrderReceipt {
   total: number;
   status: "placed";
   payment_url?: string | null;
-  /** The Preference agent's update when this order counted as your pick; null when it didn't. */
+  /** The Preference teagent's update when this order counted as your pick; null when it didn't. */
   learned?: PreferenceReport | null;
 }
 

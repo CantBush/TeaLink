@@ -1,4 +1,4 @@
-"""Explorer agent: something new, but only among drinks the user would plausibly enjoy."""
+"""Explorer teagent: something new, but only among drinks the user would plausibly enjoy."""
 
 from __future__ import annotations
 

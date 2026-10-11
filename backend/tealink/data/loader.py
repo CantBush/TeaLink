@@ -29,7 +29,7 @@ class Catalog:
             self.reviews_by_user.setdefault(review.user_id, []).append(review)
         # Quiz profiles, keyed by user. They seed the taste profile.
         self.base_profiles: dict[str, dict[str, float]] = {}
-        # Users created or re-profiled after load. Agent processes over NATS
+        # Users created or re-profiled after load. Teagent processes over NATS
         # loaded the catalog at startup and have never seen these changes.
         self.runtime_users: set[str] = set()
 
@@ -50,7 +50,7 @@ class Catalog:
         self.upsert_review(review)
 
     def upsert_review(self, review: Review) -> None:
-        """Insert or replace a review. Remote agents have not seen it, so later rounds for this user stay in-process."""
+        """Insert or replace a review. Remote teagents have not seen it, so later rounds for this user stay in-process."""
         self.runtime_users.add(review.user_id)
         for index, existing in enumerate(self.reviews):
             if existing.id != review.id:

@@ -38,7 +38,7 @@ SHOPS: list[tuple[str, str, str]] = [
     ("sharetea", "Sharetea Lounge", "Richmond"),
 ]
 
-# Shops with no agent at startup. They join mid-session through /events/shop-join.
+# Shops with no teagent at startup. They join mid-session through /events/shop-join.
 LATE_SHOPS: list[tuple[str, str, str]] = [
     ("lantern_leaf", "Lantern Leaf", "Outer Sunset"),
 ]

@@ -130,7 +130,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-/** POST /choices: the user picked one of the top 3; returns what the Preference agent learned. */
+/** POST /choices: the user picked one of the top 3; returns what the Preference teagent learned. */
 export function choose(userId: string, drinkId: string): Promise<PreferenceReport> {
   return post<PreferenceReport>("/choices", { user_id: userId, drink_id: drinkId });
 }

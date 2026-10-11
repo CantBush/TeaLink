@@ -226,7 +226,7 @@ function AccountStep({ onReady, onSignIn }: { onReady: (account: Account) => voi
       </div>
       <h1 className="mt-6 font-display text-4xl leading-tight sm:text-5xl">Find your next favorite boba.</h1>
       <p className="mt-3 text-lg text-mute">
-        Six quick questions, then a team of AI agents argues over what you should order. Every pick teaches them more.
+        Six quick questions, then a team of AI teagents argues over what you should order. Every pick teaches them more.
       </p>
 
       <form
@@ -384,7 +384,7 @@ function Result({ profile }: { profile: UserProfile }) {
         stats={profile.stats}
       />
       <p className="mx-auto mt-6 max-w-sm text-center text-mute">
-        Your answers set where the Preference agent starts. From here, every drink you pick teaches it more.
+        Your answers set where the Preference teagent starts. From here, every drink you pick teaches it more.
       </p>
       <div className="mx-auto mt-6 grid w-full max-w-sm gap-3">
         <Link to="/" className="rounded-full bg-ink py-3.5 text-center text-lg font-semibold text-foam">

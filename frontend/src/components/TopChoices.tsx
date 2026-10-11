@@ -56,8 +56,8 @@ function CloseCall({
         Close call: {a.drink_name} {matchPercent(a.score)} vs {b.drink_name} {matchPercent(b.score)}.
       </p>
       <p className="mt-1 text-[15px] text-mute">
-        The agents can't separate these two, so they're asking you. Ordering one also teaches the Preference
-        agent which priority matters more.
+        The teagents can't separate these two, so they're asking you. Ordering one also teaches the Preference
+        teagent which priority matters more.
       </p>
       <div className="mt-3 grid gap-3 @lg:grid-cols-2">
         {[
@@ -108,7 +108,7 @@ function Choices({
         <p className="flex items-center gap-2 font-display text-2xl leading-none text-moss"><BobaMark clinking className="h-8 w-10" />just for you</p>
         <h2 className="mt-3 font-display text-3xl text-ink">steeping your top 3…</h2>
         <p className="mt-2 max-w-md text-mute">
-          The agents are weighing in on your picks, and the shops are checking stock.
+          The teagents are weighing in on your picks, and the shops are checking stock.
         </p>
       </article>
     );

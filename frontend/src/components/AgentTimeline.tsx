@@ -25,19 +25,19 @@ function TransportBadge({ health, busCount, usingMock }: { health: Health | null
   if (!health) return <span className={`${base} bg-sage text-mute`}>Live</span>;
   if (health.effective === "agntcy" && busCount > 0) {
     return (
-      <span className={`${base} bg-ink text-cream`} title="Agents answered over A2A on a NATS bus (Cisco AGNTCY)">
-        AGNTCY · {busCount} agents over NATS
+      <span className={`${base} bg-ink text-cream`} title="Teagents answered over A2A on a NATS bus (Cisco AGNTCY)">
+        AGNTCY · {busCount} teagents over NATS
       </span>
     );
   }
   if (health.transport === "agntcy") {
     return (
-      <span className={`${base} bg-sage`} title="AGNTCY is configured, but the bus didn't answer, so agents ran in-process">
+      <span className={`${base} bg-sage`} title="AGNTCY is configured, but the bus didn't answer, so teagents ran in-process">
         In-process fallback
       </span>
     );
   }
-  return <span className={`${base} bg-sage text-mute`}>In-process agents</span>;
+  return <span className={`${base} bg-sage text-mute`}>In-process teagents</span>;
 }
 
 /** Drop the speaker's own name from backend text, since the chat already shows who is talking. */
@@ -50,7 +50,7 @@ function firstPerson(agentId: string, text: string): string {
   return readableShops(trimmed);
 }
 
-/** Drinks this agent softened on this round; a summary event lists them on `objections[].revised_from`. */
+/** Drinks this teagent softened on this round; a summary event lists them on `objections[].revised_from`. */
 function softened(event: LensEvent): string[] {
   const items = Array.isArray(event.payload.objections) ? (event.payload.objections as Record<string, unknown>[]) : [];
   return items
@@ -205,7 +205,7 @@ const TAG: Record<Tone, string> = {
   priorities: "text-moss",
 };
 
-/** Agents "kill an agent" can take out. Preference stays, since every score is weighted by it. */
+/** Teagents "kill a teagent" can take out. Preference stays, since every score is weighted by it. */
 function stoppable(agentId: string): boolean {
   return agentKind(agentId) !== "preference";
 }
@@ -312,7 +312,7 @@ function TeamGrid({
         </div>
       ) : (
         <p className="mt-2 text-xs text-mute">
-          Picked by capability. Tap an agent to see what it does, or to stop it and watch the team re-plan.
+          Picked by capability. Tap a teagent to see what it does, or to stop it and watch the team re-plan.
           {overBus.size > 0 ? " A green dot means it answered over the AGNTCY bus." : ""}
         </p>
       )}
@@ -396,12 +396,12 @@ function DecisionCard({ decision }: { decision: LensEvent }) {
   ]
     .filter(Boolean)
     .join(" ");
-  const who = byAgents ? "the agents agreed" : "the arbiter decided";
+  const who = byAgents ? "the teagents agreed" : "the arbiter decided";
   const how = byAgents
     ? `They settled it themselves after ${rounds} ${rounds === 1 ? "round" : "rounds"} of back-and-forth.`
     : rounds > 0
       ? `No agreement after ${rounds} ${rounds === 1 ? "round" : "rounds"}, so the arbiter weighed everyone's final scores by your priorities.`
-      : "It weighed every agent's scores by your priorities and removed anything a shop couldn't confirm.";
+      : "It weighed every teagent's scores by your priorities and removed anything a shop couldn't confirm.";
 
   return (
     <div className="timeline-in rounded-3xl border border-ink/80 bg-foam p-5">
@@ -449,7 +449,7 @@ export function AgentTimeline({
     return (
       <section className="flex items-center gap-3 rounded-[28px] border border-line bg-foam p-6 text-mute">
         {started ? <BobaMark clinking className="h-8 w-10 shrink-0 text-moss" /> : <TeaBowl className="h-7 w-7 shrink-0 text-moss" />}
-        {started ? "Calling the agents to the counter…" : "The round has not started."}
+        {started ? "Calling the teagents to the counter…" : "The round has not started."}
       </section>
     );
   }

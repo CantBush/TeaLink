@@ -1,9 +1,9 @@
 """Rank candidates by the user's learned priorities and return the top 3.
 
-Every objective agent scores every candidate on its own dimension. A drink's
+Every objective teagent scores every candidate on its own dimension. A drink's
 overall score is the weighted sum of those dimension scores, using the weights
-the Preference agent learned for this user. Vetoed drinks, and drinks whose
-shop has no online agent to confirm stock, are dropped first. No agent gets a
+the Preference teagent learned for this user. Vetoed drinks, and drinks whose
+shop has no online teagent to confirm stock, are dropped first. No teagent gets a
 casting vote; the weights decide.
 """
 
@@ -67,7 +67,7 @@ def resolve(
                 DroppedDrink(
                     drink_id=drink_id,
                     drink_name=proposal.drink_name,
-                    reason=f"No shop agent is online for {proposal.shop_id}, so nobody can confirm it is in stock.",
+                    reason=f"No shop teagent is online for {proposal.shop_id}, so nobody can confirm it is in stock.",
                     by="registry",
                 )
             )

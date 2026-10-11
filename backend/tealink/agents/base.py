@@ -1,4 +1,4 @@
-"""Agent interface shared by local and AGNTCY transports."""
+"""Teagent interface shared by local and AGNTCY transports."""
 
 from __future__ import annotations
 

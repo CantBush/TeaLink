@@ -2,7 +2,7 @@
 
 Propose, then one objection round. ``DELIBERATION=single`` (the default)
 resolves on those scores. ``dialogue`` relays the objections and lets
-objective agents soften, up to three rebuttals, then resolves on the latest
+objective teagents soften, up to three rebuttals, then resolves on the latest
 complete scores.
 """
 
@@ -124,7 +124,7 @@ async def deliberate(
         basis = "quiz" if prior_weights else "default"
         yield emit(
             LensEventType.preference,
-            f"No Preference agent answered, so {basis} priorities are used.",
+            f"No Preference teagent answered, so {basis} priorities are used.",
             {
                 "weights": weights,
                 "summary": describe_weights(weights, 0, from_quiz=prior_weights is not None),
@@ -154,7 +154,7 @@ async def deliberate(
 
     yield emit(
         LensEventType.status,
-        f"{len(candidate_ids)} candidates. Every agent now scores each one by its own objective.",
+        f"{len(candidate_ids)} candidates. Every teagent now scores each one by its own objective.",
         {"candidate_drink_ids": candidate_ids},
         None,
     )
@@ -356,7 +356,7 @@ def _emit_objections(
 
 
 def _summarize(reply: AgentReply, names: dict[str, str], registry: Registry, event_round: int) -> dict | None:
-    """One timeline entry per agent: what it backs and what it pushes back on."""
+    """One timeline entry per teagent: what it backs and what it pushes back on."""
     rated = [item for item in reply.objections if item.kind != ObjectionKind.veto]
     if not rated:
         return None
@@ -365,7 +365,7 @@ def _summarize(reply: AgentReply, names: dict[str, str], registry: Registry, eve
     doubts = [names.get(item.target_drink_id, item.target_drink_id) for item in reversed(rated) if item.kind == ObjectionKind.concern]
     card = registry.get(reply.agent_id)
     if card is not None and card.shop_id:
-        label = card.name.removesuffix(" agent")
+        label = card.name.removesuffix(" teagent").removesuffix(" agent")
         reason = f"{label} confirms in stock: {_listing(backs)}."
     else:
         parts = []

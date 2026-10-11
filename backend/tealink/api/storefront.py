@@ -314,7 +314,7 @@ def post_parse(body: ParseBody) -> dict:
 
 
 async def _learn_order(runtime, order: dict) -> dict | None:
-    """A top-3 drink teaches the Preference agent now. Anything else only nudges taste.
+    """A top-3 drink teaches the Preference teagent now. Anything else only nudges taste.
 
     Pickup does not teach again, and cancelling does not undo either update.
     Neither path adds a feed item.

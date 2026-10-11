@@ -37,7 +37,7 @@ export const shops = {
       () => shopMock.addDrink(shopId, input),
     ),
 
-  /** Sold out also goes to the live recommender's existing event, so the agents see it today. */
+  /** Sold out also goes to the live recommender's existing event, so the teagents see it today. */
   updateDrink: async (shopId: string, drinkId: string, patch: DrinkPatch) => {
     const drink = await withFallback(
       () => request<ShopDrink>("PATCH", `${base(shopId)}/drinks/${encodeURIComponent(drinkId)}`, patch),

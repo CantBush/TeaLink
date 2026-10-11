@@ -2,7 +2,7 @@
 
 The Critic deliberately runs after scoring, rather than participating in the
 vote: it challenges the current #1 and makes the arbiter's response visible
-without changing the objective agents' scores.
+without changing the objective teagents' scores.
 """
 
 from __future__ import annotations

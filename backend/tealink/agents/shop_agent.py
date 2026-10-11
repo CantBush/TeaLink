@@ -1,4 +1,4 @@
-"""Shop agent: the only agent that knows its own inventory.
+"""Shop teagent: the only teagent that knows its own inventory.
 
 It does not propose drinks. In the objection round it confirms its own
 candidates are in stock, or vetoes the ones that are sold out. On a revise
@@ -27,7 +27,7 @@ class ShopAgent(BaseAgent):
     def card(self) -> AgentCardInfo:
         return AgentCardInfo(
             id=self.agent_id,
-            name=f"{self.shop_name} agent",
+            name=f"{self.shop_name} teagent",
             description=f"Confirms what is in stock at {self.shop_name}.",
             capabilities=CAPABILITIES["shop"],
             shop_id=self.shop_id,

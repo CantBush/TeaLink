@@ -1,4 +1,4 @@
-"""Agent cards for the registry, plus an optional a2a AgentCard."""
+"""Teagent cards for the registry, plus an optional a2a AgentCard."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def try_a2a_card(info: AgentCardInfo, nats_url: str = "nats://localhost:4222"):
     """Build an a2a AgentCard when the library imports. Otherwise return None.
 
     The card advertises a NATS interface so ``add_a2a_card`` can serve it.
-    ``nats_url`` is ``scheme://host:port``; the topic is ``tealink.<agent id>``.
+    ``nats_url`` is ``scheme://host:port``; the topic is ``tealink.<teagent id>``.
     """
     try:
         from urllib.parse import urlparse

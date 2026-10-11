@@ -4,7 +4,7 @@ import { ControlPanel } from "../components/ControlPanel.tsx";
 import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { loadProfile, startRecommendation, toggleAgent, useSession } from "../state/session.ts";
 
-/** At the counter: the agents, their conversation about your order, and the what-if buttons. */
+/** At the counter: the teagents, their conversation about your order, and the what-if buttons. */
 export function Counter() {
   const session = useSession();
   const { userId, started } = session;
@@ -19,7 +19,7 @@ export function Counter() {
       <TeaLinkTabs />
       <header>
         <h1 className="font-display text-4xl leading-none">at the counter</h1>
-        <p className="mt-2 text-mute">The agents talk through your order here. Change something and watch them re-plan.</p>
+        <p className="mt-2 text-mute">The teagents talk through your order here. Change something and watch them re-plan.</p>
       </header>
       <ControlPanel decision={session.decision} running={session.running} />
       <AgentTimeline

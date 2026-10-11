@@ -1,4 +1,4 @@
-"""In-memory agent cards, capability selection, and heartbeats."""
+"""In-memory teagent cards, capability selection, and heartbeats."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ class Registry:
         return (current - last).total_seconds() <= HEARTBEAT_TTL_SECONDS
 
     def select_for_query(self, query: str, now: datetime | None = None) -> list[AgentSelection]:
-        """Online core agents by capability, plus every online shop agent."""
+        """Online core teagents by capability, plus every online shop teagent."""
         suffix = f" to answer '{query}'" if query else ""
         selected: list[AgentSelection] = []
         for agent_id in CORE_AGENTS:

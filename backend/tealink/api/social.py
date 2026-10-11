@@ -1,7 +1,7 @@
 """Social routes: sign-up, the onboarding quiz, profiles, follows, and the feed.
 
 Mounted after the routes in ``main`` so ``/users/similar`` keeps matching
-first. Nothing here changes how the agents deliberate, except that a quiz
+first. Nothing here changes how the teagents deliberate, except that a quiz
 gives a new user their own taste profile and starting priorities.
 """
 
@@ -141,7 +141,7 @@ def prior_weights(runtime, user_id: str) -> dict[str, float] | None:
 
 
 async def current_weights(runtime, user_id: str) -> dict[str, float]:
-    """What the Preference agent believes now: quiz prior plus every pick."""
+    """What the Preference teagent believes now: quiz prior plus every pick."""
     from tealink.api.main import _prepare
 
     await _prepare(runtime)

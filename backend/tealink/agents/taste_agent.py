@@ -1,4 +1,4 @@
-"""Taste agent: how well a drink fits this user's own reviews."""
+"""Taste teagent: how well a drink fits this user's own reviews."""
 
 from __future__ import annotations
 

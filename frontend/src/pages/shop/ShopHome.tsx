@@ -6,7 +6,7 @@ import { ShopPage, useShopCatalog } from "./ShopLayout.tsx";
 const PICKUPS = 11;
 const PICKUP_FEE = 0.35;
 
-/** Today: agent status, the scripted Sunright close call, and a sample pickup fee. */
+/** Today: teagent status, the scripted Sunright close call, and a sample pickup fee. */
 export function ShopHome() {
   const shopId = useShopId() ?? "";
   const online = useShopOnline(shopId);
@@ -27,7 +27,7 @@ export function ShopHome() {
       {error ? <p className="rounded-3xl border border-line bg-foam p-5">{error}</p> : null}
 
       <section className="rounded-[28px] border border-line bg-foam p-5">
-        <h2 className="font-display text-2xl">Shop agent</h2>
+        <h2 className="font-display text-2xl">Shop teagent</h2>
         <p className="mt-2 text-lg">
           {online ? "Online. It can confirm what is in stock." : "Offline in this browser. It is not confirming stock."}
         </p>

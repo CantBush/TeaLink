@@ -84,70 +84,70 @@
     {
       "type": "selection",
       "agent_id": "shop_boba_guys",
-      "message": "Selected Boba Guys agent: it is online and can confirm what is in stock.",
+      "message": "Selected Boba Guys teagent: it is online and can confirm what is in stock.",
       "payload": {
         "agent_id": "shop_boba_guys",
         "capabilities": [
           "availability",
           "menu"
         ],
-        "reason": "Selected Boba Guys agent: it is online and can confirm what is in stock."
+        "reason": "Selected Boba Guys teagent: it is online and can confirm what is in stock."
       },
       "seq": 7
     },
     {
       "type": "selection",
       "agent_id": "shop_kungfu",
-      "message": "Selected Kung Fu Tea Co. agent: it is online and can confirm what is in stock.",
+      "message": "Selected Kung Fu Tea Co. teagent: it is online and can confirm what is in stock.",
       "payload": {
         "agent_id": "shop_kungfu",
         "capabilities": [
           "availability",
           "menu"
         ],
-        "reason": "Selected Kung Fu Tea Co. agent: it is online and can confirm what is in stock."
+        "reason": "Selected Kung Fu Tea Co. teagent: it is online and can confirm what is in stock."
       },
       "seq": 8
     },
     {
       "type": "selection",
       "agent_id": "shop_sharetea",
-      "message": "Selected Sharetea Lounge agent: it is online and can confirm what is in stock.",
+      "message": "Selected Sharetea Lounge teagent: it is online and can confirm what is in stock.",
       "payload": {
         "agent_id": "shop_sharetea",
         "capabilities": [
           "availability",
           "menu"
         ],
-        "reason": "Selected Sharetea Lounge agent: it is online and can confirm what is in stock."
+        "reason": "Selected Sharetea Lounge teagent: it is online and can confirm what is in stock."
       },
       "seq": 9
     },
     {
       "type": "selection",
       "agent_id": "shop_sunright",
-      "message": "Selected Sunright Tea Studio agent: it is online and can confirm what is in stock.",
+      "message": "Selected Sunright Tea Studio teagent: it is online and can confirm what is in stock.",
       "payload": {
         "agent_id": "shop_sunright",
         "capabilities": [
           "availability",
           "menu"
         ],
-        "reason": "Selected Sunright Tea Studio agent: it is online and can confirm what is in stock."
+        "reason": "Selected Sunright Tea Studio teagent: it is online and can confirm what is in stock."
       },
       "seq": 10
     },
     {
       "type": "selection",
       "agent_id": "shop_tigersugar",
-      "message": "Selected Tiger Sugar Lab agent: it is online and can confirm what is in stock.",
+      "message": "Selected Tiger Sugar Lab teagent: it is online and can confirm what is in stock.",
       "payload": {
         "agent_id": "shop_tigersugar",
         "capabilities": [
           "availability",
           "menu"
         ],
-        "reason": "Selected Tiger Sugar Lab agent: it is online and can confirm what is in stock."
+        "reason": "Selected Tiger Sugar Lab teagent: it is online and can confirm what is in stock."
       },
       "seq": 11
     },
@@ -904,7 +904,7 @@
     {
       "type": "status",
       "agent_id": null,
-      "message": "12 candidates. Every agent now scores each one by its own objective.",
+      "message": "12 candidates. Every teagent now scores each one by its own objective.",
       "payload": {
         "candidate_drink_ids": [
           "kf_brown_sugar_oolong",
@@ -1494,11 +1494,11 @@
     {
       "type": "status",
       "agent_id": null,
-      "message": "Dropped Brown Sugar Hojicha Milk: No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+      "message": "Dropped Brown Sugar Hojicha Milk: No shop teagent is online for lantern_leaf, so nobody can confirm it is in stock.",
       "payload": {
         "drink_id": "ll_brown_sugar_hojicha",
         "drink_name": "Brown Sugar Hojicha Milk",
-        "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+        "reason": "No shop teagent is online for lantern_leaf, so nobody can confirm it is in stock.",
         "by": "registry"
       },
       "seq": 34
@@ -1506,11 +1506,11 @@
     {
       "type": "status",
       "agent_id": null,
-      "message": "Dropped Osmanthus Milk Tea: No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+      "message": "Dropped Osmanthus Milk Tea: No shop teagent is online for lantern_leaf, so nobody can confirm it is in stock.",
       "payload": {
         "drink_id": "ll_osmanthus_milk",
         "drink_name": "Osmanthus Milk Tea",
-        "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+        "reason": "No shop teagent is online for lantern_leaf, so nobody can confirm it is in stock.",
         "by": "registry"
       },
       "seq": 35
@@ -1606,13 +1606,13 @@
           {
             "drink_id": "ll_brown_sugar_hojicha",
             "drink_name": "Brown Sugar Hojicha Milk",
-            "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+            "reason": "No shop teagent is online for lantern_leaf, so nobody can confirm it is in stock.",
             "by": "registry"
           },
           {
             "drink_id": "ll_osmanthus_milk",
             "drink_name": "Osmanthus Milk Tea",
-            "reason": "No shop agent is online for lantern_leaf, so nobody can confirm it is in stock.",
+            "reason": "No shop teagent is online for lantern_leaf, so nobody can confirm it is in stock.",
             "by": "registry"
           }
         ]

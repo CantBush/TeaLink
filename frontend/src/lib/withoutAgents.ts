@@ -4,12 +4,12 @@ import { DIMENSIONS, dimensionLabel } from "./format.ts";
 /** Same near-tie rule as the backend resolver. */
 const TIE_GAP = 0.02;
 
-/** The priority each core agent speaks for. */
+/** The priority each core teagent speaks for. */
 export const DIMENSION_OF: Record<string, Dimension> = { taste: "taste", social: "social", explorer: "novelty", budget: "cost" };
 
 /**
  * Re-rank a round as if `stopped` never answered, for an API without `POST /agents/{id}/stop`.
- * Mirrors `core/resolution.py` with the agents missing: their proposals are gone, and the priority
+ * Mirrors `core/resolution.py` with the teagents missing: their proposals are gone, and the priority
  * they speak for scores 0 for every drink while your weights stay as they are.
  */
 export function resolveWithout(decision: Decision, proposals: Proposal[], objections: LensEvent[], stopped: string[]): Decision {

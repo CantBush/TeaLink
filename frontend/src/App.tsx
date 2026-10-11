@@ -59,7 +59,7 @@ export default function App() {
         </Routes>
         <footer className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-5 pt-6 pb-10 text-moss/60">
           <Vine className="h-5 w-40" />
-          <p className="text-xs tracking-[0.2em] text-mute lowercase">steeped by a team of agents · tealink</p>
+          <p className="text-xs tracking-[0.2em] text-mute lowercase">steeped by a team of teagents · tealink</p>
         </footer>
       </div>
     </BrowserRouter>

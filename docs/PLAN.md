@@ -6,46 +6,46 @@
 
 **Cisco Cloud AI track, "When AI Agents Disagree."** We're targeting **Level 2 (Adaptive AI Team)**, plus two Level 3 pieces: a baseline comparison and an ask-the-human rule.
 
-TeaLink is an explainable boba recommender. A team of agents with different goals argues over what you should order next. You get a top 3, you pick one, and the team learns what you care about.
+TeaLink is an explainable boba recommender. A team of teagents with different goals argues over what you should order next. You get a top 3, you pick one, and the team learns what you care about.
 
 ## Key decisions
 
-- **Agents** run on AGNTCY `agntcy-app-sdk`, using A2A over **NATS**. SLIM group chat is a stretch goal.
-- **Fallback:** setting `TRANSPORT=local` runs the same agent classes in-process. This is the current default, and the demo never depends on the message bus.
+- **Teagents** run on AGNTCY `agntcy-app-sdk`, using A2A over **NATS**. SLIM group chat is a stretch goal.
+- **Fallback:** setting `TRANSPORT=local` runs the same teagent classes in-process. This is the current default, and the demo never depends on the message bus.
 - **Numbers come from code, never the LLM.** Scores, weights, vetoes, rankings, and the learned priorities are all computed in code. An LLM may only reword rationales (optional, through LiteLLM and the `LLM_MODEL` setting, with fixed template wording otherwise).
 - **The user picks from a top 3** rather than getting a single answer. Each pick is a learning signal. *(Changed 12:50 PM.)*
-- **Each agent has its own objective.** Every agent scores every candidate by its own objective, and the resolver blends those scores with weights learned for this user. No agent gets a casting vote. *(Changed 12:50 PM.)*
-- **TeaLink is social.** Profiles, boba stats, follows, and a friends feed sit around the recommender, and a first-visit quiz seeds the Preference agent. See "Social layer" under the two-person split. *(Added 2:55 PM.)*
-## Agent team
+- **Each teagent has its own objective.** Every teagent scores every candidate by its own objective, and the resolver blends those scores with weights learned for this user. No teagent gets a casting vote. *(Changed 12:50 PM.)*
+- **TeaLink is social.** Profiles, boba stats, follows, and a friends feed sit around the recommender, and a first-visit quiz seeds the Preference teagent. See "Social layer" under the two-person split. *(Added 2:55 PM.)*
+## Teagent team
 
-| Agent | Objective | Proposes? | Notes |
+| Teagent | Objective | Proposes? | Notes |
 |---|---|---|---|
 | Taste | Fit to the user's own reviews (`taste`) | Top 3 | Cites the user's reviews as evidence |
 | Social | What the most similar users rated highly (`social`) | Top 3 untried, taste ≥ 0.5 | Similarity is the centered cosine of taste profiles. A drink nobody has rated scores neutral (0.5) |
 | Explorer | Something new that's still a plausible fit (`novelty`) | Top 3 untried, taste ≥ 0.6 | |
 | Budget | Cheapest that still fits (`cost`) | Top 3, taste ≥ 0.7 | |
-| Shop (one per shop) | Inventory truth | No | Confirms stock or vetoes sold-out drinks. If a shop has no online agent, its drinks are dropped |
+| Shop (one per shop) | Inventory truth | No | Confirms stock or vetoes sold-out drinks. If a shop has no online teagent, its drinks are dropped |
 | Preference | Learns how much this user weighs each objective | No | Seeded from past picks (`data/choices.json`) and updated on every pick from the top 3 |
 
 ## Deliberation protocol
 
 Schemas are in `backend/tealink/schemas.py`, mirrored in `frontend/src/api/types.ts`.
 
-1. **Select.** The Concierge picks agents based on what their cards say they can do, and logs why it picked each one.
-2. **Preference.** The Preference agent reports the user's current weights, for example taste 39%, price 42%, novelty 5%, and friends 14%.
-3. **Propose.** Each objective agent proposes up to 3 drinks, each with evidence and a rationale.
-4. **Object.** Every agent scores every candidate on its own objective. It supports a drink at 0.55 or above, raises a concern below 0.45, and is neutral in between. Shops veto anything sold out.
+1. **Select.** The Concierge picks teagents based on what their cards say they can do, and logs why it picked each one.
+2. **Preference.** The Preference teagent reports the user's current weights, for example taste 39%, price 42%, novelty 5%, and friends 14%.
+3. **Propose.** Each objective teagent proposes up to 3 drinks, each with evidence and a rationale.
+4. **Object.** Every teagent scores every candidate on its own objective. It supports a drink at 0.55 or above, raises a concern below 0.45, and is neutral in between. Shops veto anything sold out.
 5. **Resolve.** The Concierge drops vetoed drinks and drinks with no confirming shop, then ranks the rest by the weighted sum of objective scores and returns the top 3. If the top two are within **0.02** of each other, or everything was ruled out, it sets `ask_human`.
-6. **Learn.** `POST /choices` records the user's pick. The Preference agent nudges the weights toward the objectives where the pick beat the drinks the user passed over (learning rate 0.25, minimum weight 5%), then explains the change.
+6. **Learn.** `POST /choices` records the user's pick. The Preference teagent nudges the weights toward the objectives where the pick beat the drinks the user passed over (learning rate 0.25, minimum weight 5%), then explains the change.
 7. Every step streams to the frontend as a `LensEvent` over Server-Sent Events.
 
 ## How each Level 2 requirement is met
 
 | Requirement | How | Status |
 |---|---|---|
-| Agents chosen by capability | Registry, agent cards, and the selection reasons the Concierge logs | ✅ |
+| Teagents chosen by capability | Registry, teagent cards, and the selection reasons the Concierge logs | ✅ |
 | Unexpected change | A shop sells out (and vetoes the drink), or a shop goes offline (and its drinks are dropped) | ✅ |
-| Dynamic discovery | Lantern Leaf registers a shop agent partway through a session | ✅ |
+| Dynamic discovery | Lantern Leaf registers a shop teagent partway through a session | ✅ |
 | Conflict resolution | The resolver blends objective scores with learned weights, plus an ask-the-human rule | ✅ |
 | Explain who was selected and why | Lens timeline and the Why This page (score times weight, plus ruled-out drinks) | ✅ |
 | New information changes the decision | User picks update the weights. Brown sugar dislike, sell-outs, and shop joins each trigger a fresh deliberation | ✅ |
@@ -82,14 +82,14 @@ TeaLink/
 ## Already done (Phases 0 to 2, plus most of 3)
 
 - ✅ Skeleton, schemas and types, SSE gateway, seed data (6 shops, 43 drinks, users, reviews, and Andrew's past picks)
-- ✅ All six agent kinds, capability selection, both rounds, the resolver, top 3, and the learning Preference agent
+- ✅ All six teagent kinds, capability selection, both rounds, the resolver, top 3, and the learning Preference teagent
 - ✅ Discover and Why This on live data, the timeline, and control panel buttons that re-run deliberation
 - ✅ Sold-out, shop offline, shop joining mid-session, the preference flip, and ask-the-human
 - ✅ **6:00 checkpoint met early:** real disagreement on screen, end to end
 
 ## Two-person split
 
-The remaining work runs as two parallel tracks. **Track A** is the backend: agents, transport, and evidence. **Track B** is the frontend, demo, and write-ups. Each track owns its files outright, so the two of you don't block each other or hit merge conflicts. The default is Andrew on A and Emily on B; swap if you prefer.
+The remaining work runs as two parallel tracks. **Track A** is the backend: teagents, transport, and evidence. **Track B** is the frontend, demo, and write-ups. Each track owns its files outright, so the two of you don't block each other or hit merge conflicts. The default is Andrew on A and Emily on B; swap if you prefer.
 
 ### Ground rules
 
@@ -103,7 +103,7 @@ The remaining work runs as two parallel tracks. **Track A** is the backend: agen
 
 | Track A owns (backend) | Track B owns (frontend, demo, docs) |
 |---|---|
-| `backend/tealink/**` (agents, core, concierge, api, data/seed) | `frontend/src/**` |
+| `backend/tealink/**` (teagents, core, concierge, api, data/seed) | `frontend/src/**` |
 | `backend/eval/**`, `backend/tests/**`, `backend/data/*.json` | `frontend/src/mocks/**` (including mocks for A's upcoming endpoints) |
 | `Makefile`, `docker-compose.yml`, `.env.example` | `docs/demo-script.md`, `docs/writeup.md`, the demo video |
 | `docs/architecture.md` | `README.md` (A sends B notes on endpoints and setup) |
@@ -135,17 +135,17 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 // RankedDrink.offer?: Offer | null      LensEventType adds "offer"
 ```
 
-### Track A: backend, agents, evidence
+### Track A: backend, teagents, evidence
 
 | When | Task | Done when |
 |---|---|---|
-| 1:30 to 2:00 | ✅ **AGNTCY spike.** Get one Taste agent answering over NATS through `AgntcyTransport` (`docker compose up nats`, then `python -m tealink.agents.serve --agent taste`) | One `/recommend` with `TRANSPORT=agntcy` gets a Taste reply over NATS |
+| 1:30 to 2:00 | ✅ **AGNTCY spike.** Get one Taste teagent answering over NATS through `AgntcyTransport` (`docker compose up nats`, then `python -m tealink.agents.serve --agent taste`) | One `/recommend` with `TRANSPORT=agntcy` gets a Taste reply over NATS |
 | **2:00** | **Go/no-go.** Go. Stay able to run `TRANSPORT=local`. B does not need a frontend change | |
-| 2:00 to 3:30 | ✅ If go: serve every agent over NATS, run shop heartbeats over the bus, add `make agents`, and a startup fallback to local. If no-go: skip straight to the baseline | The demo flow passes on both transports |
+| 2:00 to 3:30 | ✅ If go: serve every teagent over NATS, run shop heartbeats over the bus, add `make agents`, and a startup fallback to local. If no-go: skip straight to the baseline | The demo flow passes on both transports |
 | 3:30 to 5:00 | ✅ `core/baseline.py` (most-reviewed untried in-stock drink). Extend `eval/run_eval.py` to popularity vs fixed weights vs learning, write `eval_results.json`, and add `GET /eval` | `GET /eval` matches the contract, with a test |
 | 5:00 to 6:00 | ✅ Story data fixes: tune Sarah's seed reviews so she's Andrew's top match, re-seed, and update the tests | `/users/similar?user_id=andrew` returns Sarah first |
 | **6:00** | **Sync:** merge, then run the full demo together | |
-| 6:30 to 8:00 | ✅ Stretch: **shop offers.** In a near-tie, the trailing shop's agent offers up to 10% off from its budget, but only when it is behind on price. The resolver re-scores the cost dimension, and an `offer` event is emitted | The offer can flip the #1. The scripted demo does not hit that case, so its numbers are unchanged |
+| 6:30 to 8:00 | ✅ Stretch: **shop offers.** In a near-tie, the trailing shop's teagent offers up to 10% off from its budget, but only when it is behind on price. The resolver re-scores the cost dimension, and an `offer` event is emitted | The offer can flip the #1. The scripted demo does not hit that case, so its numbers are unchanged |
 | 8:00 to 9:00 | ⬜ Optional LLM wording for rationales (template fallback stays the default). Edge-case tests: all vetoed, no reviews, every shop offline | Tests pass with no API key set |
 | **9:00** | **Merge.** Feature freeze at 9:30 | |
 | Overnight | ⬜ `docs/architecture.md`: mermaid diagram, protocol, Level 2 mapping | |
@@ -178,7 +178,7 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 **Features:**
 1. **Onboarding quiz** (6 questions, under a minute) for new users:
    - **Questions:** sweetness level, milk vs fruit vs tea-forward, toppings, flavors you like (multi-select over the `drinks.json` flavor tags), typical budget, and how adventurous you are. The exact questions and option ids are in `frontend/src/mocks/social/quiz.json`; A can serve that file from `GET /quiz` as is.
-   - **Results:** your starting taste profile, your starting priority weights for the Preference agent, and a boba personality, such as "Floral Explorer" or "Brown Sugar Loyalist."
+   - **Results:** your starting taste profile, your starting priority weights for the Preference teagent, and a boba personality, such as "Floral Explorer" or "Brown Sugar Loyalist."
    - **Rule:** like every other number in TeaLink, the backend computes the mapping from answers to profile and weights in code.
 2. **Boba stats:**
    - favorite drink and favorite store;
@@ -206,9 +206,9 @@ type Offer = { shop_id: string; percent: number; price_after: number; reason: st
 **Ground rules:**
 - **The demo stays safe.** Andrew (the demo user) is already onboarded, so the 3-minute demo doesn't depend on any social feature. Reset demo also restores the social seed data.
 - **No real accounts.** "Signing up" just picks a handle, and the user id is kept in `localStorage`. Social data lives in JSON files and in memory, like picks do today.
-- **How it ties into the agents:**
-  - The quiz solves the Preference agent's cold start: it gives a new user non-default weights from round one.
-  - Follows can optionally feed the Social agent (people you follow count a little more).
+- **How it ties into the teagents:**
+  - The quiz solves the Preference teagent's cold start: it gives a new user non-default weights from round one.
+  - Follows can optionally feed the Social teagent (people you follow count a little more).
 
 **Contracts** (A adds these to `schemas.py`; B mirrors them in `types.ts` and builds against mocks first):
 
@@ -255,7 +255,7 @@ type FeedItem = {
 - **Quiz and sign-up:**
   - `GET /quiz` returns the questions.
   - `POST /users` takes `{handle, display_name}`, creates a user, and returns the profile.
-  - `POST /quiz` takes `{user_id, answers}` (question id → chosen option ids) and returns a `QuizResult`. It also seeds the Preference agent.
+  - `POST /quiz` takes `{user_id, answers}` (question id → chosen option ids) and returns a `QuizResult`. It also seeds the Preference teagent.
 - **Profiles:**
   - `GET /users?viewer=` returns `UserProfile[]` of everyone else, best taste match first (for "Suggested for you").
   - `GET /users/{id}?viewer=` returns a `UserProfile`. `{id}` may be a user id or a handle.
@@ -277,7 +277,7 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 | 3:00 to 4:00 | ✅ Schemas above in `schemas.py`; seed social data for the existing users (handles, bios, avatars, follows, a few feed items from real reviews); Reset demo restores it | Seed loads, and `GET /users/sarah?viewer=andrew` returns a full profile |
 | 4:00 to 5:00 | ✅ `core/stats.py`: boba stats and personality from reviews and picks. Quiz questions and the answer → taste profile + weights mapping (`core/quiz.py`), unit-tested | `POST /quiz` returns stats and weights; a new user's first `/recommend` uses those weights |
 | 5:00 to 6:00 | ✅ Profile, follow, feed, like, comment, and rec endpoints; picks and reviews post feed items; visibility respected for other viewers | Tests cover hidden stats, follow counts, and feed order |
-| 8:00 to 9:00 | ⬜ Optional: Social agent gives a small boost to people the user follows (replaces the LLM wording block if time is short) | The boost shows up in the Social agent's evidence |
+| 8:00 to 9:00 | ⬜ Optional: Social teagent gives a small boost to people the user follows (replaces the LLM wording block if time is short) | The boost shows up in the Social teagent's evidence |
 
 #### Track B: social frontend
 
@@ -300,7 +300,7 @@ The existing `GET /profile/{id}` (taste profile) stays as it is.
 - **Home** (`/home`): the friends feed.
 - **Discover** (`/discover`): browse and search drinks, shops, and people, with filter chips (milk, fruit, or tea; under $5; flavor tags). Tapping a drink opens a detail sheet with its photo, shop, price, and friends' ratings.
 - **TeaLink** (`/`, the center tab): today's picks.
-  - This is the current agent recommender, reframed as "today's top 3": the close call, the debate, What changed, and Why this order.
+  - This is the current teagent recommender, reframed as "today's top 3": the close call, the debate, What changed, and Why this order.
   - What changed, Why this order, and Evidence become links inside this tab instead of items in the main nav.
   - It stays at `/`, so the demo URL and `docs/demo-script.md` don't change.
 - **Stats** (`/stats`): your own stats.
@@ -319,7 +319,7 @@ The current Friends page folds into Discover (the people results) and profiles.
 flowchart LR
   Home["Home: friend feed"]
   Discover["Discover: search drinks, shops, people"]
-  TeaLink["TeaLink: today's top 3 and agent debate"]
+  TeaLink["TeaLink: today's top 3 and teagent debate"]
   Stats["Stats: boba stats, taste, priorities"]
   Profile["Profile: identity and photo grid"]
   TeaLink --> WhatChanged[What changed]
@@ -332,7 +332,7 @@ flowchart LR
 - **Type:** a consistent scale of page title, section title, body, and caption. Body text is at least 15px, and muted text still passes contrast.
 - **Fewer boxes inside boxes:** sections are separated by spacing and headers, not nested cards.
 - **Touch and states:** tap targets are at least 44px, and every list has a clear empty, loading, and error state.
-- **TeaLink timeline:** the agent timeline is collapsed by default behind "See how the agents decided." During the demo it opens with one tap.
+- **TeaLink timeline:** the teagent timeline is collapsed by default behind "See how the teagents decided." During the demo it opens with one tap.
 
 **Pictures (placeholders now, uploads later):**
 - **Drinks:** about 10 generated images, one per drink style:
@@ -376,11 +376,11 @@ This reshuffles B's remaining evening; the earlier Track B social rows keep thei
 | 7:30 to 8:30 | 🟡 (Stats tab, photos, and the collapsed timeline are done; the older pages still need the readability pass) Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
 | 8:30 to 9:00 | ✅ Feed leftovers ("send a rec") and the offer badge, if A built offers | |
 
-### UI round 2 and agent dialogue (added 6:55 PM)
+### UI round 2 and teagent dialogue (added 6:55 PM)
 
 **Goal:**
-- The TeaLink tab shows only today's top 3, and the agent story gets its own sub-tab.
-- The agents genuinely respond to each other's objections, and the timeline reads like a group chat.
+- The TeaLink tab shows only today's top 3, and the teagent story gets its own sub-tab.
+- The teagents genuinely respond to each other's objections, and the timeline reads like a group chat.
 - Stats and Discover are trimmed to what matters.
 
 **General (both tracks):**
@@ -404,9 +404,9 @@ flowchart LR
   - Remove "what you care about" and "my taste"; both are already in Stats.
   - Remove "people with your taste"; that belongs in Discover.
 - **At the counter (new sub-tab):** it moves out of today's picks.
-  - **Agent symbols:** each core agent gets its own minimal line symbol, matching the doodle style. Every shop agent shares one shop symbol.
-  - **Team selected:** a grid of agent icons replaces the list of names. Tapping an icon expands it to show the agent's name, symbol, and description.
-  - **They argue:** shown as a group chat. Messages are grouped by round, concessions are visible ("Budget softens on Thai Tea"), and the last line says who decided: the agents agreed, the arbiter decided, or you picked.
+  - **Teagent symbols:** each core teagent gets its own minimal line symbol, matching the doodle style. Every shop teagent shares one shop symbol.
+  - **Team selected:** a grid of teagent icons replaces the list of names. Tapping an icon expands it to show the teagent's name, symbol, and description.
+  - **They argue:** shown as a group chat. Messages are grouped by round, concessions are visible ("Budget softens on Thai Tea"), and the last line says who decided: the teagents agreed, the arbiter decided, or you picked.
   - **The what-if demo controls** (#1 sells out, shop offline, Lantern Leaf joins, no brown sugar, Reset demo) move here. They now sit on what changed, which is being removed.
 - **Stats:**
   - **Boba card background:** you choose the color yourself.
@@ -419,15 +419,15 @@ flowchart LR
   - **Drink filters:** no repeats, so "fruit tea" and "fruit" merge into one chip.
   - **Order:** shops and drinks are ordered from closest match to least match for you.
 
-**Agent dialogue (soften-only rebuttal rounds):**
-- **Rounds:** after the objection round, the gateway relays every agent's objections to all agents, which may then revise their stances. This repeats up to **3 rounds**.
-- **Soften-only:** after round 1, an agent may only soften: concede, drop a concern, or lower its confidence. It never hardens a stance, so the dialogue always settles.
+**Teagent dialogue (soften-only rebuttal rounds):**
+- **Rounds:** after the objection round, the gateway relays every teagent's objections to all teagents, which may then revise their stances. This repeats up to **3 rounds**.
+- **Soften-only:** after round 1, a teagent may only soften: concede, drop a concern, or lower its confidence. It never hardens a stance, so the dialogue always settles.
 - **Vetoes:** shop vetoes (sold out) stay binding and are never softened.
 - **The gateway only relays:**
-  - It stops early when no agent changes anything in a round.
-  - At the cap, or if an agent times out, it runs the existing `resolve()` on everyone's latest scores. It never restarts.
+  - It stops early when no teagent changes anything in a round.
+  - At the cap, or if a teagent times out, it runs the existing `resolve()` on everyone's latest scores. It never restarts.
 - **Who decided:**
-  - "the agents agreed" if the dialogue settled before the cap.
+  - "the teagents agreed" if the dialogue settled before the cap.
   - "the arbiter decided" if it hit the cap or a timeout.
   - The existing near-tie question to you still runs after that. If you pick, the timeline says "you picked."
 - **Setting:** `DELIBERATION=dialogue|single`. `single` is today's two-round behavior and stays the demo fallback. The `/health` response reports which mode is on.
@@ -438,7 +438,7 @@ flowchart LR
 ```ts
 // On "proposal" and "objection" events. Round 1 is the first objection round.
 LensEvent.payload.round?: number;
-// On objection events where an agent softened its stance this round.
+// On objection events where a teagent softened its stance this round.
 LensEvent.payload.revised_from?: { kind: "support" | "concern" | "neutral"; score: number | null };
 // On the "decision" event. "you picked" is added by the frontend when the user breaks a near-tie.
 Decision.decided_by?: "agents" | "arbiter";
@@ -468,7 +468,7 @@ Health.deliberation?: "dialogue" | "single";
 | Order | Task | Done when |
 |---|---|---|
 | 1 | ✅ TeaLink: new sub-tabs (today's picks · at the counter · why this order · evidence); remove what changed; move the what-if controls to at the counter; strip the top 3 meters and the three extra sections | Today's picks shows only the top 3, and the demo runs from the at the counter sub-tab |
-| 2 | ✅ At the counter: agent symbols, team icon grid with tap-to-expand, and "they argue" as a group chat grouped by round, with concessions and who decided | Readable in both `single` and `dialogue` mode (in `single`, it shows one round and "the arbiter decided") |
+| 2 | ✅ At the counter: teagent symbols, team icon grid with tap-to-expand, and "they argue" as a group chat grouped by round, with concessions and who decided | Readable in both `single` and `dialogue` mode (in `single`, it shows one round and "the arbiter decided") |
 | 3 | ✅ Stats: card color picker, "what matters most to you" without a percentage, trimmed and combined stats, receipt layout | |
 | 4 | ✅ Discover: deduplicated drink filters, and match ordering for shops and drinks | Your closest match is first in both lists |
 | 5 | ✅ "You" copy pass across all frontend text, and transition animations everywhere | |
@@ -502,7 +502,7 @@ Health.deliberation?: "dialogue" | "single";
   - **Checkout:** the price, any close-call offer you were shown (applied only before it expires, and only for that drink), and the pickup fee.
   - **Payment:** Stripe in test mode, with the secret key on the server only. The browser never sees a secret key or raw card numbers. "Pay at pickup" is the fallback, and it is what the demo uses if Stripe isn't set up.
   - **Order status:** placed → accepted → ready → picked up. You see it on an Orders page. The shop sees incoming orders and moves them along.
-  - A completed order counts as a pick for the Preference agent, and afterwards you're asked to rate the drink.
+  - A completed order counts as a pick for the Preference teagent, and afterwards you're asked to rate the drink.
 
 **Shops side:**
 - **Menu editing:**
@@ -571,7 +571,7 @@ PATCH /orders/{id}       { status: "accepted" | "ready" | "picked_up" | "cancell
 | 2 | ✅ Menu and shop profile: drinks CRUD, menu sections, shop `description` and `photo_url`; sold out from the shop menu reaches the recommender | An edited price or a new drink shows up in the next recommendation |
 | 3 | ✅ Offer rules: platform rules locked, shop rules CRUD, and the offer engine checks both | A shop rule can stop an offer but never allows one outside a close call or above the cap. Demo numbers unchanged |
 | 4 | ✅ Demand trends over week, month, and year from choices, orders, and reviews, with timestamps in the seed | Each range returns data, and small buckets are hidden |
-| 5 | ✅ Orders: create, status changes, offers applied at checkout, Stripe test mode with pay at pickup as the fallback; a completed order teaches the Preference agent | A demo order goes from placed to picked up, and the shop sees it |
+| 5 | ✅ Orders: create, status changes, offers applied at checkout, Stripe test mode with pay at pickup as the fallback; a completed order teaches the Preference teagent | A demo order goes from placed to picked up, and the shop sees it |
 | 6 | ✅ Reset demo restores menus, rules, sold-out marks, and orders, but keeps accounts | The scripted demo runs twice in a row unchanged |
 
 #### Track B: accounts, store tools, and ordering
@@ -592,7 +592,7 @@ All seven run on in-browser mocks until Track A's routes land, and switch to the
 
 ### Custom what-if at the counter (added 8:20 PM)
 
-**Goal:** the what-if box on at the counter takes your own changes, not just the five preset buttons. You describe a change, and the agents re-plan around it.
+**Goal:** the what-if box on at the counter takes your own changes, not just the five preset buttons. You describe a change, and the teagents re-plan around it.
 
 **How it works:**
 - **A change builder:** pick the kind of change, then the target from lists of real drinks, shops, and flavors. Kinds:
@@ -649,7 +649,7 @@ Until `POST /whatif` is served, the frontend applies sold out, shop offline, sho
 **Customer side:**
 - **Order, don't pick:**
   - "Pick this" is removed from the top 3 cards, and the close-call buttons ("I'd take Thai Tea") become "Order Thai Tea". Both open the order sheet.
-  - Placing an order for a drink from your current top 3 is the pick: the Preference agent learns from it right away, the same way "Pick this" did, and the round re-runs. Learning moves from pickup to placement so the demo doesn't wait on the shop. A later pickup doesn't teach it twice, and cancelling doesn't undo it.
+  - Placing an order for a drink from your current top 3 is the pick: the Preference teagent learns from it right away, the same way "Pick this" did, and the round re-runs. Learning moves from pickup to placement so the demo doesn't wait on the shop. A later pickup doesn't teach it twice, and cancelling doesn't undo it.
   - An order for a drink that isn't in your top 3 (for example from Discover) counts as a taste signal instead. It nudges your taste profile toward that drink, like a good review, and counts toward drinks tried. It doesn't change your priority weights: with no passed-over options to compare against, there's no way to tell whether you chose it for taste, price, novelty, or a friend.
 - **No automatic posts:** ordering (or the old pick route) no longer adds a "pick" item to your profile or anyone's feed. The seeded "pick" posts are removed from the feed; they still count as order history.
 - **Your own posts:**
@@ -800,31 +800,31 @@ Notification.text?: string                        // the note that came with it
 
 ### More of the Cisco challenge (added Sun 10:00 AM)
 
-**Goal:** show more of "When AI Agents Disagree" on screen: agents that are discovered, verified, traced, and allowed to fail; agents that negotiate rather than only score; and a team that learns whom to trust. Submission is at 12:30 today, so the rows are in demo-value order. Do the top ones first, and stop wherever time runs out.
+**Goal:** show more of "When AI Agents Disagree" on screen: teagents that are discovered, verified, traced, and allowed to fail; teagents that negotiate rather than only score; and a team that learns whom to trust. Submission is at 12:30 today, so the rows are in demo-value order. Do the top ones first, and stop wherever time runs out.
 
 **The ideas:**
-1. **Failure on stage.** A "kill an agent" button drops Budget or a shop agent partway through a round. The team visibly re-plans, and the arbiter explains what it decided without that agent.
-2. **Observability.** Each round is traced with AGNTCY's observability tooling: latency per agent, retries, and fallbacks. A small trace view sits on the Evidence page.
-3. **Adversarial check.** A Critic agent looks for the weakest reason in the winning case before the decision is final. The arbiter either answers it or changes the pick, and the chat shows which.
-4. **More baselines.** Compare the agent team with a single LLM choosing alone, and report where the team wins and where it loses.
-5. **Agent directory.** Each agent publishes its card to an AGNTCY directory, and the concierge finds agents by capability at runtime instead of from a hard-coded list.
-6. **Agent identity and permissions.** Agents have signed identities, so only a verified shop agent can veto its own stock. A fake shop agent is rejected, on screen.
-7. **Real negotiation, not just scoring.** Agents trade concessions ("I'll drop price if you drop novelty this round"), with a capped number of rounds and the arbiter as tiebreaker.
-8. **Trust that shifts over time.** The arbiter gives less weight to an agent whose past advice users kept passing over, and says so.
-9. **Tool-using agents over MCP.** A shop agent reads live inventory or opening hours through MCP. A Weather or Time agent nudges toward iced or hot.
+1. **Failure on stage.** A "kill a teagent" button drops Budget or a shop teagent partway through a round. The team visibly re-plans, and the arbiter explains what it decided without that teagent.
+2. **Observability.** Each round is traced with AGNTCY's observability tooling: latency per teagent, retries, and fallbacks. A small trace view sits on the Evidence page.
+3. **Adversarial check.** A Critic teagent looks for the weakest reason in the winning case before the decision is final. The arbiter either answers it or changes the pick, and the chat shows which.
+4. **More baselines.** Compare the teagent team with a single LLM choosing alone, and report where the team wins and where it loses.
+5. **Teagent directory.** Each teagent publishes its card to an AGNTCY directory, and the concierge finds teagents by capability at runtime instead of from a hard-coded list.
+6. **Teagent identity and permissions.** Teagents have signed identities, so only a verified shop teagent can veto its own stock. A fake shop teagent is rejected, on screen.
+7. **Real negotiation, not just scoring.** Teagents trade concessions ("I'll drop price if you drop novelty this round"), with a capped number of rounds and the arbiter as tiebreaker.
+8. **Trust that shifts over time.** The arbiter gives less weight to a teagent whose past advice users kept passing over, and says so.
+9. **Tool-using teagents over MCP.** A shop teagent reads live inventory or opening hours through MCP. A Weather or Time teagent nudges toward iced or hot.
 10. **Feedback after the fact.** After pickup, "Was this a good pick?" feeds learning, separately from what was ordered.
-11. **Group orders.** Several friends' Preference agents negotiate one shared order or shop over an AGNTCY group channel (SLIM). The result shows the compromise and who gave ground.
+11. **Group orders.** Several friends' Preference teagents negotiate one shared order or shop over an AGNTCY group channel (SLIM). The result shows the compromise and who gave ground.
 
 **Demo safety:**
 - None of this runs in the scripted 3 minutes unless it's switched on. After Reset demo, single mode still opens at Thai Tea 78, Wintermelon 77, Pearl 71, and ordering Pearl still gives taste 45%, price 36%, Pearl 73.
 - Anything that can fail live (the directory, identity checks, MCP tools, the bus) falls back to today's behaviour and says so in the chat. The demo never depends on it.
-- Kill an agent, the Critic, negotiation, trust, and group orders are each off by default and switched on by a button or setting. Reset demo brings back every agent and clears trust changes and feedback.
+- Kill a teagent, the Critic, negotiation, trust, and group orders are each off by default and switched on by a button or setting. Reset demo brings back every teagent and clears trust changes and feedback.
 
 **Contract additions** (A adds them; B mirrors them in `types.ts`). These are proposals; A finalises the shapes.
 
 ```ts
 // Failure on stage
-POST /agents/{agent_id}/stop      // takes the agent off the bus or out of the roster mid-session
+POST /agents/{agent_id}/stop      // takes the teagent off the bus or out of the roster mid-session
 POST /agents/{agent_id}/start     // brings it back; Reset demo restarts all of them
 LensEventType adds "agent_lost"   // { agent_id, reason, when: "before_round" | "mid_round" }
 Decision.missing_agents?: string[]  // who the arbiter decided without
@@ -841,11 +841,11 @@ LensEventType adds "critique"     // { drink_id, weakest_reason, answered: boole
 // Directory and identity
 AgentSelection.discovered_via?: "directory" | "roster"
 AgentSelection.verified?: boolean   // a signed identity checked out
-LensEventType adds "rejected_agent" // { agent_id, reason }  e.g. a fake shop agent
+LensEventType adds "rejected_agent" // { agent_id, reason }  e.g. a fake shop teagent
 
 // Negotiation and trust
 Objection.concession?: { gives: Dimension; wants: Dimension }   // "drop price if you drop novelty"
-Decision.trust?: Record<string, number>   // 0..1 per agent; the arbiter's note says when one moved
+Decision.trust?: Record<string, number>   // 0..1 per teagent; the arbiter's note says when one moved
 
 // Tools over MCP
 Proposal.tool?: { name: string; result: string }   // e.g. "live_inventory" or "weather: 31°C"
@@ -862,48 +862,48 @@ POST /groups/{id}/recommend -> Decision & { compromise: { user_id: string; gave_
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ✅ Kill an agent: stop and start routes, an `agent_lost` event, and an arbiter note on what it decided without that agent. Works over AGNTCY and local | Stopping Budget mid-session re-ranks, the chat says Budget is gone, and Reset demo brings it back |
-| 2 | ✅ Trace each round with AGNTCY observability (latency, retries, fallbacks) and serve it at `GET /trace/{session_id}` | A round's trace lists every agent with its time and transport |
-| 3 | ✅ Critic agent: finds the weakest reason for #1 before the decision; the arbiter answers it or changes the pick. Off by default | With the Critic on, a `critique` event appears and the decision shows whether it held |
+| 1 | ✅ Kill a teagent: stop and start routes, an `agent_lost` event, and an arbiter note on what it decided without that teagent. Works over AGNTCY and local | Stopping Budget mid-session re-ranks, the chat says Budget is gone, and Reset demo brings it back |
+| 2 | ✅ Trace each round with AGNTCY observability (latency, retries, fallbacks) and serve it at `GET /trace/{session_id}` | A round's trace lists every teagent with its time and transport |
+| 3 | ✅ Critic teagent: finds the weakest reason for #1 before the decision; the arbiter answers it or changes the pick. Off by default | With the Critic on, a `critique` event appears and the decision shows whether it held |
 | 4 | ⬜ Single-LLM baseline in `eval/run_eval.py`, served in `GET /eval` alongside the others. No key falls back to the saved results | The Evidence table has a single-LLM row |
-| 5 | ⬜ Publish agent cards to an AGNTCY directory; the concierge discovers by capability and falls back to the roster | The selection says "discovered via directory", and stopping the directory still runs the demo |
-| 6 | ⬜ Signed agent identities: only a verified shop agent can veto its own stock; an unsigned "fake shop" agent is rejected | A demo fake shop joins, and a `rejected_agent` event says why |
+| 5 | ⬜ Publish teagent cards to an AGNTCY directory; the concierge discovers by capability and falls back to the roster | The selection says "discovered via directory", and stopping the directory still runs the demo |
+| 6 | ⬜ Signed teagent identities: only a verified shop teagent can veto its own stock; an unsigned "fake shop" teagent is rejected | A demo fake shop joins, and a `rejected_agent` event says why |
 | 7 | ⬜ Concession rounds in dialogue mode ("drop price if you drop novelty"), capped, with the arbiter as tiebreaker | A round shows at least one concession, and the decision names it |
-| 8 | ⬜ Trust per agent from how often users passed over its advice; the arbiter's weighting uses it and says when it moved | After several orders against one agent's advice, its trust drops and the chat says so |
-| 9 | ⬜ MCP tools: a shop agent reads inventory or hours, and a Weather or Time agent nudges iced or hot. Offline tools fall back | A proposal shows the tool it used, and with the tool down the round still runs |
+| 8 | ⬜ Trust per teagent from how often users passed over its advice; the arbiter's weighting uses it and says when it moved | After several orders against one teagent's advice, its trust drops and the chat says so |
+| 9 | ⬜ MCP tools: a shop teagent reads inventory or hours, and a Weather or Time teagent nudges iced or hot. Offline tools fall back | A proposal shows the tool it used, and with the tool down the round still runs |
 | 10 | ⬜ ~~`POST /orders/{id}/feedback` after pickup feeds learning separately from the order~~ Superseded by order ratings (Sun 10:55 AM, Track A row 5) | Marking a pick as bad moves the weights the other way |
-| 11 | ⬜ Group orders over SLIM: members' Preference agents negotiate one order or shop and report the compromise | Andrew and Sarah's group order names who gave ground and on what |
+| 11 | ⬜ Group orders over SLIM: members' Preference teagents negotiate one order or shop and report the compromise | Andrew and Sarah's group order names who gave ground and on what |
 
 #### Track B: more of the Cisco challenge
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ✅ "Kill an agent" on at the counter: tap an agent in the team grid to stop or restart it; a greyed-out icon, the `agent_lost` message in the chat, and "decided without Budget" on the decision | Stopping Budget mid-session is visible in the grid, the chat, and the decision |
-| 2 | ✅ Trace view on the Evidence page: per-round bars of agent latency, retries, and fallbacks, labelled by transport | The latest round's trace renders, with a saved trace when the API is down |
+| 1 | ✅ "Kill a teagent" on at the counter: tap a teagent in the team grid to stop or restart it; a greyed-out icon, the `agent_lost` message in the chat, and "decided without Budget" on the decision | Stopping Budget mid-session is visible in the grid, the chat, and the decision |
+| 2 | ✅ Trace view on the Evidence page: per-round bars of teagent latency, retries, and fallbacks, labelled by transport | The latest round's trace renders, with a saved trace when the API is down |
 | 3 | ✅ Critic in the chat: its message, and whether the arbiter answered it or changed the pick. A Critic switch next to the what-if buttons | Turning the Critic on adds its message and the outcome |
 | 4 | ⬜ Single-LLM row in the Evidence table and chart, with one honest sentence on where it wins or loses | The new row shows, and the copy matches the numbers |
 | 5 | ⬜ "Discovered via directory" and "verified" badges in the team grid; a "fake shop joins" what-if that shows the rejection | The fake shop is visibly turned away |
-| 6 | ⬜ Concessions in the chat ("Budget gives on price if Explorer gives on novelty"), and trust meters per agent with the arbiter's note when one moves | A concession and a trust change both read clearly in one round |
+| 6 | ⬜ Concessions in the chat ("Budget gives on price if Explorer gives on novelty"), and trust meters per teagent with the arbiter's note when one moves | A concession and a trust change both read clearly in one round |
 | 7 | ⬜ Tool results on proposals ("checked live inventory", "31°C, so iced") | A proposal that used a tool says which, and what it found |
 | 8 | ⬜ ~~"Was this a good pick?" on a picked-up order, sending the feedback~~ Superseded by order ratings (Sun 10:55 AM, Track B row 7) | Answering it is confirmed, and the next round reflects it |
 | 9 | ⬜ Group order: pick friends, see the shared top 3, and a compromise line for each person | A two-person group order shows who gave ground |
-| 10 | ✅ Demo script: an optional 30-second Cisco segment (kill an agent, the trace, the Critic), and judge Q&A lines for identity, directory, and observability; write-up rows for the new Level 2 and 3 pieces | The script and write-up match what the app shows |
+| 10 | ✅ Demo script: an optional 30-second Cisco segment (kill a teagent, the trace, the Critic), and judge Q&A lines for identity, directory, and observability; write-up rows for the new Level 2 and 3 pieces | The script and write-up match what the app shows |
 
 ### Ordering fixes, a full quiz, favorites, and order ratings (added Sun 10:55 AM)
 
-**Goal:** fix two ordering bugs, give new users a deeper starting taste profile, and give the agents better evidence: favorite drinks named by the user, recent orders counting more, and a 0–5 rating on past orders.
+**Goal:** fix two ordering bugs, give new users a deeper starting taste profile, and give the teagents better evidence: favorite drinks named by the user, recent orders counting more, and a 0–5 rating on past orders.
 
 **What changes:**
 1. **Ordering from the top 3 confirms and closes.** Placing an order from a top 3 card shows the "order placed" confirmation, and **Done** closes the ordering sheet. Today the round that re-runs after the order can swallow the confirmation or leave the sheet open.
 2. **Order history on the profile works.** With the past orders toggle on, the profile shows recent orders, including ones placed in the app, newest first. Drink, shop, and date only; never prices.
 3. **Two quizzes: basic and full.** On the customer route, **Start the quiz** first asks which quiz to take, in the same style as the rest of onboarding:
    - **Basic:** today's six questions.
-   - **Full:** a longer quiz for a more detailed taste profile, so the agents start closer to what you like. It covers ice and temperature, tea bases, milk type, specific toppings, texture, flavors to avoid, and how often you try something new.
+   - **Full:** a longer quiz for a more detailed taste profile, so the teagents start closer to what you like. It covers ice and temperature, tea bases, milk type, specific toppings, texture, flavors to avoid, and how often you try something new.
    **Retake quiz** on the profile offers both types again.
 4. **Favorite drinks from favorite shops.** A question in the full quiz: type a shop name, pick it from suggestions, then pick your favorite drinks from its menu. Repeat for more shops. Favorites count heavily, because they're more accurate evidence of what you like than a quiz answer.
 5. **A loading animation.** The two hands and cups from the logo clink (cheers) while things load. It replaces the current loading state everywhere, and is off for reduced motion.
 6. **Tagging a post: shop first.** You can tag just a shop, or pick a shop before you can tag one of its drinks. You type the shop name, and suggestions appear as you type, closest name first, then most popular.
-7. **Agents weight recent orders more.** Newer orders count more than old ones in the taste profile and in what the Preference agent learns.
+7. **Teagents weight recent orders more.** Newer orders count more than old ones in the taste profile and in what the Preference teagent learns.
 8. **Rate past orders from 0 to 5.** After pickup, you can rate an order. The rating feeds the taste profile and future team decisions: 4–5 pulls toward that drink's profile, and 0–1 pushes away. It replaces the fixed rating of 4 a placed order gets today, and supersedes Cisco Track A row 10 and Track B row 8 ("Was this a good pick?").
 
 **Demo safety:**
@@ -955,20 +955,20 @@ PastOrder.rating?: number | null                     // only on your own profile
 | 5 | ⬜ Full quiz screens, including the favorites question: type a shop name with suggestions, pick it, then pick drinks from its menu; add another shop; remove any. Sends `kind` and `favorites` | A full quiz with two favorite shops submits, and the result screen opens |
 | 6 | 🟡 Post tags: one tag field where you type a shop name, with suggestions closest first and then by popularity. After choosing a shop, you can tag one of its drinks, or leave it at the shop | You can't tag a drink without its shop, and typing "kung" suggests Kung Fu Tea Co. first |
 | 7 | ⬜ Rate past orders 0–5 on the Orders page once picked up, and on your own profile's order history; a rated order shows its stars. The chat notes the next round used it ("You rated Pearl Milk Tea 1/5.") | Rating an order is saved, and the next round reflects it |
-| 8 | ⬜ Copy: "recent orders count more" and "your ratings count" on Why this order and the quiz result. Update `demo-script.md` if A's numbers change, and PROGRESS | The copy matches what the agents do, and the script numbers still match a real run |
+| 8 | ⬜ Copy: "recent orders count more" and "your ratings count" on Why this order and the quiz result. Update `demo-script.md` if A's numbers change, and PROGRESS | The copy matches what the teagents do, and the script numbers still match a real run |
 
-### Location, a closer-store agent, a logo clink, and quiz back (added Sun 11:35 AM)
+### Location, a closer-store teagent, a logo clink, and quiz back (added Sun 11:35 AM)
 
 **Goal:** let someone say where they are, and have the team prefer nearer shops when they do. Two small screen fixes ride along: the TeaLink logo clinks when you click it, and Back on the first quiz question leaves the quiz.
 
 **What changes:**
 1. **Location is optional.** On the customer route, after the account step and before the quiz, one screen asks where you are. **Skip** continues with no location. You can pick a shop neighborhood, or use the browser's location if you allow it. Edit profile can set or clear it later. Skipping, and the demo accounts, leave location empty.
-2. **A Location agent joins only when you gave a location.** It sits with Taste, Social, Explorer, and Budget and speaks in the chat. It prioritizes drinks from closer shops. With no location it is not selected, so the scripted round is unchanged.
+2. **A Location teagent joins only when you gave a location.** It sits with Taste, Social, Explorer, and Budget and speaks in the chat. It prioritizes drinks from closer shops. With no location it is not selected, so the scripted round is unchanged.
 3. **Clicking the TeaLink logo clinks.** The header mark (the two cups) plays one clink, the same motion as the loading animation, then rests. The link still goes home. Reduced motion plays nothing.
 4. **Quiz Back on the first question leaves the quiz.** Later questions still go to the previous question. On the first question, Back returns to the page you came from: the profile on **Retake quiz**, otherwise the page before the quiz. Today the first question sends you back to the account step, and a retake's Back stays put.
 
 **Demo safety:**
-- Andrew has no location, and Reset demo clears one set during the session. After Reset demo the opening is still Thai Tea 78, Wintermelon 77, Pearl 71. The Location agent is absent from that round.
+- Andrew has no location, and Reset demo clears one set during the session. After Reset demo the opening is still Thai Tea 78, Wintermelon 77, Pearl 71. The Location teagent is absent from that round.
 - If A can't keep those numbers once a location is set, A posts the new ones in PROGRESS. The script itself does not set a location.
 - The logo clink and the quiz Back button do not change scores.
 
@@ -985,26 +985,26 @@ PATCH /users { location?: { label: string; lat?: number; lng?: number } | null }
 Shop.lat: number
 Shop.lng: number
 
-// The Location agent is selected only when that user has a location.
+// The Location teagent is selected only when that user has a location.
 // Its id is "location". Its dimension is "distance": 1 at the nearest shop, 0 at the farthest.
 // Preference weights include "distance" only on those rounds, starting small,
 // with the other four keeping their relative shares.
 ```
 
-#### Track A: location and the closer-store agent
+#### Track A: location and the closer-store teagent
 
 | Order | Task | Done when |
 |---|---|---|
 | 1 | ⬜ `PATCH /users` stores `location` (`label`, `lat`, `lng`), or null to clear it. A neighborhood name with no coordinates uses the seeded point for that neighborhood. `UserProfile.location` is null until they set one | Setting "Mission" stores a point, null clears it, and "nowhere" is 422 |
 | 2 | ⬜ Seed a lat/lng for each shop from its neighborhood, and return them on `GET /shops` | The six shops come back with coordinates, and two shops in different neighborhoods are not the same point |
-| 3 | ⬜ Location agent: selected only when the user has a location. It scores drinks by how close the shop is, speaks in the chat, and closer shops rank higher. No location means it is not in the roster and the weights stay the four they are today | A user in the Mission sees a Location line in the chat and a Mission shop's drink above a farther shop that otherwise tied. Andrew's opening round is still 78 / 77 / 71, with no Location agent |
+| 3 | ⬜ Location teagent: selected only when the user has a location. It scores drinks by how close the shop is, speaks in the chat, and closer shops rank higher. No location means it is not in the roster and the weights stay the four they are today | A user in the Mission sees a Location line in the chat and a Mission shop's drink above a farther shop that otherwise tied. Andrew's opening round is still 78 / 77 / 71, with no Location teagent |
 
 #### Track B: location, the logo clink, and quiz back
 
 | Order | Task | Done when |
 |---|---|---|
 | 1 | ⬜ Optional location screen after the account step and before the quiz, in the onboarding style. **Skip** sends no location. A neighborhood list, plus **Use my location** when the browser allows it. Edit profile can set or clear it. Until A's route exists, keep the choice in the browser | Skip reaches the quiz with no location. Picking Mission stores it, and Edit profile can clear it |
-| 2 | ⬜ When the round's team includes `location`, show it in the team grid (`AgentSymbol`) and its line in the chat. No symbol when the agent was not selected | A user with a location sees the Location agent argue for the closer shop. Andrew's round does not |
+| 2 | ⬜ When the round's team includes `location`, show it in the team grid (`AgentSymbol`) and its line in the chat. No symbol when the teagent was not selected | A user with a location sees the Location teagent argue for the closer shop. Andrew's round does not |
 | 3 | ⬜ Clicking the header TeaLink logo plays one clink, then rests. The link still goes home. Off for reduced motion | One click clinks once. A second click can clink again. Reduced motion stays still |
 | 4 | ⬜ On the first quiz question, Back leaves the quiz for the previous page: the profile on **Retake quiz**, otherwise the page before the quiz. Later questions still go to the previous question | From question 1 of a retake, Back opens the profile. From question 2, Back opens question 1 |
 
@@ -1025,13 +1025,13 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. Location, a closer-store agent, a logo clink, and quiz back (Sun 11:35 AM), from the bottom row up: quiz Back, the logo clink, then the Location agent. **Keep if you can:** the optional location question and the agent, since the question does nothing without it.
+1. Location, a closer-store teagent, a logo clink, and quiz back (Sun 11:35 AM), from the bottom row up: quiz Back, the logo clink, then the Location teagent. **Keep if you can:** the optional location question and the teagent, since the question does nothing without it.
 2. Ordering fixes, full quiz, favorites, and ratings (Sun 10:55 AM), from the bottom row up: shop popularity, the copy, ratings, recency, favorites, the full quiz and its chooser, post tags, then the loading animation. **Keep:** the two ordering bug fixes (top 3 confirmation and profile order history).
-3. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill an agent and the trace view, the two that show adaptation and AGNTCY most directly.
+3. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill a teagent and the trace view, the two that show adaptation and AGNTCY most directly.
 4. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
 5. UI round 2 extras, in this order:
    - typed custom what-ifs (keep the change builder), then the change builder (keep the preset buttons);
-   - agent dialogue (keep `single`);
+   - teagent dialogue (keep `single`);
    - the Stats receipt layout and card color;
    - transition animations;
    - Discover match ordering.
@@ -1055,21 +1055,21 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Stretch ideas (only after the freeze-safe build)
 
-- Shop offers: a shop agent may offer a small discount, bounded by the shop's budget, to win a close call. It would show up as a cost change in the resolver.
-- Group mode and agent identity moved into "More of the Cisco challenge" (Sun 10:00 AM).
+- Shop offers: a shop teagent may offer a small discount, bounded by the shop's budget, to win a close call. It would show up as a cost change in the resolver.
+- Group mode and teagent identity moved into "More of the Cisco challenge" (Sun 10:00 AM).
 
 ## Plan change log
 
-- **Sun 11:35 AM:** Added "Location, a closer-store agent, a logo clink, and quiz back". An optional location question on the customer route, and a Location agent that joins only when they answer and prioritizes closer shops. Clicking the TeaLink logo plays one clink. Back on the first quiz question leaves the quiz. Split into Track A rows 1-3 and Track B rows 1-4. The scripted 78 / 77 / 71 stays, because the demo accounts have no location. First on the cut list, except the location question and the agent.
+- **Sun 11:35 AM:** Added "Location, a closer-store teagent, a logo clink, and quiz back". An optional location question on the customer route, and a Location teagent that joins only when they answer and prioritizes closer shops. Clicking the TeaLink logo plays one clink. Back on the first quiz question leaves the quiz. Split into Track A rows 1-3 and Track B rows 1-4. The scripted 78 / 77 / 71 stays, because the demo accounts have no location. First on the cut list, except the location question and the teagent.
 - **Sun 11:30 AM:** Track A finished rows 1-6 of "Ordering fixes, a full quiz, favorites, and order ratings". Shapes for Track B are in `PROGRESS.md`. Demo scores stay 78 / 77 / 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73.
-- **Sun 10:55 AM:** Added "Ordering fixes, a full quiz, favorites, and order ratings". Ordering from the top 3 always confirms and Done closes the sheet; the profile's past orders toggle shows real order history. Onboarding and Retake quiz offer a basic and a full quiz; the full one adds more taste questions and favorite drinks from favorite shops, which count heavily. A clinking-cups loading animation. Post tags are shop first, with type-ahead suggestions. Agents weight recent orders more, and customers can rate past orders 0–5, which replaces the fixed rating of 4 and supersedes the Cisco yes/no feedback rows. Split into Track A rows 1-6 and Track B rows 1-8. The scripted 78 / 77 / 71 stays. First on the cut list, except the two ordering bug fixes.
-- **Sun 10:00 AM:** Added "More of the Cisco challenge": kill an agent mid-round, AGNTCY observability traces on the Evidence page, a Critic agent, a single-LLM baseline, an AGNTCY agent directory, signed agent identities that reject a fake shop, concession rounds, trust that shifts per agent, MCP tools (inventory, hours, weather), feedback after pickup, and group orders over SLIM. Split into Track A rows 1-11 and Track B rows 1-10, in demo-value order. All of it is off by default and falls back to today's behaviour, so the scripted 78 / 77 / 71 is unchanged. First on the cut list, except kill an agent and the trace view.
+- **Sun 10:55 AM:** Added "Ordering fixes, a full quiz, favorites, and order ratings". Ordering from the top 3 always confirms and Done closes the sheet; the profile's past orders toggle shows real order history. Onboarding and Retake quiz offer a basic and a full quiz; the full one adds more taste questions and favorite drinks from favorite shops, which count heavily. A clinking-cups loading animation. Post tags are shop first, with type-ahead suggestions. Teagents weight recent orders more, and customers can rate past orders 0–5, which replaces the fixed rating of 4 and supersedes the Cisco yes/no feedback rows. Split into Track A rows 1-6 and Track B rows 1-8. The scripted 78 / 77 / 71 stays. First on the cut list, except the two ordering bug fixes.
+- **Sun 10:00 AM:** Added "More of the Cisco challenge": kill a teagent mid-round, AGNTCY observability traces on the Evidence page, a Critic teagent, a single-LLM baseline, an AGNTCY teagent directory, signed teagent identities that reject a fake shop, concession rounds, trust that shifts per teagent, MCP tools (inventory, hours, weather), feedback after pickup, and group orders over SLIM. Split into Track A rows 1-11 and Track B rows 1-10, in demo-value order. All of it is off by default and falls back to today's behaviour, so the scripted 78 / 77 / 71 is unchanged. First on the cut list, except kill a teagent and the trace view.
 - **1:20 AM:** Track B finished its eight "Profile layout, photos, and recs" rows. Card and stats sit side by side (stacked and centered on a narrow window). Sheets open in the middle and scroll inside themselves. Profile photo and banner uploads show on the profile, in the feed, and on notifications, with emoji and placeholder covers as the fallback. Favorite shop spans the full row on a narrow window. Send a rec, Follow, and Request bestea sit below the banner. A rec only goes to someone who follows you, and it shows in the bell. Top 3 cards lead with "78% match". Side doodles stay in the margin until it gets too narrow. The scripted scores stay 78 / 77 / 71.
 - **1:10 AM:** Track A finished rows 1-3 of "Profile layout, photos, and recs". `PATCH /users` stores `avatar.photo_url` (JPEG, at most 512 px a side) and `cover_url` (a placeholder id, a JPEG at most 1600 px wide and 1600 px tall, or null). `POST /recs` is 403 unless the recipient follows the sender, and a successful rec writes an unread notification. Post photos round-trip as stored. Demo scores stay 78 / 77 / 71. The `types.ts` notes for Track B are in `PROGRESS.md`.
 - **12:55 AM:** Added "Profile layout, photos, and recs". The boba card and boba stats sit side by side when both are on, and a single one is centered. Popups open in the middle of the screen. People can upload a profile photo, a banner, and post photos. Stat rows stay consistent on a narrow window, including favorite shop. Send a rec and Follow sit below the banner. A rec is allowed only when the recipient follows the sender, and it shows in the notification bell. Top 3 cards read "78% match" in front of the rank. Side doodles hide only when the margins are almost gone. Split into Track A rows 1-3 and Track B rows 1-8. First on the cut list. The scripted scores stay 78 / 77 / 71.
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
 - **9:50 PM:** Track B finished its six "Ordering replaces picking" rows on in-browser mocks: ordering from the top 3 is the pick (same 45% / 36% / Pearl 73), no pick posts, photo and caption posts, a past orders stat, besteas, and a notification bell. The demo script now orders Pearl instead of picking it.
-- **9:30 PM:** Added "Ordering replaces picking, custom posts, and besteas": ordering is the only way to choose (placing an order from your top 3 teaches the Preference agent), orders no longer post automatically, people write their own photo or caption posts, past orders become a profile stat, and besteas get notified of each other's orders. Split into Track A rows 1-4 and Track B rows 1-6. Orders from outside the top 3 (for example Discover) nudge the taste profile but not the priority weights.
+- **9:30 PM:** Added "Ordering replaces picking, custom posts, and besteas": ordering is the only way to choose (placing an order from your top 3 teaches the Preference teagent), orders no longer post automatically, people write their own photo or caption posts, past orders become a profile stat, and besteas get notified of each other's orders. Split into Track A rows 1-4 and Track B rows 1-6. Orders from outside the top 3 (for example Discover) nudge the taste profile but not the priority weights.
 - **9:05 PM:** Track B finished its three custom what-if rows: a text box with confirm chips, a change builder, and the presets unchanged.
 - **8:50 PM:** Track B finished its seven "Accounts, store tools, and ordering" rows on in-browser mocks, including sign-in, the shop pages, and pickup orders. Reset demo now keeps whoever is signed in.
 - **8:15 PM:** Added "Accounts, store tools, and ordering":
@@ -1079,12 +1079,12 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
   - New contracts for both tracks. These go second on the cut list, after the round 2 extras.
 - **7:40 PM:** Track B finished its UI round 2 rows:
   - At the counter (`/counter`) has the what-if buttons, the team grid, the group chat, and the decision. `/counterfactual` now redirects there.
-  - The frontend already reads the planned fields (`name`/`description`, `round`/`revised_from`, `decided_by`/`rounds`, `match`, `card_color`). Until they're served, it falls back to its own agent descriptions, round 1, "the arbiter decided," client-side taste matching, and a card color saved in the browser.
+  - The frontend already reads the planned fields (`name`/`description`, `round`/`revised_from`, `decided_by`/`rounds`, `match`, `card_color`). Until they're served, it falls back to its own teagent descriptions, round 1, "the arbiter decided," client-side taste matching, and a card color saved in the browser.
   - Re-check the demo script once Track A reports the `dialogue` numbers.
-- **6:55 PM:** Added "UI round 2 and agent dialogue":
+- **6:55 PM:** Added "UI round 2 and teagent dialogue":
   - TeaLink sub-tabs are now today's picks · at the counter · why this order · evidence. What changed is removed, and the what-if controls move to at the counter.
   - Today's picks is trimmed to the top 3.
-  - At the counter gets agent symbols, a team icon grid, and a group-chat "they argue."
+  - At the counter gets teagent symbols, a team icon grid, and a group-chat "they argue."
   - Soften-only rebuttal rounds (cap 3) with arbiter fallback, behind `DELIBERATION=dialogue|single`.
   - Stats and Discover are trimmed; Discover is ordered by match.
   - All copy says "you."
@@ -1114,12 +1114,12 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 - **1:45 PM:** Track B also finished the close-call prompt, the timeline regrouping, and a first draft of `docs/demo-script.md`. B's remaining work waits on Track A (the offer badge and the real `/eval` numbers) or is Sunday work (write-up, video, rehearsal). The "Demo script (draft)" section below is replaced by that file.
 - **1:45 PM:** AGNTCY is a go. Track A serves the roster over NATS, with in-process fallback. No schema change for Track B.
 - **1:30 PM:** Track B finished its first three blocks early (Counterfactual, clean-up, Evidence page). Next up for B: ask-the-human and timeline polish, then the demo script.
-- **1:15 PM:** Split the remaining work into Track A (backend, agents, evidence) and Track B (frontend, demo, write-ups), with separate file ownership, agreed contracts for `/eval` and offers, and shared sync points. Added an Evidence page, and an AGNTCY-plus-baseline block for A.
+- **1:15 PM:** Split the remaining work into Track A (backend, teagents, evidence) and Track B (frontend, demo, write-ups), with separate file ownership, agreed contracts for `/eval` and offers, and shared sync points. Added an Evidence page, and an AGNTCY-plus-baseline block for A.
 
 - **1:10 PM:** The plan moved into this file (`docs/PLAN.md`) so the team can edit it on GitHub.
 - **12:50 PM:**
-  - Single recommendation → top 3 plus a learning Preference agent.
-  - Added a Budget agent (cost).
+  - Single recommendation → top 3 plus a learning Preference teagent.
+  - Added a Budget teagent (cost).
   - Shops verify rather than propose.
   - Ask-human gap went from 0.05 to 0.02, since a bigger gap fired too often.
   - Counterfactual moved up the cut list.

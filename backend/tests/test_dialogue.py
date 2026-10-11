@@ -142,7 +142,7 @@ def _registry() -> Registry:
     registry.register(
         AgentCardInfo(
             id="shop_kungfu",
-            name="Kung Fu Tea Co. agent",
+            name="Kung Fu Tea Co. teagent",
             description="Confirms what is in stock.",
             capabilities=["availability"],
             shop_id="kungfu",

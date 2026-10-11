@@ -1,8 +1,8 @@
 """Onboarding quiz: six questions mapped to a starting taste profile and priorities.
 
 The mapping is fixed code, like every other number in TeaLink. The taste
-profile seeds the Taste, Social, and Explorer agents for a user with no
-reviews. The weights are the Preference agent's prior, and picks are learned
+profile seeds the Taste, Social, and Explorer teagents for a user with no
+reviews. The weights are the Preference teagent's prior, and picks are learned
 on top of them.
 """
 

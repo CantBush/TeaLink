@@ -40,7 +40,7 @@ export function agentKind(agentId: string): AgentKind {
   return agentId in CORE ? (agentId as AgentKind) : "shop";
 }
 
-/** Name and description for an agent, preferring what the backend sent when it sends one. */
+/** Name and description for a teagent, preferring what the backend sent when it sends one. */
 export function agentInfo(agentId: string, fromBackend?: { name?: unknown; description?: unknown }): AgentInfo {
   const kind = agentKind(agentId);
   const base =
@@ -52,7 +52,7 @@ export function agentInfo(agentId: string, fromBackend?: { name?: unknown; descr
       : CORE[kind];
   return {
     kind,
-    name: typeof fromBackend?.name === "string" ? fromBackend.name.replace(/ agent$/, "") : base.name,
+    name: typeof fromBackend?.name === "string" ? fromBackend.name.replace(/ (?:te)?agent$/, "") : base.name,
     description: typeof fromBackend?.description === "string" ? fromBackend.description : base.description,
   };
 }

@@ -1,4 +1,4 @@
-"""Non-agent baseline: the most-reviewed in-stock drink the user has not tried."""
+"""Non-teagent baseline: the most-reviewed in-stock drink the user has not tried."""
 
 from __future__ import annotations
 

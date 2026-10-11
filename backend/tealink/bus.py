@@ -1,7 +1,7 @@
 """NATS subjects that are not part of the HTTP API.
 
 The frontend never sees these. Deliberation still travels as A2A on
-``tealink.<agent id>`` (see ``agents.cards``). Heartbeats and demo control
+``tealink.<teagent id>`` (see ``agents.cards``). Heartbeats and demo control
 (shop join, shop offline, reset) use the two subjects below so the gateway
 can keep the registry honest without a schema change.
 """

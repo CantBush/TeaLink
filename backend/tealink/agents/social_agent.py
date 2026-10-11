@@ -1,4 +1,4 @@
-"""Social agent: drinks the user's most similar neighbors rated highly."""
+"""Social teagent: drinks the user's most similar neighbors rated highly."""
 
 from __future__ import annotations
 

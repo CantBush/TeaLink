@@ -8,14 +8,14 @@ import { sampleEval } from "../mocks/sample.ts";
 
 const METHOD_LABELS: Record<EvalMethodName, string> = {
   popularity: "Most popular drink",
-  fixed_weights: "Agent team, fixed priorities",
-  learning: "Agent team, learned priorities",
+  fixed_weights: "Teagent team, fixed priorities",
+  learning: "Teagent team, learned priorities",
 };
 
 const METHOD_NOTES: Record<EvalMethodName, string> = {
   popularity: "Baseline: recommends the most-reviewed in-stock drink the user hasn't tried.",
-  fixed_weights: "Same agents, but every user gets the default priorities.",
-  learning: "The Preference agent updates priorities after every pick.",
+  fixed_weights: "Same teagents, but every user gets the default priorities.",
+  learning: "The Preference teagent updates priorities after every pick.",
 };
 
 function Bar({ value, tone }: { value: number; tone: "strong" | "soft" }) {
@@ -132,14 +132,14 @@ export function Evidence() {
         </table>
         <p className="mt-3 text-xs text-mute">
           Small sample: early evidence, not a benchmark. No recommender ever suggested a sold-out drink, because the
-          shop agents veto them.
+          shop teagents veto them.
         </p>
       </section>
 
       <RoundTrace />
 
       <section className="space-y-3">
-        <h2 className="font-display text-2xl">Hidden priorities vs what the Preference agent learned</h2>
+        <h2 className="font-display text-2xl">Hidden priorities vs what the Preference teagent learned</h2>
         <p className="text-sm text-mute">
           Learned from {result.rounds} picks alone. Each priority keeps at least 5%, so none is ever ignored.
         </p>
@@ -167,7 +167,7 @@ export function Evidence() {
             </article>
           ))}
         </div>
-        <p className="text-xs text-mute">Grey: each simulated person's hidden priority. Green: what the agent learned from their picks alone.</p>
+        <p className="text-xs text-mute">Grey: each simulated person's hidden priority. Green: what the teagent learned from their picks alone.</p>
       </section>
     </main>
   );
