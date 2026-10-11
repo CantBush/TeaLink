@@ -24,6 +24,15 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## Done
 
+### Ordering fixes and tags (Emily, Track B rows 1, 2, 3, and 6 of the Sun 10:55 AM plan)
+
+Browser-checked over AGNTCY. Demo numbers unchanged: ordering Pearl from the top 3 still gives Thai Tea 79, Wintermelon 75, Pearl 73, taste 45%.
+
+- **Ordering from the top 3.** The order sheet now lives outside the top 3 cards, so the round that re-runs after an order no longer unmounts it. "Order placed" stays up through the re-run, and **Done** closes the sheet.
+- **Past orders on the profile.** Highlights took the first 3 visible stats before dropping retired ones, so past orders never showed on your own profile. Past orders now have their own "recent orders" section on any profile that shares them, newest first, with the drink photo, shop, and date. Track A row 1 is already served: an order placed in the app comes back first in `stats.past_orders`.
+- **Loading animation.** `components/Loading.tsx`: the logo's cups swing apart and clink, with sparks on contact. It's used for every page, sheet, and shop loading state, the top 3 while it steeps, the chat while the agents are called, and the quiz. With reduced motion, it rests on the static logo.
+- **Post tags.** `components/ShopSearch.tsx`: type a shop name, and suggestions come up ranked by name match (starts with, then a word starts with, then contains, then the letters in order). After picking a shop, you can tag one of its drinks or leave it at the shop. Ordering ties by popularity waits on `Shop.popularity` (Track A row 6). `ShopSearch` is also meant for the quiz's favorites question.
+
 ### More of the Cisco challenge (Emily, Track B rows 1, 2, 3, and 10 of the Sun 10:00 AM plan, on Andrew's 6266d66)
 
 Browser-checked over AGNTCY against Andrew's stop, start, and trace routes. Off by default; after Reset demo the round still opens at Thai Tea 78, Wintermelon 77, Pearl 71.
@@ -216,6 +225,11 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Known issues and decisions to revisit
 
+- **For Andrew (from Track B Sun 11:20 AM).** Track B rows 4, 5, 7, and 8 of the 10:55 AM plan need your side first, so they haven't been started:
+  - Quiz chooser and full quiz (B4, B5): `GET /quiz?kind=full`, the `"favorites"` question kind, and `POST /quiz` with `kind` and `favorites` (A2, A3).
+  - Rating past orders (B7): `PATCH /orders/{id}` with `rating`, and `Order.rating` / `PastOrder.rating` (A5).
+  - The "recent orders count more" copy (B8): recency (A4), so the copy describes what the agents actually do.
+  - Popularity ordering in shop suggestions (rest of B6): `Shop.popularity` (A6).
 - **For Andrew (Cisco rows, from Track B Sun 10:35 AM).** Your stop, start, `agent_lost`, `missing_agents`, and trace routes are wired in and browser-checked. Notes:
   - Trace times look queued: in one round they climb 4, 9, 13 … 23 ms in call order, so `started` is probably taken before `AgntcyTransport._send_lock` is acquired. Starting the timer inside the lock would show each agent's own time. The frontend just draws what you send.
   - The browser fallback for stopping a core agent now matches your scoring (the missing priority scores 0, weights unchanged), so both give Pearl 0.49 with Budget stopped.

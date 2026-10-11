@@ -948,12 +948,12 @@ PastOrder.rating?: number | null                     // only on your own profile
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Ordering from a top 3 card: the confirmation always shows, and **Done** closes the sheet, even while the next round re-runs | Ordering Pearl from today's picks shows "order placed", Done closes it, and the new top 3 shows |
-| 2 | ⬜ Past orders on the profile: render `stats.past_orders` when the toggle is on (drink, shop, date), on your own and others' profiles, with an empty state | Turning the toggle on shows your recent orders, including one you just placed |
-| 3 | ⬜ Clinking loading animation: the two hands and cups from the logo cheers in a loop, used for every loading state; a still logo for reduced motion | Every loading state shows the clink |
+| 1 | ✅ Ordering from a top 3 card: the confirmation always shows, and **Done** closes the sheet, even while the next round re-runs | Ordering Pearl from today's picks shows "order placed", Done closes it, and the new top 3 shows |
+| 2 | ✅ Past orders on the profile: render `stats.past_orders` when the toggle is on (drink, shop, date), on your own and others' profiles, with an empty state | Turning the toggle on shows your recent orders, including one you just placed |
+| 3 | ✅ Clinking loading animation: the two hands and cups from the logo cheers in a loop, used for every loading state; a still logo for reduced motion | Every loading state shows the clink |
 | 4 | ⬜ Quiz chooser: after **Start the quiz** on the customer route, pick **Basic** (six questions, about a minute) or **Full** (more detail, better picks), in the onboarding style. **Retake quiz** on the profile offers both | Both entry points offer both quizzes, and each runs its own questions |
 | 5 | ⬜ Full quiz screens, including the favorites question: type a shop name with suggestions, pick it, then pick drinks from its menu; add another shop; remove any. Sends `kind` and `favorites` | A full quiz with two favorite shops submits, and the result screen opens |
-| 6 | ⬜ Post tags: one tag field where you type a shop name, with suggestions closest first and then by popularity. After choosing a shop, you can tag one of its drinks, or leave it at the shop | You can't tag a drink without its shop, and typing "kung" suggests Kung Fu Tea Co. first |
+| 6 | 🟡 Post tags: one tag field where you type a shop name, with suggestions closest first and then by popularity. After choosing a shop, you can tag one of its drinks, or leave it at the shop | You can't tag a drink without its shop, and typing "kung" suggests Kung Fu Tea Co. first |
 | 7 | ⬜ Rate past orders 0–5 on the Orders page once picked up, and on your own profile's order history; a rated order shows its stars. The chat notes the next round used it ("You rated Pearl Milk Tea 1/5.") | Rating an order is saved, and the next round reflects it |
 | 8 | ⬜ Copy: "recent orders count more" and "your ratings count" on Why this order and the quiz result. Update `demo-script.md` if A's numbers change, and PROGRESS | The copy matches what the agents do, and the script numbers still match a real run |
 
