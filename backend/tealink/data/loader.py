@@ -48,6 +48,25 @@ class Catalog:
     def drink(self, drink_id: str) -> Drink | None:
         return self.drinks_by_id.get(drink_id)
 
+    def add_drink(self, drink: Drink) -> None:
+        if drink.id in self.drinks_by_id:
+            raise ValueError("drink already exists")
+        self.drinks.append(drink)
+        self.drinks_by_id[drink.id] = drink
+
+    def replace_drink(self, drink: Drink) -> None:
+        if drink.id not in self.drinks_by_id:
+            raise ValueError("drink not found")
+        self.drinks_by_id[drink.id] = drink
+        self.drinks = [drink if item.id == drink.id else item for item in self.drinks]
+
+    def remove_drink(self, drink_id: str) -> Drink | None:
+        drink = self.drinks_by_id.pop(drink_id, None)
+        if drink is None:
+            return None
+        self.drinks = [item for item in self.drinks if item.id != drink_id]
+        return drink
+
     def shop(self, shop_id: str) -> Shop | None:
         return self.shops_by_id.get(shop_id)
 

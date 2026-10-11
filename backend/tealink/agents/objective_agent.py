@@ -123,6 +123,8 @@ class ObjectiveAgent(BaseAgent):
     def _propose(self, request: DeliberationRequest, catalog: Catalog, ctx: Any) -> list[Proposal]:
         scored = []
         for drink in catalog.drinks:
+            if request.max_price is not None and drink.price > request.max_price:
+                continue
             if not self.eligible(request, catalog, drink, ctx):
                 continue
             score, detail = self.objective(request, catalog, drink, ctx)

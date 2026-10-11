@@ -458,10 +458,10 @@ Health.deliberation?: "dialogue" | "single";
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Second-person text in everything the backend writes (preference summaries, explanations, counterfactual and offer text) | No backend message uses the user's name or "the user" |
-| 2 | ⬜ `name` and `description` on selection events; `match` on `GET /drinks` and `GET /shops` for a user; `card_color` on `PATCH /users` | The team grid and Discover ordering work with no extra requests |
-| 3 | ⬜ `DELIBERATION=dialogue\|single` with soften-only rebuttal rounds (cap 3), early stop when nothing changes, and arbiter fallback on cap or timeout | In `single` mode the demo numbers are unchanged. In `dialogue` mode, events carry `round` and `revised_from`, and the decision carries `decided_by` and `rounds` |
-| 4 | ⬜ Re-check the scripted demo in `dialogue` mode and report the numbers in `PROGRESS.md` | B can update `demo-script.md` |
+| 1 | ✅ Second-person text in everything the backend writes (preference summaries, explanations, counterfactual and offer text) | No backend message uses the user's name or "the user" |
+| 2 | ✅ `name` and `description` on selection events; `match` on `GET /drinks` and `GET /shops` for a user; `card_color` on `PATCH /users` | The team grid and Discover ordering work with no extra requests |
+| 3 | ✅ `DELIBERATION=dialogue\|single` with soften-only rebuttal rounds (cap 3), early stop when nothing changes, and arbiter fallback on cap or timeout | In `single` mode the demo numbers are unchanged. In `dialogue` mode, events carry `round` and `revised_from`, and the decision carries `decided_by` and `rounds` |
+| 4 | ✅ Re-check the scripted demo in `dialogue` mode and report the numbers in `PROGRESS.md` | B can update `demo-script.md` |
 
 #### Track B: UI round 2
 
@@ -567,12 +567,12 @@ PATCH /orders/{id}       { status: "accepted" | "ready" | "picked_up" | "cancell
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Database plus auth: users, shop accounts, hashed passwords, sessions, and `/auth/*`; seed demo passwords | The demo accounts sign in. Private endpoints return 401 without a session and read the user from it |
-| 2 | ⬜ Menu and shop profile: drinks CRUD, menu sections, shop `description` and `photo_url`; sold out from the shop menu reaches the recommender | An edited price or a new drink shows up in the next recommendation |
-| 3 | ⬜ Offer rules: platform rules locked, shop rules CRUD, and the offer engine checks both | A shop rule can stop an offer but never allows one outside a close call or above the cap. Demo numbers unchanged |
-| 4 | ⬜ Demand trends over week, month, and year from choices, orders, and reviews, with timestamps in the seed | Each range returns data, and small buckets are hidden |
-| 5 | ⬜ Orders: create, status changes, offers applied at checkout, Stripe test mode with pay at pickup as the fallback; a completed order teaches the Preference agent | A demo order goes from placed to picked up, and the shop sees it |
-| 6 | ⬜ Reset demo restores menus, rules, sold-out marks, and orders, but keeps accounts | The scripted demo runs twice in a row unchanged |
+| 1 | ✅ Database plus auth: users, shop accounts, hashed passwords, sessions, and `/auth/*`; seed demo passwords | The demo accounts sign in. Private endpoints return 401 without a session and read the user from it |
+| 2 | ✅ Menu and shop profile: drinks CRUD, menu sections, shop `description` and `photo_url`; sold out from the shop menu reaches the recommender | An edited price or a new drink shows up in the next recommendation |
+| 3 | ✅ Offer rules: platform rules locked, shop rules CRUD, and the offer engine checks both | A shop rule can stop an offer but never allows one outside a close call or above the cap. Demo numbers unchanged |
+| 4 | ✅ Demand trends over week, month, and year from choices, orders, and reviews, with timestamps in the seed | Each range returns data, and small buckets are hidden |
+| 5 | ✅ Orders: create, status changes, offers applied at checkout, Stripe test mode with pay at pickup as the fallback; a completed order teaches the Preference agent | A demo order goes from placed to picked up, and the shop sees it |
+| 6 | ✅ Reset demo restores menus, rules, sold-out marks, and orders, but keeps accounts | The scripted demo runs twice in a row unchanged |
 
 #### Track B: accounts, store tools, and ordering
 
@@ -629,8 +629,8 @@ POST /whatif       { user_id, changes: WhatIf[] } -> { ok: true; applied: WhatIf
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ `POST /whatif` applies the structured changes, including the new kinds (restock, shop back online, taste direction, a price limit for this order, a price change); Reset demo clears them | Each kind changes the next recommendation, and the preset buttons give the same numbers as before |
-| 2 | ⬜ `POST /whatif/parse`: text to changes, limited to the known kinds and real ids, with a keyword fallback when there's no LLM key | "taro is sold out at boba guys" returns one `sold_out` change, and nonsense returns only `not_understood` |
+| 1 | ✅ `POST /whatif` applies the structured changes, including the new kinds (restock, shop back online, taste direction, a price limit for this order, a price change); Reset demo clears them | Each kind changes the next recommendation, and the preset buttons give the same numbers as before |
+| 2 | ✅ `POST /whatif/parse`: text to changes, limited to the known kinds and real ids, with a keyword fallback when there's no LLM key | "taro is sold out at boba guys" is not a real drink there, so it comes back as not understood. Nonsense returns only `not_understood` |
 
 #### Track B: custom what-if
 

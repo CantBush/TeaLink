@@ -224,6 +224,8 @@ class DeliberationRequest(BaseModel):
     prior_weights: dict[str, float] | None = None
     # Latest objections from every agent. Revise is stateless, so the prior stance travels here.
     peer_objections: list[Objection] = Field(default_factory=list)
+    # This order only. Drinks above it are not proposed.
+    max_price: float | None = None
 
 
 class AgentReply(BaseModel):

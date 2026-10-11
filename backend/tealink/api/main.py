@@ -23,6 +23,7 @@ from tealink.agents.roster import default_agents
 from tealink.agents.scoring import score_drink, user_profile
 from tealink.agents.shop_agent import ShopAgent
 from tealink.api import social
+from tealink.api.storefront import router as storefront_router
 from tealink.concierge.deliberation import deliberate
 from tealink.concierge.registry import Registry
 from tealink.concierge.transport import AgntcyTransport, LocalTransport
@@ -93,6 +94,13 @@ class Runtime:
     preferences: dict[str, dict[str, float]] = field(default_factory=dict)
     offline: set[str] = field(default_factory=set)
     last_decision: dict[str, Decision] = field(default_factory=dict)
+    menus: dict = field(default_factory=dict)
+    drink_meta: dict = field(default_factory=dict)
+    shop_profiles: dict = field(default_factory=dict)
+    offer_rules: dict = field(default_factory=dict)
+    offer_log: list = field(default_factory=list)
+    orders: list = field(default_factory=list)
+    max_price: dict[str, float] = field(default_factory=dict)
 
 
 def get_runtime() -> Runtime:
@@ -114,6 +122,9 @@ def _build_runtime() -> Runtime:
         by_id[card.id] = agent
     settings = get_settings()
     local = LocalTransport(by_id, catalog)
+    from tealink.auth import store as accounts
+
+    accounts.ensure()
     if settings.transport == "agntcy":
         transport: LocalTransport | AgntcyTransport = AgntcyTransport(settings.nats_url, fallback=local)
     else:
@@ -169,7 +180,7 @@ def drinks(user: str | None = None) -> list[dict]:
             "shop_id": drink.shop_id,
             "price": drink.price,
             "flavor_tags": drink.flavor_tags,
-            "photo_url": None,
+            "photo_url": runtime.drink_meta.get(drink.id, {}).get("photo_url"),
             "match": None if matches is None else matches[drink.id],
         }
         for drink in runtime.catalog.drinks
@@ -197,7 +208,8 @@ def shops(user: str | None = None) -> list[dict]:
             "id": shop.id,
             "name": shop.name,
             "neighborhood": shop.neighborhood,
-            "photo_url": None,
+            "description": runtime.shop_profiles.get(shop.id, {}).get("description", ""),
+            "photo_url": runtime.shop_profiles.get(shop.id, {}).get("photo_url"),
             "match": None if matches is None else best.get(shop.id, 0.0),
         }
         for shop in runtime.catalog.shops
@@ -265,6 +277,11 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
     overrides = dict(runtime.preferences.get(body.user_id, {}))
     overrides.update(body.preference_overrides)
 
+    from tealink.store.rules import constrain
+
+    def offer_gate(shop_id: str, drink_id: str, offer):
+        return constrain(runtime, shop_id, drink_id, offer)
+
     async def events():
         async for event in deliberate(
             registry=runtime.registry,
@@ -277,6 +294,8 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
             prior_weights=social.prior_weights(runtime, body.user_id),
             price_low=min(drink.price for drink in runtime.catalog.drinks),
             price_high=max(drink.price for drink in runtime.catalog.drinks),
+            max_price=runtime.max_price.get(body.user_id),
+            offer_gate=offer_gate,
         ):
             if event.type == LensEventType.decision:
                 runtime.last_decision[body.user_id] = Decision.model_validate(event.payload)
@@ -452,6 +471,7 @@ def _on_remote_heartbeat(runtime: Runtime, agent_id: str) -> None:
 
 
 app.include_router(social.router)
+app.include_router(storefront_router)
 
 
 def _local_agent_map(runtime: Runtime) -> dict:

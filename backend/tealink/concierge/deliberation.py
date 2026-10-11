@@ -47,6 +47,8 @@ async def deliberate(
     prior_weights: dict[str, float] | None = None,
     price_low: float | None = None,
     price_high: float | None = None,
+    max_price: float | None = None,
+    offer_gate=None,
 ) -> AsyncIterator[LensEvent]:
     log = recorder or LensRecorder()
     seq = 1
@@ -93,6 +95,7 @@ async def deliberate(
         preference_overrides=overrides,
         sold_out_drink_ids=sold_out,
         prior_weights=prior_weights,
+        max_price=max_price,
     )
     propose_replies = await transport.broadcast(cards, propose)
 
@@ -188,7 +191,7 @@ async def deliberate(
     decision = resolve(proposals, objections, weights=weights, confirmed_shop_ids=confirmed_shops)
     decision = decision.model_copy(update={"decided_by": decided_by, "rounds": rebuttals})
     if price_low is not None and price_high is not None:
-        offered = await _ask_for_offer(decision, registry, transport, user_id, query)
+        offered = await _ask_for_offer(decision, registry, transport, user_id, query, offer_gate)
         if offered is not None:
             reply, runner = offered
             yield emit(
@@ -337,7 +340,7 @@ def _listing(items: list[str]) -> str:
     return shown + (f" (+{extra} more)" if extra > 0 else "")
 
 
-async def _ask_for_offer(decision, registry, transport, user_id: str, query: str):
+async def _ask_for_offer(decision, registry, transport, user_id: str, query: str, offer_gate=None):
     """In a near-tie between two shops, ask the trailing shop for a discount."""
     options = decision.options
     if not decision.ask_human or len(options) < 2 or options[0].shop_id == options[1].shop_id:
@@ -362,6 +365,11 @@ async def _ask_for_offer(decision, registry, transport, user_id: str, query: str
     )
     if reply.offer is None:
         return None
+    if offer_gate is not None:
+        adjusted = offer_gate(runner.shop_id, runner.drink_id, reply.offer)
+        if adjusted is None:
+            return None
+        reply = reply.model_copy(update={"offer": adjusted})
     return reply, runner
 
 

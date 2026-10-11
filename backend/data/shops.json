@@ -3,36 +3,42 @@
     "id": "kungfu",
     "name": "Kung Fu Tea Co.",
     "neighborhood": "Inner Sunset",
-    "online": true
+    "online": true,
+    "promo_budget": 1.0
   },
   {
     "id": "sunright",
     "name": "Sunright Tea Studio",
     "neighborhood": "Mission",
-    "online": true
+    "online": true,
+    "promo_budget": 1.0
   },
   {
     "id": "tigersugar",
     "name": "Tiger Sugar Lab",
     "neighborhood": "SoMa",
-    "online": true
+    "online": true,
+    "promo_budget": 1.0
   },
   {
     "id": "boba_guys",
     "name": "Boba Guys",
     "neighborhood": "Hayes Valley",
-    "online": true
+    "online": true,
+    "promo_budget": 1.0
   },
   {
     "id": "sharetea",
     "name": "Sharetea Lounge",
     "neighborhood": "Richmond",
-    "online": true
+    "online": true,
+    "promo_budget": 1.0
   },
   {
     "id": "lantern_leaf",
     "name": "Lantern Leaf",
     "neighborhood": "Outer Sunset",
-    "online": false
+    "online": false,
+    "promo_budget": 1.0
   }
 ]
