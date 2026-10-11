@@ -636,9 +636,11 @@ POST /whatif       { user_id, changes: WhatIf[] } -> { ok: true; applied: WhatIf
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Change builder on at the counter: kind, then target from real lists; stack several; apply runs one re-plan | A custom sold-out and a taste change both show up in the chat and the new top 3 |
-| 2 | ⬜ Text box: parse, show the changes as chips to confirm or remove, and show what wasn't understood | Nothing runs until you confirm |
-| 3 | ⬜ Keep the five presets as chips, and make sure the demo script still matches | The scripted demo is unchanged |
+| 1 | ✅ Change builder on at the counter: kind, then target from real lists; stack several; apply runs one re-plan | A custom sold-out and a taste change both show up in the chat and the new top 3 |
+| 2 | ✅ Text box: parse, show the changes as chips to confirm or remove, and show what wasn't understood | Nothing runs until you confirm |
+| 3 | ✅ Keep the five presets as chips, and make sure the demo script still matches | The scripted demo is unchanged |
+
+Until `POST /whatif` is served, the frontend applies sold out, shop offline, shop joins or back online, avoid, and taste through the existing event routes. Restock, a price limit, and a price change are listed as "not applied yet". Until `POST /whatif/parse` is served, the same keyword matcher runs in the browser (`frontend/src/lib/whatif.ts`).
 
 ### Sync points
 
@@ -692,6 +694,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## Plan change log
 
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
+- **9:05 PM:** Track B finished its three custom what-if rows: a text box with confirm chips, a change builder, and the presets unchanged.
 - **8:50 PM:** Track B finished its seven "Accounts, store tools, and ordering" rows on in-browser mocks, including sign-in, the shop pages, and pickup orders. Reset demo now keeps whoever is signed in.
 - **8:15 PM:** Added "Accounts, store tools, and ordering":
   - Real sign in, with no default profile before it, and no access without an account. The demo keeps one-tap demo account buttons.

@@ -407,6 +407,23 @@ export interface ShopProfilePatch {
   photo_url?: string | null;
 }
 
+/* Custom what-if. Contract in docs/PLAN.md, "Custom what-if at the counter". */
+
+export type WhatIf =
+  | { kind: "sold_out" | "restock"; drink_id: string }
+  | { kind: "shop_offline" | "shop_online" | "shop_join"; shop_id: string }
+  | { kind: "avoid"; tag: string }
+  | { kind: "taste"; attribute: TasteAttribute; direction: "more" | "less" }
+  | { kind: "max_price"; dollars: number }
+  | { kind: "price"; drink_id: string; dollars: number };
+
+export type WhatIfKind = WhatIf["kind"];
+
+export interface WhatIfParse {
+  changes: WhatIf[];
+  not_understood: string[];
+}
+
 /* Orders. Request and receipt are from the contract; the full Order shape is B's proposal (see PROGRESS.md). */
 
 export type OrderStatus = "placed" | "accepted" | "ready" | "picked_up" | "cancelled";
