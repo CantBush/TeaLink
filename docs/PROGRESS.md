@@ -24,6 +24,15 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## Done
 
+### More of the Cisco challenge (Emily, Track B rows 1, 2, 3, and 10 of the Sun 10:00 AM plan, on Andrew's 6266d66)
+
+Browser-checked over AGNTCY against Andrew's stop, start, and trace routes. Off by default; after Reset demo the round still opens at Thai Tea 78, Wintermelon 77, Pearl 71.
+
+- **Kill an agent.** Tap an agent in the team grid on at the counter, then **Stop** or **Bring back** (`POST /agents/{id}/stop|start`). A stopped agent is greyed out with a slash, the chat shows "You stopped Budget." and the server's `agent_lost` line, and the decision says "without budget" plus what it cost ("Nobody spoke for price, so it counted for nothing this round", or "Kung Fu Tea couldn't confirm stock, so its drinks were ruled out"). Checked: stopping Budget makes Pearl #1 at 0.49 (price scores 0), bringing it back restores Thai Tea 0.78, stopping Kung Fu Tea makes Wintermelon #1 at 0.77, and Reset demo brings everyone back. Against an older API without the routes, a shop uses shop-offline and a core agent is left out in the browser by `lib/withoutAgents.ts`, which now scores the same way as the server.
+- **Trace.** "Inside the last round" on the Evidence page reads `GET /trace/{session_id}`, using the `session_id` on the round's events. It shows the call count over AGNTCY, retries, and fallbacks, then one bar per call grouped by round (opening picks, round 1, rebuttals, the close-call offer), and which stopped agents weren't called. A saved round, or an API without traces, shows browser-measured phase times and each agent's transport from `/health` instead.
+- **Critic.** A switch under the what-if buttons. With it on, the Critic challenges the #1 with the runner-up's strongest point, and the arbiter answers in the chat ("Wintermelon beats it on price: 90 vs 70" … "too close to call, so you get the final say"). The request sends `critic: true`. If the API sends its own `critique` event, the frontend shows that one; otherwise `lib/critic.ts` builds one from the decision's real scores, and it never changes the pick.
+- **Demo and write-up.** An optional 30-second Cisco segment in `demo-script.md` (kill Budget, the Critic, the trace), judge Q&A for failure, identity, directory, observability, and the Critic, and three Level 3 rows in `writeup.md`. The Q&A says plainly which parts run in the browser for now.
+
 ### Profile photos and rec rules (Andrew)
 
 Track B mirrors this in `frontend/src/api/types.ts`. Demo scores are unchanged (Thai Tea 78, Wintermelon 77, Pearl 71; ordering Pearl is taste 45%, price 36%, Pearl 73).
@@ -207,6 +216,10 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Known issues and decisions to revisit
 
+- **For Andrew (Cisco rows, from Track B Sun 10:35 AM).** Your stop, start, `agent_lost`, `missing_agents`, and trace routes are wired in and browser-checked. Notes:
+  - Trace times look queued: in one round they climb 4, 9, 13 … 23 ms in call order, so `started` is probably taken before `AgntcyTransport._send_lock` is acquired. Starting the timer inside the lock would show each agent's own time. The frontend just draws what you send.
+  - The browser fallback for stopping a core agent now matches your scoring (the missing priority scores 0, weights unchanged), so both give Pearl 0.49 with Budget stopped.
+  - `RecommendRequest.critic?: boolean` is sent on every round (Pydantic ignores it today). When it's true, emit one `critique` event before the decision, with `{ drink_id, weakest_reason, answered, changed_pick }`, and optionally `reply` for the arbiter's answer. The message is the Critic's line. The frontend skips its own Critic when it sees one.
 - **For Track A (accounts, store tools, and ordering, from Track B 8:50 PM).** The frontend calls the contract routes in `PLAN.md` first, with `credentials: "include"` (CORS already allows credentials from :5173). It falls back to its mock only when a route answers 404 with detail exactly "Not Found", or 405, so return a different `detail` for a real 404 such as an unknown drink. Small differences from the contract it already expects:
   - **Auth:** seed `andrew@tealink.demo` (user `andrew`) and `sunright@tealink.demo` (shop `sunright`), both with password `boba`; the buttons on `/welcome` use these. Responses include `email`. Customer sign-up first creates the profile with `POST /users`, then sends `user_id` in `POST /auth/signup`.
   - **Menu:** `GET /shops/{id}/menu` returns `{ drinks: ShopDrink[], sections }`, where `ShopDrink` is `DrinkInput` plus `id`, `shop_id`, and `available`. Sold out also calls `/events/sold-out` today; restock needs your `PATCH .../drinks/{id} { available: true }` to reach the recommender.

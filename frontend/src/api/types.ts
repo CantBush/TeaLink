@@ -101,6 +101,8 @@ export interface Decision {
   decided_by?: "agents" | "arbiter";
   /** Planned: rebuttal rounds that ran before the decision. */
   rounds?: number;
+  /** Agents stopped for this round; the arbiter decided without them. */
+  missing_agents?: string[];
 }
 
 export interface PreferenceReport {
@@ -124,7 +126,9 @@ export type LensEventType =
   | "decision"
   | "status"
   | "preference"
-  | "offer";
+  | "offer"
+  | "agent_lost"
+  | "critique";
 
 export interface LensEvent {
   type: LensEventType;
@@ -133,6 +137,8 @@ export interface LensEvent {
   /** Planned extras: `round` (1-based) and `revised_from` on objections that soften in a rebuttal. */
   payload: Record<string, unknown>;
   seq: number;
+  /** The round's id on every event from POST /recommend; GET /trace/{session_id} serves its trace. */
+  session_id?: string | null;
 }
 
 export type EvalMethodName = "popularity" | "fixed_weights" | "learning";
@@ -159,6 +165,19 @@ export interface EvalResult {
   rounds: number;
   methods: EvalMethod[];
   personas: EvalPersona[];
+}
+
+/**
+ * One gateway-to-agent call (GET /trace/{session_id}). `round` is 0 for opening picks, 1 for the
+ * first scores, then rebuttals; the close-call offer comes last.
+ */
+export interface TraceSpan {
+  round: number;
+  agent_id: string;
+  transport: "agntcy" | "local";
+  ms: number;
+  retries: number;
+  fell_back: boolean;
 }
 
 /** GET /health. `effective` is what is actually answering: "pending" means AGNTCY is configured but not connected. */
@@ -349,6 +368,8 @@ export interface RecommendRequest {
   user_id: string;
   query: string;
   preference_overrides: Record<string, number>;
+  /** Planned: ask the Critic to challenge the #1. Older APIs ignore it. */
+  critic?: boolean;
 }
 
 /** GET /drinks. photo_url stays null until real photos exist. */

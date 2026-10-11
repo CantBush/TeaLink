@@ -1,6 +1,6 @@
 import { agentLabel } from "./format.ts";
 
-export type AgentKind = "taste" | "social" | "explorer" | "budget" | "preference" | "shop";
+export type AgentKind = "taste" | "social" | "explorer" | "budget" | "preference" | "critic" | "shop";
 
 export interface AgentInfo {
   kind: AgentKind;
@@ -28,6 +28,10 @@ const CORE: Record<Exclude<AgentKind, "shop">, Omit<AgentInfo, "kind">> = {
   preference: {
     name: "Preference",
     description: "Learns how much you care about taste, friends, trying something new, and price from every pick you make.",
+  },
+  critic: {
+    name: "Critic",
+    description: "Looks for the weakest reason behind the #1 before it's final, so the arbiter has to defend it.",
   },
 };
 

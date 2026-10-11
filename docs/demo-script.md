@@ -69,6 +69,19 @@ Switch to the **evidence** sub-tab.
 
 AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every agent is a separate service talking A2A over NATS on Cisco's AGNTCY, and if the bus goes down, the same agents answer in-process, so the demo never breaks."
 
+## Optional, if there's time: agents that fail, get traced, and get challenged (about 30 seconds)
+
+Do this after the close, or if a judge asks about failure or observability. Press **Reset demo** first, so the round opens at Thai Tea 78. Everything here is off by default.
+
+1. **Kill an agent.** In **the team** on **at the counter**, tap **Budget**, then **Stop Budget**. Its icon greys out with a slash, and the server stops it.
+   > "Agents fail. Budget just went down, and the team re-plans without it: the chat says Budget is unavailable, and the decision is marked 'without budget'. Nobody speaks for price now, so it counts for nothing, every score drops, and Pearl Milk Tea, the best taste match, moves up to #1."
+   Tap **Budget** again, then **Bring Budget back**: Thai Tea is back at 78.
+2. **The Critic.** Flip the **Critic** switch under the what-if buttons.
+   > "Before the pick is final, a Critic looks for its weakest point: Wintermelon beats Thai Tea on price, 90 to 70. The arbiter has to answer, and here it agrees it's too close to call, so Andrew decides." Flip the switch off again.
+3. **The trace.** Open **evidence** and scroll to **inside the last round**.
+   > "Every call from the concierge to an agent is traced: how long it took, retries, and whether it went over Cisco's AGNTCY bus or fell back to in-process. Here all 20 calls went over the bus, with no retries and no fallbacks."
+   If Budget was still stopped for the last round, the trace shows 9 agents and "not called: budget".
+
 ## Optional, if there's time: besteas, the shop side, and checkout (about 40 seconds)
 
 Only do this after the close, or if a judge asks how shops fit in. It comes after every number above, so it can't change them.
@@ -85,6 +98,11 @@ Only do this after the close, or if a judge asks how shops fit in. It comes afte
 - **"How does it learn?"** Each order from the top 3 is compared with the drinks passed over. Weight moves toward the priorities where the pick scored higher. A minimum weight of 5% means no priority is ever ignored completely.
 - **"What if everything is ruled out?"** The team says so and asks the user instead of recommending something unavailable.
 - **"What's the human-in-the-loop rule?"** If the top two are within 0.02, or nothing survives, the team asks.
+- **"What happens when an agent fails?"** The server takes it out of the next round, the chat says it's unavailable, and the decision names who the arbiter decided without. A missing agent never blocks a round: its priority just counts for nothing. Stopping a shop agent rules out its drinks, because nobody can confirm stock.
+- **"How do you know which agents are trustworthy?"** Only a shop's own agent can confirm its stock, and a drink with no confirming agent is dropped. Signed identities, so a fake shop agent gets rejected, are next on the plan, not built yet.
+- **"Is the team discovered or hard-coded?"** The concierge picks agents by capability from their agent cards, and a new shop agent joins mid-session (Lantern Leaf). Publishing the cards to an AGNTCY directory is planned, not built yet.
+- **"Can you see what the agents are doing?"** Yes: the evidence page shows the server's trace of the last round, with every call's time, retries, and whether it went over AGNTCY or fell back to in-process.
+- **"Isn't the Critic just another scorer?"** It doesn't score. It argues against the #1 using the runner-up's strongest point, and the arbiter has to answer. Today it runs in the browser on the arbiter's real scores; the server-side Critic agent is planned.
 - **"Can a shop pay to win?"** No. An offer only goes out in a close call that passes the four locked platform rules, it's capped at 10% or $1, it's computed in code, and it's labelled on the card. A shop's own rules can only make offers rarer.
 
 ## Dry runs

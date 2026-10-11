@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { client } from "../api/client.ts";
 import type { EvalMethodName, EvalResult } from "../api/types.ts";
+import { RoundTrace } from "../components/RoundTrace.tsx";
 import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { DIMENSIONS, dimensionLabel, matchPercent } from "../lib/format.ts";
 import { sampleEval } from "../mocks/sample.ts";
@@ -134,6 +135,8 @@ export function Evidence() {
           shop agents veto them.
         </p>
       </section>
+
+      <RoundTrace />
 
       <section className="space-y-3">
         <h2 className="font-display text-2xl">Hidden priorities vs what the Preference agent learned</h2>

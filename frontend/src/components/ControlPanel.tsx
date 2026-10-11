@@ -7,7 +7,7 @@ import { allDrinks } from "../lib/catalog.ts";
 import { SHOP_IDS, TASTE_ORDER, attributeLabel, shopLabel } from "../lib/format.ts";
 import { noteLabel } from "../lib/stats.ts";
 import { KIND_LABEL, allFlavors, describeWhatIf, sameWhatIf } from "../lib/whatif.ts";
-import { getSession, pushStatus, rerun, resetAll } from "../state/session.ts";
+import { getSession, pushStatus, rerun, resetAll, toggleCritic, useSession } from "../state/session.ts";
 
 const button =
   "rounded-full border border-ink/15 bg-cream px-4 py-2 text-sm font-semibold disabled:opacity-40";
@@ -130,6 +130,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
   const [unclear, setUnclear] = useState<string[]>([]);
   const [skipped, setSkipped] = useState<WhatIf[]>([]);
   const [applying, setApplying] = useState(false);
+  const { critic } = useSession();
 
   const add = (changes: WhatIf[]) =>
     setPending((list) => [...list, ...changes.filter((change) => !list.some((item) => sameWhatIf(item, change)))]);
@@ -220,6 +221,24 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
         <button type="button" className={button} disabled={busy} onClick={() => void resetAll()}>
           Reset demo
         </button>
+      </div>
+      <div className="mt-4 flex w-fit items-center gap-3 text-sm">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={critic}
+          disabled={busy}
+          onClick={toggleCritic}
+          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-40 ${critic ? "bg-moss" : "bg-line"}`}
+        >
+          <span
+            className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-foam shadow transition-transform ${critic ? "translate-x-5" : ""}`}
+          />
+        </button>
+        <span>
+          <span className="font-semibold">Critic</span>
+          <span className="text-mute"> challenges the #1 before it's final</span>
+        </span>
       </div>
 
       <div className="mt-6 space-y-3 border-t border-line pt-5">

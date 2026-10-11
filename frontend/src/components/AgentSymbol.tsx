@@ -36,6 +36,14 @@ const PATHS: Record<AgentKind, ReactNode> = {
       <path d="M19 8l-2.2 5a2.3 2.3 0 0 0 4.4 0Z" />
     </>
   ),
+  critic: (
+    <>
+      <circle cx="10.5" cy="10.5" r="6" />
+      <path d="m15 15 5 5" />
+      <path d="M9 8.6a1.7 1.7 0 1 1 2.4 1.6c-.6.3-.9.7-.9 1.3" />
+      <path d="M10.5 13.6v.1" />
+    </>
+  ),
   shop: (
     <>
       <path d="M4 10v9.5h16V10" />

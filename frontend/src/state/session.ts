@@ -11,6 +11,10 @@ import type {
   TasteProfile,
 } from "../api/types.ts";
 import { social } from "../api/social.ts";
+import { startAgent, stopAgent } from "../api/agents.ts";
+import { agentInfo } from "../lib/agents.ts";
+import { critique } from "../lib/critic.ts";
+import { resolveWithout } from "../lib/withoutAgents.ts";
 import { resetCovers, resetPortraits } from "../lib/images.ts";
 import { sampleSession } from "../mocks/sample.ts";
 import { orderMock } from "../mocks/orderStore.ts";
@@ -49,7 +53,27 @@ export interface SessionState {
   started: boolean;
   running: boolean;
   round: number;
+  /** Agents taken out with "kill an agent", in the order they were stopped. */
+  stopped: string[];
+  /** The subset the API can't stop yet, so the browser leaves them out of each round. */
+  browserStopped: string[];
+  /** When each phase of the latest round first reached the browser, in ms after the round started. */
+  phases: { phase: Phase; ms: number }[];
+  /** The Critic challenges each #1 before it's final. Off by default. */
+  critic: boolean;
+  /** The latest round's id from the API, for its trace. Null for a saved round. */
+  sessionId: string | null;
 }
+
+export type Phase = "selected" | "proposed" | "scored" | "decided";
+
+const PHASE_OF: Partial<Record<LensEvent["type"], Phase>> = {
+  selection: "selected",
+  proposal: "proposed",
+  objection: "scored",
+  decision: "decided",
+};
+let roundStartedAt = 0;
 
 let state: SessionState = {
   userId: getMe(),
@@ -70,6 +94,11 @@ let state: SessionState = {
   started: false,
   running: false,
   round: 0,
+  stopped: [],
+  browserStopped: [],
+  phases: [],
+  critic: false,
+  sessionId: null,
 };
 
 const listeners = new Set<() => void>();
@@ -103,7 +132,24 @@ export function pushEvent(event: LensEvent) {
   const key = eventKey(event);
   if (seen.has(key)) return;
   seen.add(key);
+  if (event.type !== "agent_lost" && event.agent_id && state.browserStopped.includes(event.agent_id)) return;
+  if (event.type === "decision" && state.browserStopped.length > 0) {
+    const decision = resolveWithout(
+      event.payload as unknown as Decision,
+      state.proposals,
+      state.events.filter((item) => item.type === "objection"),
+      state.browserStopped,
+    );
+    event = { ...event, message: decision.explanation, payload: decision as unknown as Record<string, unknown> };
+  } else if (event.type === "decision" && state.stopped.length > 0 && !event.payload.missing_agents) {
+    event = { ...event, payload: { ...event.payload, missing_agents: state.stopped } };
+  }
   const patch: Partial<SessionState> = { events: [...state.events, event] };
+  if (event.session_id && !state.sessionId) patch.sessionId = event.session_id;
+  const phase = PHASE_OF[event.type];
+  if (phase && !state.phases.some((item) => item.phase === phase)) {
+    patch.phases = [...state.phases, { phase, ms: Math.round(performance.now() - roundStartedAt) }];
+  }
   if (event.type === "proposal") {
     patch.proposals = [...state.proposals, event.payload as unknown as Proposal];
   }
@@ -118,6 +164,13 @@ export function pushEvent(event: LensEvent) {
     patch.preferenceSummary = event.message;
   }
   set(patch);
+  if (event.type === "decision" && state.critic && !state.events.some((item) => item.type === "critique")) {
+    const challenge = critique(event.payload as unknown as Decision);
+    if (challenge) {
+      localSeq += 1;
+      pushEvent({ type: "critique", agent_id: "critic", message: challenge.message, payload: { ...challenge.payload, reply: challenge.reply }, seq: localSeq });
+    }
+  }
 }
 
 export function pushStatus(message: string) {
@@ -137,8 +190,15 @@ function replayMock() {
 }
 
 function run(note?: string) {
+  const round = state.round + 1;
+  const forThisRound = (event: LensEvent) => {
+    if (state.round === round) pushEvent(event);
+  };
+  roundStartedAt = performance.now();
   set({
-    round: state.round + 1,
+    round,
+    phases: [],
+    sessionId: null,
     events: [],
     proposals: [],
     previousDecision: state.decision ?? state.previousDecision,
@@ -155,11 +215,15 @@ function run(note?: string) {
   }
 
   void client
-    .recommend({ user_id: state.userId, query: "What should I get next?", preference_overrides: {} }, pushEvent)
+    .recommend(
+      { user_id: state.userId, query: "What should I get next?", preference_overrides: {}, critic: state.critic },
+      forThisRound,
+    )
     .catch(() => {
-      if (state.decision === null) replayMock();
+      if (state.round === round && state.decision === null) replayMock();
     })
     .finally(() => {
+      if (state.round !== round) return;
       set({ running: false });
       refreshHealth();
     });
@@ -238,7 +302,60 @@ export function switchUser() {
   loadProfile(userId);
 }
 
+/**
+ * "Kill an agent": take it out of the team, or bring it back, and re-plan. Stopping during a round
+ * abandons that round and starts the next one without the agent.
+ */
+export async function toggleAgent(agentId: string) {
+  const name = agentInfo(agentId).name;
+  const midRound = state.running;
+  if (state.stopped.includes(agentId)) {
+    try {
+      await startAgent(agentId);
+    } catch {
+      pushStatus(`${name} couldn't be brought back (the API did not answer).`);
+      return;
+    }
+    set({
+      stopped: state.stopped.filter((id) => id !== agentId),
+      browserStopped: state.browserStopped.filter((id) => id !== agentId),
+    });
+    rerun(`You brought ${name} back.`);
+    return;
+  }
+  let mode: Awaited<ReturnType<typeof stopAgent>>;
+  try {
+    mode = await stopAgent(agentId);
+  } catch {
+    pushStatus(`${name} couldn't be stopped (the API did not answer).`);
+    return;
+  }
+  set({
+    stopped: [...state.stopped, agentId],
+    browserStopped: mode === "browser" ? [...state.browserStopped, agentId] : state.browserStopped,
+  });
+  rerun(`You stopped ${name}${midRound ? " mid-round" : ""}.`);
+  if (mode === "browser") {
+    localSeq += 1;
+    pushEvent({
+      type: "agent_lost",
+      agent_id: agentId,
+      message: `${name} is unavailable, so the team will decide without it.`,
+      payload: { agent_id: agentId, reason: "stopped for this round", when: midRound ? "mid_round" : "before_round" },
+      seq: localSeq,
+    });
+  }
+}
+
+export function toggleCritic() {
+  set({ critic: !state.critic });
+  rerun(state.critic ? "The Critic joins the table and will challenge the #1." : "The Critic leaves the table.");
+}
+
 export async function resetAll() {
+  const serverStopped = state.stopped.filter((id) => !state.browserStopped.includes(id));
+  await Promise.all(serverStopped.map((id) => startAgent(id).catch(() => {})));
+  set({ stopped: [], browserStopped: [], critic: false });
   await client.resetDemo().catch(() => {});
   resetSocialMock();
   shopMock.reset();
