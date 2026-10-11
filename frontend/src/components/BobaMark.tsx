@@ -5,13 +5,12 @@
 function HandAndCup() {
   return (
     <>
-      {/* Light green tea; pearls sit in it. */}
+      {/* Light green tea, filled to the cup's rounded base. Pearls sit in it. */}
       <path
-        d="M-3.9.75C-2.15-.3.55 1.3 2.45.4 3.3 0 3.65.3 3.85.9L3.55 5.4C3.4 6.2 2.15 6.75.35 6.8-1.55 6.85-3 6.4-3.45 5.55L-3.85 1Z"
+        d="M-3.9.75C-2.15-.3.55 1.3 2.45.4 3.35-.05 3.9.35 4.4.8L4 6a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1l-.3-3L-3.9.75Z"
         fill="#8fbf96"
         stroke="none"
       />
-      <path d="M-3.75.8C-2-.15.65 1.25 3.7.85" fill="none" stroke="#e7f6ea" strokeWidth="0.6" />
       <path d="M-5.8 -7H5.8" />
       <path d="M-1 -7l-2.2 -5" />
       <path d="M5 -7l-1 13a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1l-.3-3" />
