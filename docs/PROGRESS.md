@@ -24,6 +24,15 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## Done
 
+### More of the Cisco challenge (Emily, Track B rows 1, 2, 3, and 10 of the Sun 10:00 AM plan)
+
+Browser-checked over AGNTCY. Off by default; after Reset demo the round still opens at Thai Tea 78, Wintermelon 77, Pearl 71.
+
+- **Kill an agent.** Tap an agent in the team grid on at the counter, then **Stop** or **Bring back**. A stopped agent is greyed out with a slash, the chat says it dropped out, and the decision says "without budget". The frontend calls `POST /agents/{id}/stop|start` first. Until those exist, a shop goes through the real shop-offline and shop-join routes, and a core agent is left out in the browser: its events are skipped and `lib/withoutAgents.ts` re-ranks with the same maths as `core/resolution.py`, spreading its weight over the others. Checked: stopping Budget makes Pearl #1 at 0.86, and bringing it back restores Thai Tea 0.78. Reset demo brings back every agent.
+- **Trace.** "Inside the last round" on the Evidence page shows how long each phase took (measured in the browser) and, per agent, AGNTCY bus, in-process, or fell back (from `/health`). When `GET /trace/{user_id}` answers, it shows the per-agent table instead: time, retries, and transport.
+- **Critic.** A switch under the what-if buttons. With it on, the Critic challenges the #1 with the runner-up's strongest point, and the arbiter answers in the chat ("Wintermelon beats it on price: 90 vs 70" … "too close to call, so you get the final say"). The request sends `critic: true`. If the API sends its own `critique` event, the frontend shows that one; otherwise `lib/critic.ts` builds one from the decision's real scores, and it never changes the pick.
+- **Demo and write-up.** An optional 30-second Cisco segment in `demo-script.md` (kill Budget, the Critic, the trace), judge Q&A for failure, identity, directory, observability, and the Critic, and three Level 3 rows in `writeup.md`. The Q&A says plainly which parts run in the browser for now.
+
 ### Profile photos and rec rules (Andrew)
 
 Track B mirrors this in `frontend/src/api/types.ts`. Demo scores are unchanged (Thai Tea 78, Wintermelon 77, Pearl 71; ordering Pearl is taste 45%, price 36%, Pearl 73).
@@ -207,6 +216,10 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Known issues and decisions to revisit
 
+- **For Andrew (Cisco rows, from Track B Sun 10:20 AM).** The frontend is ready for these and falls back until they're served:
+  - `GET /trace/{session_id}`: the frontend passes the user id as `session_id`. Return 404 "Not Found" (or nothing) until it exists.
+  - `POST /agents/{id}/stop|start`: the frontend already sends these. For a stopped core agent, the browser spreads its weight over the remaining priorities. If the server instead scores the missing dimension as 0, the numbers will differ from the browser fallback, so tell Emily which one you pick.
+  - `RecommendRequest.critic?: boolean` is sent on every round (Pydantic ignores it today). When it's true, emit one `critique` event before the decision, with `{ drink_id, weakest_reason, answered, changed_pick }`, and optionally `reply` for the arbiter's answer. The message is the Critic's line. The frontend skips its own Critic when it sees one.
 - **For Track A (accounts, store tools, and ordering, from Track B 8:50 PM).** The frontend calls the contract routes in `PLAN.md` first, with `credentials: "include"` (CORS already allows credentials from :5173). It falls back to its mock only when a route answers 404 with detail exactly "Not Found", or 405, so return a different `detail` for a real 404 such as an unknown drink. Small differences from the contract it already expects:
   - **Auth:** seed `andrew@tealink.demo` (user `andrew`) and `sunright@tealink.demo` (shop `sunright`), both with password `boba`; the buttons on `/welcome` use these. Responses include `email`. Customer sign-up first creates the profile with `POST /users`, then sends `user_id` in `POST /auth/signup`.
   - **Menu:** `GET /shops/{id}/menu` returns `{ drinks: ShopDrink[], sections }`, where `ShopDrink` is `DrinkInput` plus `id`, `shop_id`, and `available`. Sold out also calls `/events/sold-out` today; restock needs your `PATCH .../drinks/{id} { available: true }` to reach the recommender.

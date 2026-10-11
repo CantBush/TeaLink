@@ -19,6 +19,9 @@ The user gets a **top 3** instead of a single answer. Each pick is both a decisi
 | Explaining decisions | Live timeline, the Why this order page (score × weight), and the What changed before/after |
 | *Level 3:* comparison with a simpler baseline | The Evidence page: learned priorities 7/24 hits, fixed priorities 5/24, popularity 2/24 |
 | *Level 3:* human in the loop | A near-tie or an empty result produces a prompt over the top 3 that explains the trade-off |
+| *Level 3:* failure handling | Tap an agent in the team grid to stop it. The team re-plans without it, the decision says "without budget", and the arbiter explains how it spread that agent's share of the priorities. Stopped shops go through the real shop-offline route; core agents are left out by the browser until the API's stop route lands |
+| *Level 3:* observability | The Evidence page shows the last round's trace: how long each phase took, and which agents answered over the AGNTCY bus, which ran in-process, and which fell back |
+| *Level 3:* adversarial check | With the Critic switched on, it challenges the #1 with its weakest point against the runner-up ("Wintermelon beats it on price: 90 vs 70"), and the arbiter answers it in the chat. For now the Critic runs in the browser on the arbiter's real scores |
 
 ## Architecture ✏️ (Track A)
 

@@ -878,16 +878,16 @@ POST /groups/{id}/recommend -> Decision & { compromise: { user_id: string; gave_
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ "Kill an agent" on at the counter: tap an agent in the team grid to stop or restart it; a greyed-out icon, the `agent_lost` message in the chat, and "decided without Budget" on the decision | Stopping Budget mid-session is visible in the grid, the chat, and the decision |
-| 2 | ⬜ Trace view on the Evidence page: per-round bars of agent latency, retries, and fallbacks, labelled by transport | The latest round's trace renders, with a saved trace when the API is down |
-| 3 | ⬜ Critic in the chat: its message, and whether the arbiter answered it or changed the pick. A Critic switch next to the what-if buttons | Turning the Critic on adds its message and the outcome |
+| 1 | ✅ "Kill an agent" on at the counter: tap an agent in the team grid to stop or restart it; a greyed-out icon, the `agent_lost` message in the chat, and "decided without Budget" on the decision | Stopping Budget mid-session is visible in the grid, the chat, and the decision |
+| 2 | ✅ Trace view on the Evidence page: per-round bars of agent latency, retries, and fallbacks, labelled by transport | The latest round's trace renders, with a saved trace when the API is down |
+| 3 | ✅ Critic in the chat: its message, and whether the arbiter answered it or changed the pick. A Critic switch next to the what-if buttons | Turning the Critic on adds its message and the outcome |
 | 4 | ⬜ Single-LLM row in the Evidence table and chart, with one honest sentence on where it wins or loses | The new row shows, and the copy matches the numbers |
 | 5 | ⬜ "Discovered via directory" and "verified" badges in the team grid; a "fake shop joins" what-if that shows the rejection | The fake shop is visibly turned away |
 | 6 | ⬜ Concessions in the chat ("Budget gives on price if Explorer gives on novelty"), and trust meters per agent with the arbiter's note when one moves | A concession and a trust change both read clearly in one round |
 | 7 | ⬜ Tool results on proposals ("checked live inventory", "31°C, so iced") | A proposal that used a tool says which, and what it found |
 | 8 | ⬜ "Was this a good pick?" on a picked-up order, sending the feedback | Answering it is confirmed, and the next round reflects it |
 | 9 | ⬜ Group order: pick friends, see the shared top 3, and a compromise line for each person | A two-person group order shows who gave ground |
-| 10 | ⬜ Demo script: an optional 30-second Cisco segment (kill an agent, the trace, the Critic), and judge Q&A lines for identity, directory, and observability; write-up rows for the new Level 2 and 3 pieces | The script and write-up match what the app shows |
+| 10 | ✅ Demo script: an optional 30-second Cisco segment (kill an agent, the trace, the Critic), and judge Q&A lines for identity, directory, and observability; write-up rows for the new Level 2 and 3 pieces | The script and write-up match what the app shows |
 
 ### Sync points
 
