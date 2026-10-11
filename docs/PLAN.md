@@ -871,7 +871,7 @@ POST /groups/{id}/recommend -> Decision & { compromise: { user_id: string; gave_
 | 7 | ⬜ Concession rounds in dialogue mode ("drop price if you drop novelty"), capped, with the arbiter as tiebreaker | A round shows at least one concession, and the decision names it |
 | 8 | ⬜ Trust per agent from how often users passed over its advice; the arbiter's weighting uses it and says when it moved | After several orders against one agent's advice, its trust drops and the chat says so |
 | 9 | ⬜ MCP tools: a shop agent reads inventory or hours, and a Weather or Time agent nudges iced or hot. Offline tools fall back | A proposal shows the tool it used, and with the tool down the round still runs |
-| 10 | ⬜ `POST /orders/{id}/feedback` after pickup feeds learning separately from the order | Marking a pick as bad moves the weights the other way |
+| 10 | ⬜ ~~`POST /orders/{id}/feedback` after pickup feeds learning separately from the order~~ Superseded by order ratings (Sun 10:55 AM, Track A row 5) | Marking a pick as bad moves the weights the other way |
 | 11 | ⬜ Group orders over SLIM: members' Preference agents negotiate one order or shop and report the compromise | Andrew and Sarah's group order names who gave ground and on what |
 
 #### Track B: more of the Cisco challenge
@@ -885,11 +885,77 @@ POST /groups/{id}/recommend -> Decision & { compromise: { user_id: string; gave_
 | 5 | ⬜ "Discovered via directory" and "verified" badges in the team grid; a "fake shop joins" what-if that shows the rejection | The fake shop is visibly turned away |
 | 6 | ⬜ Concessions in the chat ("Budget gives on price if Explorer gives on novelty"), and trust meters per agent with the arbiter's note when one moves | A concession and a trust change both read clearly in one round |
 | 7 | ⬜ Tool results on proposals ("checked live inventory", "31°C, so iced") | A proposal that used a tool says which, and what it found |
-| 8 | ⬜ "Was this a good pick?" on a picked-up order, sending the feedback | Answering it is confirmed, and the next round reflects it |
+| 8 | ⬜ ~~"Was this a good pick?" on a picked-up order, sending the feedback~~ Superseded by order ratings (Sun 10:55 AM, Track B row 7) | Answering it is confirmed, and the next round reflects it |
 | 9 | ⬜ Group order: pick friends, see the shared top 3, and a compromise line for each person | A two-person group order shows who gave ground |
 | 10 | ✅ Demo script: an optional 30-second Cisco segment (kill an agent, the trace, the Critic), and judge Q&A lines for identity, directory, and observability; write-up rows for the new Level 2 and 3 pieces | The script and write-up match what the app shows |
 
-### Sync points
+### Ordering fixes, a full quiz, favorites, and order ratings (added Sun 10:55 AM)
+
+**Goal:** fix two ordering bugs, give new users a deeper starting taste profile, and give the agents better evidence: favorite drinks named by the user, recent orders counting more, and a 0–5 rating on past orders.
+
+**What changes:**
+1. **Ordering from the top 3 confirms and closes.** Placing an order from a top 3 card shows the "order placed" confirmation, and **Done** closes the ordering sheet. Today the round that re-runs after the order can swallow the confirmation or leave the sheet open.
+2. **Order history on the profile works.** With the past orders toggle on, the profile shows recent orders, including ones placed in the app, newest first. Drink, shop, and date only; never prices.
+3. **Two quizzes: basic and full.** On the customer route, **Start the quiz** first asks which quiz to take, in the same style as the rest of onboarding:
+   - **Basic:** today's six questions.
+   - **Full:** a longer quiz for a more detailed taste profile, so the agents start closer to what you like. It covers ice and temperature, tea bases, milk type, specific toppings, texture, flavors to avoid, and how often you try something new.
+   **Retake quiz** on the profile offers both types again.
+4. **Favorite drinks from favorite shops.** A question in the full quiz: type a shop name, pick it from suggestions, then pick your favorite drinks from its menu. Repeat for more shops. Favorites count heavily, because they're more accurate evidence of what you like than a quiz answer.
+5. **A loading animation.** The two hands and cups from the logo clink (cheers) while things load. It replaces the current loading state everywhere, and is off for reduced motion.
+6. **Tagging a post: shop first.** You can tag just a shop, or pick a shop before you can tag one of its drinks. You type the shop name, and suggestions appear as you type, closest name first, then most popular.
+7. **Agents weight recent orders more.** Newer orders count more than old ones in the taste profile and in what the Preference agent learns.
+8. **Rate past orders from 0 to 5.** After pickup, you can rate an order. The rating feeds the taste profile and future team decisions: 4–5 pulls toward that drink's profile, and 0–1 pushes away. It replaces the fixed rating of 4 a placed order gets today, and supersedes Cisco Track A row 10 and Track B row 8 ("Was this a good pick?").
+
+**Demo safety:**
+- The scripted numbers stay: after Reset demo, Thai Tea 78, Wintermelon 77, Pearl 71, and ordering Pearl gives taste 45%, price 36%, Pearl 73. Andrew's seeded reviews keep their weights. Recency and ratings apply to orders placed in the app, and an unrated order counts as it does today. If A can't keep the numbers, A posts the new ones in PROGRESS, and B re-runs and updates `demo-script.md`.
+- Favorites and the full quiz only affect users who take the full quiz. The demo accounts don't.
+- Reset demo clears ratings and favorites made during the session.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`). These are proposals; A finalises the shapes.
+
+```ts
+// Quiz types
+GET /quiz?kind=basic|full -> QuizQuestion[]          // no kind = basic, as today
+QuizQuestion.kind?: "choice" | "favorites"           // "favorites": shop, then drinks from its menu
+POST /quiz { user_id, answers, kind?: "basic" | "full",
+             favorites?: { shop_id: string; drink_ids: string[] }[] } -> QuizResult
+UserProfile.quiz_kind?: "basic" | "full" | null       // which quiz they last took
+
+// Shop suggestions while typing (tags and the favorites question)
+Shop.popularity?: number                             // 0..1 from orders and reviews; GET /shops is unchanged otherwise
+
+// Order history on the profile
+BobaStats.past_orders                                // now includes orders placed in the app, newest first, at most 10
+
+// Order ratings
+PATCH /orders/{order_id} { rating: 0..5 }            // the customer, only after picked_up; null clears it
+Order.rating?: number | null
+PastOrder.rating?: number | null                     // only on your own profile
+```
+
+#### Track A: ordering fixes, full quiz, favorites, and ratings
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ `stats.past_orders` includes orders placed in the app (any status after placed), newest first, still capped at 10, still hidden unless the toggle is on | Ordering a drink makes it appear first in your own profile's past orders |
+| 2 | ⬜ Full quiz in `core/quiz.py`: `GET /quiz?kind=full`, the extra questions, and their fixed mapping to the taste profile and priorities. `POST /quiz` takes `kind` and records `quiz_kind` | The full quiz gives a different, more detailed profile than basic for the same overlapping answers |
+| 3 | ⬜ Favorites: `POST /quiz` takes `favorites`, checks each drink is on that shop's menu, and counts each favorite as strong evidence (for example, a 5★ review at double weight) for Taste, Social, and Explorer | A user who names Hojicha Cream Tea as a favorite sees it, or drinks like it, in their top 3 |
+| 4 | ⬜ Recency: orders placed in the app count more the newer they are (for example, a half-life over orders), in the taste profile and in Preference learning. Seeded reviews keep their weights | Two orders of opposite drinks: the newer one pulls the profile harder. The scripted numbers are unchanged |
+| 5 | ⬜ Order ratings: `PATCH /orders/{id}` with `rating` 0–5 after pickup. The rating replaces the fixed 4 for that order's review; 0–1 counts against the drink. Reset demo clears ratings | Rating an order 0 moves its drink down in the next round, and 5 moves it up |
+| 6 | ⬜ `Shop.popularity` on `GET /shops`, from orders and reviews | Shops come back with a popularity between 0 and 1 |
+
+#### Track B: ordering fixes, full quiz, favorites, and ratings
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Ordering from a top 3 card: the confirmation always shows, and **Done** closes the sheet, even while the next round re-runs | Ordering Pearl from today's picks shows "order placed", Done closes it, and the new top 3 shows |
+| 2 | ⬜ Past orders on the profile: render `stats.past_orders` when the toggle is on (drink, shop, date), on your own and others' profiles, with an empty state | Turning the toggle on shows your recent orders, including one you just placed |
+| 3 | ⬜ Clinking loading animation: the two hands and cups from the logo cheers in a loop, used for every loading state; a still logo for reduced motion | Every loading state shows the clink |
+| 4 | ⬜ Quiz chooser: after **Start the quiz** on the customer route, pick **Basic** (six questions, about a minute) or **Full** (more detail, better picks), in the onboarding style. **Retake quiz** on the profile offers both | Both entry points offer both quizzes, and each runs its own questions |
+| 5 | ⬜ Full quiz screens, including the favorites question: type a shop name with suggestions, pick it, then pick drinks from its menu; add another shop; remove any. Sends `kind` and `favorites` | A full quiz with two favorite shops submits, and the result screen opens |
+| 6 | ⬜ Post tags: one tag field where you type a shop name, with suggestions closest first and then by popularity. After choosing a shop, you can tag one of its drinks, or leave it at the shop | You can't tag a drink without its shop, and typing "kung" suggests Kung Fu Tea Co. first |
+| 7 | ⬜ Rate past orders 0–5 on the Orders page once picked up, and on your own profile's order history; a rated order shows its stars. The chat notes the next round used it ("You rated Pearl Milk Tea 1/5.") | Rating an order is saved, and the next round reflects it |
+| 8 | ⬜ Copy: "recent orders count more" and "your ratings count" on Why this order and the quiz result. Update `demo-script.md` if A's numbers change, and PROGRESS | The copy matches what the agents do, and the script numbers still match a real run |
 
 | Time | Both of you |
 |---|---|
@@ -908,29 +974,30 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill an agent and the trace view, the two that show adaptation and AGNTCY most directly.
-2. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
-3. UI round 2 extras, in this order:
+1. Ordering fixes, full quiz, favorites, and ratings (Sun 10:55 AM), from the bottom row up: shop popularity, the copy, ratings, recency, favorites, the full quiz and its chooser, post tags, then the loading animation. **Keep:** the two ordering bug fixes (top 3 confirmation and profile order history).
+2. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill an agent and the trace view, the two that show adaptation and AGNTCY most directly.
+3. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
+4. UI round 2 extras, in this order:
    - typed custom what-ifs (keep the change builder), then the change builder (keep the preset buttons);
    - agent dialogue (keep `single`);
    - the Stats receipt layout and card color;
    - transition animations;
    - Discover match ordering.
    Keep the at the counter sub-tab and the trimmed today's picks.
-4. Accounts, store tools, and ordering, in this order:
+5. Accounts, store tools, and ordering, in this order:
    - card payments (keep pay at pickup);
    - the month and year ranges in demand trends (keep the week);
    - menu sections (keep editing drinks);
    - the shop picture and description.
    Keep sign in, the demo account buttons, the discount rules, and ordering (it replaces picking).
-5. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
-6. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-7. Shop images and cover images (keep the drink images)
-8. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-9. Friends tab (once profiles exist, it folds into them)
-10. Counterfactual page (Why This and the timeline already show the before/after)
-11. LLM wording
-12. AGNTCY (use the local transport)
+6. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
+7. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+8. Shop images and cover images (keep the drink images)
+9. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+10. Friends tab (once profiles exist, it folds into them)
+11. Counterfactual page (Why This and the timeline already show the before/after)
+12. LLM wording
+13. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
@@ -941,6 +1008,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **Sun 10:55 AM:** Added "Ordering fixes, a full quiz, favorites, and order ratings". Ordering from the top 3 always confirms and Done closes the sheet; the profile's past orders toggle shows real order history. Onboarding and Retake quiz offer a basic and a full quiz; the full one adds more taste questions and favorite drinks from favorite shops, which count heavily. A clinking-cups loading animation. Post tags are shop first, with type-ahead suggestions. Agents weight recent orders more, and customers can rate past orders 0–5, which replaces the fixed rating of 4 and supersedes the Cisco yes/no feedback rows. Split into Track A rows 1-6 and Track B rows 1-8. The scripted 78 / 77 / 71 stays. First on the cut list, except the two ordering bug fixes.
 - **Sun 10:00 AM:** Added "More of the Cisco challenge": kill an agent mid-round, AGNTCY observability traces on the Evidence page, a Critic agent, a single-LLM baseline, an AGNTCY agent directory, signed agent identities that reject a fake shop, concession rounds, trust that shifts per agent, MCP tools (inventory, hours, weather), feedback after pickup, and group orders over SLIM. Split into Track A rows 1-11 and Track B rows 1-10, in demo-value order. All of it is off by default and falls back to today's behaviour, so the scripted 78 / 77 / 71 is unchanged. First on the cut list, except kill an agent and the trace view.
 - **1:20 AM:** Track B finished its eight "Profile layout, photos, and recs" rows. Card and stats sit side by side (stacked and centered on a narrow window). Sheets open in the middle and scroll inside themselves. Profile photo and banner uploads show on the profile, in the feed, and on notifications, with emoji and placeholder covers as the fallback. Favorite shop spans the full row on a narrow window. Send a rec, Follow, and Request bestea sit below the banner. A rec only goes to someone who follows you, and it shows in the bell. Top 3 cards lead with "78% match". Side doodles stay in the margin until it gets too narrow. The scripted scores stay 78 / 77 / 71.
 - **1:10 AM:** Track A finished rows 1-3 of "Profile layout, photos, and recs". `PATCH /users` stores `avatar.photo_url` (JPEG, at most 512 px a side) and `cover_url` (a placeholder id, a JPEG at most 1600 px wide and 1600 px tall, or null). `POST /recs` is 403 unless the recipient follows the sender, and a successful rec writes an unread notification. Post photos round-trip as stored. Demo scores stay 78 / 77 / 71. The `types.ts` notes for Track B are in `PROGRESS.md`.
