@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 
@@ -31,7 +32,7 @@ from tealink.config import get_settings
 from tealink.core import objectives
 from tealink.data.loader import Catalog, load_catalog
 from tealink.lens.recorder import LensRecorder
-from tealink.schemas import ChoiceRecord, Decision, DeliberationRequest, LensEventType
+from tealink.schemas import ChoiceRecord, Decision, DeliberationRequest, LensEventType, TraceRecord
 from tealink.social.store import SocialStore, load_social
 
 @asynccontextmanager
@@ -101,6 +102,10 @@ class Runtime:
     offer_log: list = field(default_factory=list)
     orders: list = field(default_factory=list)
     max_price: dict[str, float] = field(default_factory=dict)
+    # Demo controls intentionally stop agents without unregistering their cards,
+    # so a later start or reset can bring the exact same team member back.
+    stopped_agents: set[str] = field(default_factory=set)
+    traces: dict[str, list[TraceRecord]] = field(default_factory=dict)
 
 
 def get_runtime() -> Runtime:
@@ -282,6 +287,12 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
     def offer_gate(shop_id: str, drink_id: str, offer):
         return constrain(runtime, shop_id, drink_id, offer)
 
+    session_id = uuid.uuid4().hex
+    runtime.traces[session_id] = []
+
+    def record_trace(item: TraceRecord) -> None:
+        runtime.traces[session_id].append(item)
+
     async def events():
         async for event in deliberate(
             registry=runtime.registry,
@@ -296,12 +307,24 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
             price_high=max(drink.price for drink in runtime.catalog.drinks),
             max_price=runtime.max_price.get(body.user_id),
             offer_gate=offer_gate,
+            session_id=session_id,
+            stopped_agents=runtime.stopped_agents,
+            trace_sink=record_trace,
         ):
             if event.type == LensEventType.decision:
                 runtime.last_decision[body.user_id] = Decision.model_validate(event.payload)
             yield {"event": event.type.value, "data": event.model_dump_json()}
 
     return EventSourceResponse(events())
+
+
+@app.get("/trace/{session_id}")
+def trace(session_id: str) -> list[dict]:
+    runtime = get_runtime()
+    entries = runtime.traces.get(session_id)
+    if entries is None:
+        raise HTTPException(status_code=404, detail="trace not found")
+    return [entry.model_dump(mode="json") for entry in entries]
 
 
 @app.get("/preferences/{user_id}")
@@ -353,6 +376,36 @@ def sold_out(body: SoldOutEvent) -> dict:
     runtime = get_runtime()
     runtime.sold_out.add(body.drink_id)
     return {"ok": True, "sold_out": sorted(runtime.sold_out)}
+
+
+@app.post("/agents/{agent_id}/stop")
+async def stop_agent(agent_id: str) -> dict:
+    """Take a registered agent out of the next deliberation without deleting it."""
+    runtime = get_runtime()
+    await _prepare(runtime)
+    if runtime.registry.get(agent_id) is None:
+        raise HTTPException(status_code=404, detail="agent not registered")
+    runtime.stopped_agents.add(agent_id)
+    runtime.offline.add(agent_id)
+    runtime.registry.mark_offline(agent_id)
+    if isinstance(runtime.transport, AgntcyTransport):
+        await runtime.transport.publish_control("offline", agent_id)
+    return {"ok": True, "agent_id": agent_id, "online": False}
+
+
+@app.post("/agents/{agent_id}/start")
+async def start_agent(agent_id: str) -> dict:
+    """Restore an agent stopped by the demo control without changing its card."""
+    runtime = get_runtime()
+    await _prepare(runtime)
+    if runtime.registry.get(agent_id) is None:
+        raise HTTPException(status_code=404, detail="agent not registered")
+    runtime.stopped_agents.discard(agent_id)
+    runtime.offline.discard(agent_id)
+    runtime.registry.heartbeat(agent_id)
+    if isinstance(runtime.transport, AgntcyTransport):
+        await runtime.transport.publish_control("join", agent_id)
+    return {"ok": True, "agent_id": agent_id, "online": runtime.registry.is_online(agent_id)}
 
 
 @app.post("/events/shop-offline")

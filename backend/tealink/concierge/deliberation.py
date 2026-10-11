@@ -28,6 +28,7 @@ from tealink.schemas import (
     PreferenceReport,
     Proposal,
     RevisedFrom,
+    TraceRecord,
 )
 
 LISTED = 2
@@ -49,6 +50,9 @@ async def deliberate(
     price_high: float | None = None,
     max_price: float | None = None,
     offer_gate=None,
+    session_id: str | None = None,
+    stopped_agents: set[str] | None = None,
+    trace_sink: Callable[[TraceRecord], None] | None = None,
 ) -> AsyncIterator[LensEvent]:
     log = recorder or LensRecorder()
     seq = 1
@@ -68,12 +72,24 @@ async def deliberate(
             message=message,
             payload=payload,
             seq=seq,
+            session_id=session_id,
         )
         log.record(event)
         seq += 1
         return event
 
     yield emit(LensEventType.status, "Starting deliberation.", {}, None)
+
+    missing_agents = sorted(stopped_agents or ())
+    for agent_id in missing_agents:
+        card = registry.get(agent_id)
+        label = card.name if card is not None else agent_id
+        yield emit(
+            LensEventType.agent_lost,
+            f"{label} is unavailable, so the team will decide without it.",
+            {"agent_id": agent_id, "reason": "stopped for this round", "when": "before_round"},
+            agent_id,
+        )
 
     cards = []
     for selection in registry.select_for_query(query):
@@ -98,6 +114,7 @@ async def deliberate(
         max_price=max_price,
     )
     propose_replies = await transport.broadcast(cards, propose)
+    _capture_trace(transport, 0, trace_sink)
 
     report = _preference(propose_replies)
     if report is None:
@@ -149,6 +166,7 @@ async def deliberate(
         sold_out_drink_ids=sold_out,
     )
     object_replies = await transport.broadcast(cards, object_request)
+    _capture_trace(transport, 1, trace_sink)
     objections = _plain(_objections(object_replies))
     names = {proposal.drink_id: proposal.drink_name for proposal in proposals}
     for event in _emit_objections(object_replies, names, registry, 1, {}, emit):
@@ -178,6 +196,7 @@ async def deliberate(
                 decided_by = "arbiter"
                 break
             incoming = _objections(revise_replies)
+            _capture_trace(transport, event_round, trace_sink)
             for event in _emit_objections(revise_replies, names, registry, event_round, _index(previous), emit):
                 yield event
             rebuttals = rebuttal
@@ -189,11 +208,14 @@ async def deliberate(
             decided_by = "arbiter"
 
     decision = resolve(proposals, objections, weights=weights, confirmed_shop_ids=confirmed_shops)
-    decision = decision.model_copy(update={"decided_by": decided_by, "rounds": rebuttals})
+    decision = decision.model_copy(
+        update={"decided_by": decided_by, "rounds": rebuttals, "missing_agents": missing_agents}
+    )
     if price_low is not None and price_high is not None:
         offered = await _ask_for_offer(decision, registry, transport, user_id, query, offer_gate)
         if offered is not None:
             reply, runner = offered
+            _capture_trace(transport, rebuttals + 2, trace_sink)
             yield emit(
                 LensEventType.offer,
                 reply.offer.reason,
@@ -215,6 +237,25 @@ async def deliberate(
         decision.model_dump(mode="json"),
         None,
     )
+
+
+def _capture_trace(transport: AgentTransport, round_number: int, sink: Callable[[TraceRecord], None] | None) -> None:
+    if sink is None:
+        return
+    drain = getattr(transport, "drain_traces", None)
+    if not callable(drain):
+        return
+    for item in drain():
+        sink(
+            TraceRecord(
+                round=round_number,
+                agent_id=item.agent_id,
+                transport=item.transport,
+                ms=item.ms,
+                retries=item.retries,
+                fell_back=item.fell_back,
+            )
+        )
 
 
 def _dump_objection(item: Objection, event_round: int) -> dict:

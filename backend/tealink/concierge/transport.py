@@ -15,6 +15,7 @@ import asyncio
 import sys
 import time
 import uuid
+from dataclasses import dataclass
 from typing import Protocol
 
 from tealink.agents.base import BaseAgent
@@ -32,6 +33,17 @@ class ReviseTimeout(Exception):
         super().__init__(agent_id)
 
 
+@dataclass(frozen=True)
+class TransportTrace:
+    """Timing data held until the deliberation assigns it a protocol round."""
+
+    agent_id: str
+    transport: str
+    ms: float
+    retries: int = 0
+    fell_back: bool = False
+
+
 class AgentTransport(Protocol):
     async def send(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply: ...
 
@@ -44,12 +56,25 @@ class LocalTransport:
     def __init__(self, agents: dict[str, BaseAgent], catalog: Catalog) -> None:
         self.agents = agents
         self.catalog = catalog
+        self._traces: list[TransportTrace] = []
 
     async def send(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply:
+        started = time.perf_counter()
+        reply = await self.dispatch(card, msg)
+        self._traces.append(
+            TransportTrace(card.id, "local", (time.perf_counter() - started) * 1000)
+        )
+        return reply
+
+    async def dispatch(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply:
         agent = self.agents.get(card.id)
         if agent is None:
             return AgentReply(agent_id=card.id)
         return agent.handle(msg, self.catalog)
+
+    def drain_traces(self) -> list[TransportTrace]:
+        traces, self._traces = self._traces, []
+        return traces
 
     async def broadcast(
         self, cards: list[AgentCardInfo], msg: DeliberationRequest
@@ -91,6 +116,7 @@ class AgntcyTransport:
         # One shared NATS client. Overlapping request/reply calls leave it
         # unable to deliver the next reply, so deliberation sends take turns.
         self._send_lock = asyncio.Lock()
+        self._traces: list[TransportTrace] = []
 
     @property
     def local_only(self) -> set[str]:
@@ -107,6 +133,23 @@ class AgntcyTransport:
         """Forget which agents answered remotely. Used by the demo reset."""
         self._local_only.clear()
         self._beats.clear()
+
+    def drain_traces(self) -> list[TransportTrace]:
+        traces, self._traces = self._traces, []
+        return traces
+
+    def _record_trace(
+        self, card: AgentCardInfo, transport: str, started: float, retries: int = 0, fell_back: bool = False
+    ) -> None:
+        self._traces.append(
+            TransportTrace(
+                card.id,
+                transport,
+                (time.perf_counter() - started) * 1000,
+                retries=retries,
+                fell_back=fell_back,
+            )
+        )
 
     async def connect(self) -> bool:
         async with self._connect_lock:
@@ -195,13 +238,18 @@ class AgntcyTransport:
             registry.heartbeat(card.id)
 
     async def send(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply:
+        started = time.perf_counter()
         if not self.connected or card.id in self._local_only:
-            return await self._local(card, msg)
+            reply = await self._local(card, msg)
+            self._record_trace(card, "local", started, fell_back=not self.connected or card.id in self._local_only)
+            return reply
         if msg.user_id in self.fallback.catalog.runtime_users:
-            return await self._local(card, msg)
+            reply = await self._local(card, msg)
+            self._record_trace(card, "local", started, fell_back=True)
+            return reply
         attempts = 2 if self.remote_replies.get(card.id, 0) == 0 else 1
         last_error: Exception | None = None
-        for _ in range(attempts):
+        for attempt in range(attempts):
             try:
                 reply = await asyncio.wait_for(self._remote(card, msg), self.timeout)
             except Exception as exc:
@@ -209,9 +257,11 @@ class AgntcyTransport:
                 continue
             self._local_only.discard(card.id)
             self.remote_replies[card.id] = self.remote_replies.get(card.id, 0) + 1
+            self._record_trace(card, "agntcy", started, retries=attempt)
             return reply
         self._local_only.add(card.id)
         if msg.round == "revise":
+            self._record_trace(card, "agntcy", started, retries=max(0, attempts - 1))
             print(
                 f"{card.id} did not answer over NATS ({type(last_error).__name__}). Discarding this rebuttal.",
                 file=sys.stderr,
@@ -221,7 +271,9 @@ class AgntcyTransport:
             f"{card.id} did not answer over NATS ({type(last_error).__name__}). Using the in-process agent.",
             file=sys.stderr,
         )
-        return await self._local(card, msg)
+        reply = await self._local(card, msg)
+        self._record_trace(card, "local", started, retries=max(0, attempts - 1), fell_back=True)
+        return reply
 
     async def broadcast(
         self, cards: list[AgentCardInfo], msg: DeliberationRequest
@@ -230,7 +282,7 @@ class AgntcyTransport:
 
     async def _local(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply:
         self.local_replies[card.id] = self.local_replies.get(card.id, 0) + 1
-        return await self.fallback.send(card, msg)
+        return await self.fallback.dispatch(card, msg)
 
     async def _remote(self, card: AgentCardInfo, msg: DeliberationRequest) -> AgentReply:
         async with self._send_lock:

@@ -175,6 +175,9 @@ class Decision(BaseModel):
     decided_by: Literal["agents", "arbiter"] | None = None
     # Rebuttal rounds that finished. 0 in single mode. A discarded timeout does not count.
     rounds: int | None = None
+    # Agents intentionally stopped for this deliberation. The arbiter still
+    # returns a decision using the agents that remained available.
+    missing_agents: list[str] = Field(default_factory=list)
 
 
 class ChoiceRecord(BaseModel):
@@ -202,6 +205,7 @@ class LensEventType(str, Enum):
     status = "status"
     preference = "preference"
     offer = "offer"
+    agent_lost = "agent_lost"
 
 
 class LensEvent(BaseModel):
@@ -210,6 +214,20 @@ class LensEvent(BaseModel):
     message: str
     payload: dict
     seq: int
+    # Present on all events from a recommendation round so clients can fetch
+    # its transport trace after the streamed decision arrives.
+    session_id: str | None = None
+
+
+class TraceRecord(BaseModel):
+    """One gateway-to-agent attempt, recorded for the Evidence trace view."""
+
+    round: int
+    agent_id: str
+    transport: Literal["agntcy", "local"]
+    ms: float
+    retries: int = 0
+    fell_back: bool = False
 
 
 class DeliberationRequest(BaseModel):
