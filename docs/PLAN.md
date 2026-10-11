@@ -376,6 +376,104 @@ This reshuffles B's remaining evening; the earlier Track B social rows keep thei
 | 7:30 to 8:30 | 🟡 (Stats tab, photos, and the collapsed timeline are done; the older pages still need the readability pass) Stats tab, then a readability pass across all tabs; photos on review cards and the profile grid | Every screen follows the readability rules above |
 | 8:30 to 9:00 | ✅ Feed leftovers ("send a rec") and the offer badge, if A built offers | |
 
+### UI round 2 and agent dialogue (added 6:55 PM)
+
+**Goal:**
+- The TeaLink tab shows only today's top 3, and the agent story gets its own sub-tab.
+- The agents genuinely respond to each other's objections, and the timeline reads like a group chat.
+- Stats and Discover are trimmed to what matters.
+
+**General (both tracks):**
+- **Transitions:** clean transition animations between every tab, sub-tab, and section.
+- **Always "you":** all copy speaks to the user as "you" ("your taste", "what matters most to you"). Never use the user's name ("Bob's taste") or "the user."
+  - Track B fixes the copy written in the frontend.
+  - Track A fixes the text the backend writes: preference summaries, decision explanations, counterfactual notes, and offer reasons.
+
+**New TeaLink sub-tabs:** today's picks · at the counter · why this order · evidence. **What changed is removed.**
+
+```mermaid
+flowchart LR
+  TeaLink["TeaLink: today's top 3"] --> Counter["at the counter: team, dialogue, decision"]
+  TeaLink --> WhyThis["why this order: score breakdown"]
+  TeaLink --> Evidence[evidence]
+```
+
+**Customer side:**
+- **TeaLink, today's picks:**
+  - The top 3 cards lose their four meters (taste match, price, something new, people like you). That breakdown lives only in why this order.
+  - Remove "what you care about" and "my taste"; both are already in Stats.
+  - Remove "people with your taste"; that belongs in Discover.
+- **At the counter (new sub-tab):** it moves out of today's picks.
+  - **Agent symbols:** each core agent gets its own minimal line symbol, matching the doodle style. Every shop agent shares one shop symbol.
+  - **Team selected:** a grid of agent icons replaces the list of names. Tapping an icon expands it to show the agent's name, symbol, and description.
+  - **They argue:** shown as a group chat. Messages are grouped by round, concessions are visible ("Budget softens on Thai Tea"), and the last line says who decided: the agents agreed, the arbiter decided, or you picked.
+  - **The what-if demo controls** (#1 sells out, shop offline, Lantern Leaf joins, no brown sugar, Reset demo) move here. They now sit on what changed, which is being removed.
+- **Stats:**
+  - **Boba card background:** you choose the color yourself.
+  - **"What matters most" → "what matters most to you":** no percentage.
+  - **All stats:**
+    - Remove toppings, milk vs fruit, and sweet vs not sweet.
+    - Combine boba streak, shops visited, and drinks tried into one section.
+    - Lay out everything below the card in a receipt-style format.
+- **Discover:**
+  - **Drink filters:** no repeats, so "fruit tea" and "fruit" merge into one chip.
+  - **Order:** shops and drinks are ordered from closest match to least match for you.
+
+**Agent dialogue (soften-only rebuttal rounds):**
+- **Rounds:** after the objection round, the gateway relays every agent's objections to all agents, which may then revise their stances. This repeats up to **3 rounds**.
+- **Soften-only:** after round 1, an agent may only soften: concede, drop a concern, or lower its confidence. It never hardens a stance, so the dialogue always settles.
+- **Vetoes:** shop vetoes (sold out) stay binding and are never softened.
+- **The gateway only relays:**
+  - It stops early when no agent changes anything in a round.
+  - At the cap, or if an agent times out, it runs the existing `resolve()` on everyone's latest scores. It never restarts.
+- **Who decided:**
+  - "the agents agreed" if the dialogue settled before the cap.
+  - "the arbiter decided" if it hit the cap or a timeout.
+  - The existing near-tie question to you still runs after that. If you pick, the timeline says "you picked."
+- **Setting:** `DELIBERATION=dialogue|single`. `single` is today's two-round behavior and stays the demo fallback. The `/health` response reports which mode is on.
+- **Demo numbers:** with `single`, they must not change. With `dialogue`, A re-checks the scripted run and reports any new numbers in `PROGRESS.md`.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`):
+
+```ts
+// On "proposal" and "objection" events. Round 1 is the first objection round.
+LensEvent.payload.round?: number;
+// On objection events where an agent softened its stance this round.
+LensEvent.payload.revised_from?: { kind: "support" | "concern" | "neutral"; score: number | null };
+// On the "decision" event. "you picked" is added by the frontend when the user breaks a near-tie.
+Decision.decided_by?: "agents" | "arbiter";
+Decision.rounds?: number;              // rebuttal rounds that ran (0 in single mode)
+// On "selection" events, so the team grid can show them without a second request.
+AgentSelection.name?: string;
+AgentSelection.description?: string;
+// GET /health
+Health.deliberation?: "dialogue" | "single";
+// Match scores for Discover ordering (or a sorted list per user; A's choice)
+// GET /drinks?user={id} -> each drink gains match: number (0–1)
+// GET /shops?user={id}  -> each shop gains match: number (0–1), its best drink's match
+// PATCH /users/{ref} accepts card_color: string; UserProfile.card_color?: string
+```
+
+#### Track A: UI round 2 and dialogue
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Second-person text in everything the backend writes (preference summaries, explanations, counterfactual and offer text) | No backend message uses the user's name or "the user" |
+| 2 | ⬜ `name` and `description` on selection events; `match` on `GET /drinks` and `GET /shops` for a user; `card_color` on `PATCH /users` | The team grid and Discover ordering work with no extra requests |
+| 3 | ⬜ `DELIBERATION=dialogue\|single` with soften-only rebuttal rounds (cap 3), early stop when nothing changes, and arbiter fallback on cap or timeout | In `single` mode the demo numbers are unchanged. In `dialogue` mode, events carry `round` and `revised_from`, and the decision carries `decided_by` and `rounds` |
+| 4 | ⬜ Re-check the scripted demo in `dialogue` mode and report the numbers in `PROGRESS.md` | B can update `demo-script.md` |
+
+#### Track B: UI round 2
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ TeaLink: new sub-tabs (today's picks · at the counter · why this order · evidence); remove what changed; move the what-if controls to at the counter; strip the top 3 meters and the three extra sections | Today's picks shows only the top 3, and the demo runs from the at the counter sub-tab |
+| 2 | ⬜ At the counter: agent symbols, team icon grid with tap-to-expand, and "they argue" as a group chat grouped by round, with concessions and who decided | Readable in both `single` and `dialogue` mode (in `single`, it shows one round and "the arbiter decided") |
+| 3 | ⬜ Stats: card color picker, "what matters most to you" without a percentage, trimmed and combined stats, receipt layout | |
+| 4 | ⬜ Discover: deduplicated drink filters, and match ordering for shops and drinks | Your closest match is first in both lists |
+| 5 | ⬜ "You" copy pass across all frontend text, and transition animations everywhere | |
+| 6 | ⬜ Update `docs/demo-script.md` for the new sub-tabs (Reset demo and the what-if buttons now live in at the counter) | The script's clicks match the app |
+
 ### Sync points
 
 | Time | Both of you |
@@ -395,13 +493,19 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-2. Shop images and cover images (keep the drink images)
-3. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-4. Friends tab (once profiles exist, it folds into them)
-5. Counterfactual page (Why This and the timeline already show the before/after)
-6. LLM wording
-7. AGNTCY (use the local transport)
+1. UI round 2 extras, in this order:
+   - agent dialogue (keep `single`);
+   - the Stats receipt layout and card color;
+   - transition animations;
+   - Discover match ordering.
+   Keep the at the counter sub-tab and the trimmed today's picks.
+2. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+3. Shop images and cover images (keep the drink images)
+4. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+5. Friends tab (once profiles exist, it folds into them)
+6. Counterfactual page (Why This and the timeline already show the before/after)
+7. LLM wording
+8. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
@@ -413,6 +517,14 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **6:55 PM:** Added "UI round 2 and agent dialogue":
+  - TeaLink sub-tabs are now today's picks · at the counter · why this order · evidence. What changed is removed, and the what-if controls move to at the counter.
+  - Today's picks is trimmed to the top 3.
+  - At the counter gets agent symbols, a team icon grid, and a group-chat "they argue."
+  - Soften-only rebuttal rounds (cap 3) with arbiter fallback, behind `DELIBERATION=dialogue|single`.
+  - Stats and Discover are trimmed; Discover is ordered by match.
+  - All copy says "you."
+  - New contract fields for both tracks. The round 2 extras go first on the cut list.
 - **3:50 PM:** Track A fixed quiz flavors: a new user's `top_notes` are the flavors they picked, not notes inferred from matching drinks.
 - **3:45 PM:** Track A shipped `GET /drinks`, `GET /shops`, null `photo_url` / `cover_url`, and shop offers. A near-tie discount is up to 10% and only when the runner-up is losing on price, so it can flip #1 without changing the scripted demo. Track B: mirror `offer` on `LensEventType` and `RankedDrink`, and call the two new lists. Shapes are in `PROGRESS.md`.
 - **3:35 PM:** Merged Track A's social backend into main with Track B's social frontend. The API now matches the 3:10 contract: bare lists, `{viewer}` on likes and comments, `author` on feed items, `&author=` on the feed, toppings as a 0–1 number, and the quiz questions from `mocks/social/quiz.json`.
