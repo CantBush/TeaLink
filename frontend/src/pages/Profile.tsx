@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { social } from "../api/social.ts";
 import type { FeedItem } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
+import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaStatsGrid } from "../components/BobaStats.tsx";
 import { EditProfile } from "../components/EditProfile.tsx";
 import { FeedCard } from "../components/FeedCard.tsx";
@@ -12,6 +13,7 @@ import { drinkInfo } from "../lib/catalog.ts";
 import { matchPercent, price, shopLabel } from "../lib/format.ts";
 import { coverPhoto, drinkPhoto } from "../lib/images.ts";
 import { tint } from "../lib/palette.ts";
+import { cardColor } from "../lib/cardColor.ts";
 import { ALL_STATS, shownStats } from "../lib/stats.ts";
 import { useMe } from "../state/me.ts";
 import { isSignedIn } from "../state/account.ts";
@@ -78,7 +80,8 @@ export function Profile() {
   const own = profile.user_id === me;
   const pinned = drinkInfo(profile.pinned_drink_id);
   const reviews = feed.key === `${handle}:${me}` ? feed.items : [];
-  const posts = reviews.filter((item) => item.drink_id);
+  const posts = reviews.filter((item) => item.kind === "post" || item.drink_id);
+  const sharedCard = !own && shownStats(profile.visible_stats).some((key) => key === "top_notes" || key === "priorities" || key === "past_orders");
   const hiddenCount = own ? ALL_STATS.length - shownStats(profile.visible_stats).length : 0;
 
   const toggleFollow = () => {
@@ -185,6 +188,20 @@ export function Profile() {
         </section>
       ) : null}
 
+      {sharedCard ? (
+        <section aria-label={`${profile.display_name}'s boba card`} className="mx-auto max-w-sm">
+          <BobaCard
+            name={profile.display_name}
+            handle={profile.handle}
+            avatar={profile.avatar}
+            accent={profile.accent}
+            color={cardColor(profile)}
+            stats={profile.stats}
+            yours={false}
+          />
+        </section>
+      ) : null}
+
       <section>
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <h2 className="font-display text-2xl">{own ? "Highlights" : "Boba stats"}</h2>
@@ -238,7 +255,11 @@ export function Profile() {
                   className="relative block aspect-square w-full"
                   aria-label={`${drinkInfo(item.drink_id)?.name ?? "Drink"}${item.rating ? `, ${item.rating} stars` : ""}`}
                 >
-                  <img src={drinkPhoto(item.drink_id, item.photo_url) ?? ""} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  {drinkPhoto(item.drink_id, item.photo_url) ? (
+                    <img src={drinkPhoto(item.drink_id, item.photo_url) ?? ""} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full items-center justify-center bg-cream p-2 text-center text-xs text-ink">{item.text}</span>
+                  )}
                   {item.rating ? (
                     <span className="absolute right-1.5 bottom-1.5 rounded-full bg-ink/75 px-2 py-0.5 text-xs font-semibold text-foam">
                       ★ {item.rating}

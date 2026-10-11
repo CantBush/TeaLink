@@ -123,6 +123,7 @@ function view(user: StoredUser, viewerId: string): UserProfile {
       streak: ["streak_weeks"],
       top_notes: ["top_notes"],
       priorities: ["priorities"],
+      past_orders: ["past_orders"],
     };
     for (const stat of user.visible_stats) {
       for (const field of keyed[stat] ?? []) Object.assign(stats, { [field]: user.stats[field] });
@@ -136,6 +137,8 @@ function view(user: StoredUser, viewerId: string): UserProfile {
     followed_by_me: viewer?.following.includes(user.user_id) ?? false,
     taste_match: own || !viewer ? null : similarity(viewer.taste, user.taste),
     stats,
+    bestea: "none",
+    besteas: 0,
   };
 }
 
@@ -310,6 +313,7 @@ function emptyStats(): BobaStats {
     top_notes: [],
     priorities: { taste: 0.4, cost: 0.25, novelty: 0.2, social: 0.15 },
     personality: "Classic Sipper",
+    past_orders: [],
   };
 }
 

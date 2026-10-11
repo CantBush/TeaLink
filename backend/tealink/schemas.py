@@ -249,6 +249,7 @@ StatKey = Literal[
     "streak",
     "top_notes",
     "priorities",
+    "past_orders",
 ]
 
 STAT_KEYS: tuple[str, ...] = (
@@ -262,6 +263,7 @@ STAT_KEYS: tuple[str, ...] = (
     "streak",
     "top_notes",
     "priorities",
+    "past_orders",
 )
 
 # The BobaStats fields each stat key shows. Personality is always shown.
@@ -276,7 +278,14 @@ STAT_FIELDS: dict[str, str] = {
     "streak": "streak_weeks",
     "top_notes": "top_notes",
     "priorities": "priorities",
+    "past_orders": "past_orders",
 }
+
+
+class PastOrder(BaseModel):
+    drink_id: str
+    shop_id: str
+    ordered_at: str
 
 
 class BobaStats(BaseModel):
@@ -291,6 +300,8 @@ class BobaStats(BaseModel):
     top_notes: list[str] = Field(default_factory=list)
     priorities: dict[str, float] = Field(default_factory=dict)
     personality: str = ""
+    # Newest 10. Drink, shop, and date only: never a price.
+    past_orders: list[PastOrder] = Field(default_factory=list)
 
 
 class Avatar(BaseModel):
@@ -317,6 +328,9 @@ class UserProfile(BaseModel):
     stats: dict
     # Reserved for a chosen cover. Null until photo uploads exist.
     cover_url: str | None = None
+    # From the viewer's side. "none" on your own profile.
+    bestea: Literal["none", "requested", "incoming", "bestea"] = "none"
+    besteas: int = 0
 
 
 class QuizOption(BaseModel):
@@ -356,8 +370,10 @@ class FeedComment(BaseModel):
 class FeedItem(BaseModel):
     id: str
     user_id: str
-    kind: Literal["review", "pick", "rec", "joined"]
+    # "pick" is kept so older items still validate. The feed routes no longer return them.
+    kind: Literal["review", "pick", "rec", "joined", "post"]
     drink_id: str | None = None
+    shop_id: str | None = None
     rating: int | None = None
     text: str | None = None
     to_user_id: str | None = None
@@ -367,5 +383,17 @@ class FeedItem(BaseModel):
     comments: list[FeedComment] = Field(default_factory=list)
     author: Author | None = None
     to_author: Author | None = None
-    # Reserved for a review photo. Null until photo uploads exist.
+    # A JPEG data URL, or null.
     photo_url: str | None = None
+
+
+class Notification(BaseModel):
+    id: str
+    kind: Literal["bestea_request", "bestea_accepted", "bestea_order"]
+    from_user: Author = Field(alias="from")
+    drink_id: str | None = None
+    shop_id: str | None = None
+    created_at: str
+    read: bool = False
+
+    model_config = {"populate_by_name": True}

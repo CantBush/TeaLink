@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from tealink.auth import store as accounts
-from tealink.schemas import DeliberationRequest
+from tealink.schemas import ChoiceRecord, DeliberationRequest, Review
 from tealink.store import demand as demand_core
 from tealink.store import menu as menu_core
 from tealink.store import orders as orders_core
@@ -253,10 +253,11 @@ def patch_shop(shop_id: str, body: ShopPatch, request: Request) -> dict:
 
 
 @router.post("/orders")
-def post_order(body: OrderBody, request: Request) -> dict:
+async def post_order(body: OrderBody, request: Request) -> dict:
     account = _account(request)
+    runtime = _runtime()
     try:
-        order = orders_core.create_order(_runtime(), account, body.model_dump())
+        order = orders_core.create_order(runtime, account, body.model_dump())
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc)) from exc
     except KeyError as exc:
@@ -265,7 +266,10 @@ def post_order(body: OrderBody, request: Request) -> dict:
         raise HTTPException(status_code=404, detail=detail) from None
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return orders_core.receipt(order)
+    learned = await _learn_order(runtime, order)
+    drink_id = order["items"][0]["drink_id"]
+    runtime.social.notify_order(order["user_id"], drink_id, order["shop_id"])
+    return orders_core.receipt(order, learned)
 
 
 @router.get("/orders")
@@ -286,8 +290,6 @@ async def patch_order(order_id: str, body: OrderPatch, request: Request) -> dict
         raise HTTPException(status_code=404, detail="order not found") from None
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    if before != "picked_up" and order["status"] == "picked_up":
-        await _learn_pickup(runtime, order)
     return order
 
 
@@ -310,27 +312,40 @@ def post_parse(body: ParseBody) -> dict:
     return whatif_core.parse_text(_runtime(), body.text)
 
 
-async def _learn_pickup(runtime, order: dict) -> None:
-    """A picked-up order is a pick, when that drink was in the last top 3."""
+async def _learn_order(runtime, order: dict) -> dict | None:
+    """A top-3 drink teaches the Preference agent now. Anything else only nudges taste.
+
+    Pickup does not teach again, and cancelling does not undo either update.
+    Neither path adds a feed item.
+    """
     from tealink.api.main import _prepare
     from tealink.api.social import prior_weights
 
-    choice = orders_core.choice_for_pickup(runtime, order)
-    if choice is None:
-        return
+    drink_id = order["items"][0]["drink_id"]
+    user_id = order["user_id"]
+    decision = runtime.last_decision.get(user_id)
+    in_top = decision is not None and any(option.drink_id == drink_id for option in decision.options)
+    if not in_top:
+        runtime.catalog.add_review(
+            Review(id=f"order_{order['order_id']}", user_id=user_id, drink_id=drink_id, rating=4, text="Ordered this.")
+        )
+        return None
     await _prepare(runtime)
     card = runtime.registry.get("preference")
     if card is None:
-        return
+        return None
+    choice = ChoiceRecord(user_id=user_id, chosen_drink_id=drink_id, options=decision.options, source="live")
     reply = await runtime.transport.send(
         card,
         DeliberationRequest(
             round="learn",
-            user_id=order["user_id"],
+            user_id=user_id,
             query="",
             choice=choice,
-            prior_weights=prior_weights(runtime, order["user_id"]),
+            prior_weights=prior_weights(runtime, user_id),
         ),
     )
-    if reply.preference is not None:
-        runtime.social.add(order["user_id"], "pick", drink_id=choice.chosen_drink_id)
+    runtime.social.remember_choice(user_id, drink_id)
+    if reply.preference is None:
+        return None
+    return reply.preference.model_dump(mode="json")

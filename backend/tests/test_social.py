@@ -141,18 +141,23 @@ def test_follow_counts_and_feed_order(client: TestClient):
 
 
 def test_picks_post_to_the_feed_and_friends_can_react(client: TestClient):
+    before = [item["id"] for item in client.get("/feed", params={"user_id": "sarah"}).json()]
     _events, decision = _decision(client, "andrew")
     pick = decision["options"][2]["drink_id"]
     assert client.post("/choices", json={"user_id": "andrew", "drink_id": pick}).status_code == 200
 
-    top = client.get("/feed", params={"user_id": "sarah"}).json()[0]
+    feed = client.get("/feed", params={"user_id": "sarah"}).json()
+    assert [item["id"] for item in feed] == before
+    assert all(item["kind"] != "pick" for item in feed)
+    top = next(
+        item for item in feed if item["user_id"] == "andrew" and item["kind"] == "review" and not item["liked_by_me"]
+    )
     assert top["author"]["display_name"] == "Andrew"
-    assert top["kind"] == "pick" and top["user_id"] == "andrew" and top["drink_id"] == pick
 
     liked = client.post(f"/feed/{top['id']}/like", json={"viewer": "sarah"}).json()
-    assert liked["likes"] == 1 and liked["liked_by_me"] is True
+    assert liked["likes"] == top["likes"] + 1 and liked["liked_by_me"] is True
     again = client.post(f"/feed/{top['id']}/like", json={"viewer": "sarah"}).json()
-    assert again["likes"] == 1
+    assert again["likes"] == top["likes"] + 1
     commented = client.post(f"/feed/{top['id']}/comments", json={"viewer": "sarah", "text": "Good call!"}).json()
     assert commented["comments"][-1]["text"] == "Good call!"
     assert commented["comments"][-1]["author"]["handle"] == "sarah"

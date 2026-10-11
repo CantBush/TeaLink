@@ -713,10 +713,10 @@ Notification = {
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Learning on order placement for a drink in the current top 3, returned as `learned`; an order outside the top 3 nudges the taste profile (like a good review) without changing weights; no second update at pickup; no feed item from orders or `/choices`; drop seeded "pick" items from the feed but keep them as history | Ordering Pearl after Reset demo gives taste 45%, price 36%, Pearl 73, and adds nothing to the feed |
-| 2 | ⬜ Posts: `POST /posts` and `DELETE /posts/{id}`, photo or caption only, optional drink or shop tag, likes and comments, in feeds and on profiles | A caption-only post and a photo post both show in a follower's feed |
-| 3 | ⬜ `past_orders` stat from orders and seeded history, respecting `visible_stats` | Hiding it removes it for other viewers |
-| 4 | ⬜ Besteas and notifications: request, accept, decline, end; `bestea` and `besteas` on profiles; notifications for requests, accepts, and bestea orders; mark read; Reset demo clears them | Andrew and Sarah become besteas, Sarah orders, and Andrew gets one unread notification |
+| 1 | ✅ Learning on order placement for a drink in the current top 3, returned as `learned`; an order outside the top 3 nudges the taste profile (like a good review) without changing weights; no second update at pickup; no feed item from orders or `/choices`; drop seeded "pick" items from the feed but keep them as history | Ordering Pearl after Reset demo gives taste 45%, price 36%, Pearl 73, and adds nothing to the feed |
+| 2 | ✅ Posts: `POST /posts` and `DELETE /posts/{id}`, photo or caption only, optional drink or shop tag, likes and comments, in feeds and on profiles | A caption-only post and a photo post both show in a follower's feed |
+| 3 | ✅ `past_orders` stat from orders and seeded history, respecting `visible_stats` | Hiding it removes it for other viewers |
+| 4 | ✅ Besteas and notifications: request, accept, decline, end; `bestea` and `besteas` on profiles; notifications for requests, accepts, and bestea orders; mark read; Reset demo clears them | Andrew and Sarah become besteas, Sarah orders, and Andrew gets one unread notification |
 
 #### Track B: ordering, posts, and besteas
 

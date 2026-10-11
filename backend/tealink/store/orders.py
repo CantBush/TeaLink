@@ -1,4 +1,4 @@
-"""Pickup orders. A completed order is a pick the Preference agent can learn from.
+"""Pickup orders. Placing an order for a top-3 drink is the pick the Preference agent learns from.
 
 Card checkout uses Stripe test mode when STRIPE_SECRET_KEY is set. Otherwise
 the order is pay at pickup, which is what the demo uses.
@@ -14,7 +14,6 @@ import urllib.request
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from tealink.schemas import ChoiceRecord
 from tealink.store.menu import drink_view
 
 PICKUP_FEE = 0.5
@@ -136,20 +135,6 @@ def update_order(runtime, account: dict, order_id: str, patch: dict) -> dict:
     return _public(order)
 
 
-def choice_for_pickup(runtime, order: dict) -> ChoiceRecord | None:
-    """The ordered drink beat the rest of the last top 3, when it was one of them."""
-    drink_id = order["items"][0]["drink_id"]
-    decision = runtime.last_decision.get(order["user_id"])
-    if decision is None or not any(option.drink_id == drink_id for option in decision.options):
-        return None
-    return ChoiceRecord(
-        user_id=order["user_id"],
-        chosen_drink_id=drink_id,
-        options=decision.options,
-        source="live",
-    )
-
-
 def _line_discount(decision, drink_id: str, price: float) -> float:
     if decision is None:
         return 0.0
@@ -164,13 +149,42 @@ def _public(order: dict) -> dict:
     return shown
 
 
-def receipt(order: dict) -> dict:
-    return {
+def receipt(order: dict, learned: dict | None = None) -> dict:
+    body = {
         "order_id": order["order_id"],
         "total": order["total"],
         "status": "placed",
         "payment_url": order.get("payment_url"),
     }
+    if learned is not None:
+        body["learned"] = learned
+    return body
+
+
+def history(runtime, user_id: str) -> list[dict]:
+    """Newest 10 past orders: seeded picks plus orders placed this session. No prices.
+
+    A cancelled order drops out. Learning from a top-3 order does not.
+    """
+    rows: list[dict] = []
+    for item in runtime.social.feed.values():
+        if item.user_id != user_id or item.kind != "pick" or not item.drink_id:
+            continue
+        if not str(item.id).startswith("f_pick_"):
+            continue
+        drink = runtime.catalog.drink(item.drink_id)
+        if drink is None:
+            continue
+        rows.append({"drink_id": item.drink_id, "shop_id": drink.shop_id, "ordered_at": item.created_at})
+    for order in runtime.orders:
+        if order["user_id"] != user_id or order["status"] == "cancelled":
+            continue
+        for line in order["items"]:
+            rows.append(
+                {"drink_id": line["drink_id"], "shop_id": order["shop_id"], "ordered_at": order["created_at"]}
+            )
+    rows.sort(key=lambda row: row["ordered_at"], reverse=True)
+    return rows[:10]
 
 
 def _stripe_url(total: float) -> str | None:

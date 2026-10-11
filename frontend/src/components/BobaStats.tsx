@@ -70,10 +70,26 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string, shown: StatKe
         </ol>
       );
     }
+    case "past_orders": {
+      const orders = stats.past_orders;
+      if (!orders?.length) return <p className="mt-1 text-sm text-mute">No orders yet.</p>;
+      return (
+        <ul className="mt-2 space-y-2 text-sm">
+          {orders.slice(0, 4).map((order) => (
+            <li key={`${order.drink_id}-${order.ordered_at}`}>
+              <span className="font-semibold">{drinkInfo(order.drink_id)?.name ?? "A drink"}</span>
+              <span className="block text-mute">
+                {shopLabel(order.shop_id)} · {order.ordered_at.slice(0, 10)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
   }
 }
 
-const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", ...RUN_STATS];
+const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", "past_orders", ...RUN_STATS];
 
 /** The stats a profile chose to show, in the order it chose. Keys in `hidden` are marked as private. */
 export function BobaStatsGrid({

@@ -45,6 +45,11 @@ class Catalog:
     def reviews_for(self, user_id: str) -> list[Review]:
         return list(self.reviews_by_user.get(user_id, []))
 
+    def add_review(self, review: Review) -> None:
+        """A private taste signal, such as an order from outside the top 3. Not a feed post."""
+        self.reviews.append(review)
+        self.reviews_by_user.setdefault(review.user_id, []).append(review)
+
     def drink(self, drink_id: str) -> Drink | None:
         return self.drinks_by_id.get(drink_id)
 

@@ -24,6 +24,13 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## Done
 
+### Ordering, posts, and besteas (Andrew, Track A of the 9:30 PM plan)
+
+- Placing an order for a drink in the current top 3 returns `learned` and teaches immediately. Ordering Pearl after Reset demo is taste 45%, price 36%, Pearl 73. An order from outside the top 3 adds a 4/5 taste signal and does not change weights. Pickup does not teach again, and cancelling does not undo it. Orders and `POST /choices` do not add a feed item. Seeded picks stay in history and stats, and are left out of `GET /feed`.
+- `POST /posts` and `DELETE /posts/{id}`. Text is 1–500 characters. `photo_url` is a JPEG data URL at most 1080 px a side, or null. Optional `drink_id` and `shop_id`. Likes and comments use the existing feed routes. Reset demo drops posts.
+- `BobaStats.past_orders` is the newest 10 orders as drink, shop, and date, with no prices. It is hidden from other viewers unless `visible_stats` includes `past_orders`. Seeded profiles do not include it until someone adds it in Edit profile.
+- Besteas: `POST /bestea/{user}/request|accept|decline` and `DELETE /bestea/{user}`. Profiles add `bestea` (`none`, `requested`, `incoming`, `bestea`) and `besteas`. `GET /notifications` returns `{items, unread}`. `POST /notifications/read` marks the given ids, or all of them when `ids` is omitted. A bestea's order notifies the other person with `drink_id` and `shop_id`. Reset demo clears besteas, notifications, and posts, and keeps accounts.
+
 ### On main (Andrew, through 12:43 PM)
 
 - Repo skeleton: FastAPI gateway with SSE streaming, agent cards and a registry with heartbeats, two-round deliberation, an in-process transport, and a Vite React frontend.

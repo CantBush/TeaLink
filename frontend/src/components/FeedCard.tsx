@@ -31,6 +31,8 @@ function headline(item: FeedItem): string {
       return "reviewed";
     case "pick":
       return "picked";
+    case "post":
+      return "posted";
     case "rec":
       return `recommended to ${item.to_author?.display_name ?? "a friend"}`;
     case "joined":
@@ -92,6 +94,10 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
           </div>
         </div>
       ) : null}
+      {item.photo_url && !drink ? (
+        <img src={item.photo_url} alt="" className="mt-3 aspect-[4/3] w-full rounded-2xl object-cover" />
+      ) : null}
+      {item.shop_id && !drink ? <p className="mt-2 text-sm text-mute">{shopLabel(item.shop_id)}</p> : null}
       {item.text ? <p className="mt-3 text-[15px]">{item.text}</p> : null}
       {item.kind === "rec" && item.to_user_id === me && drink ? (
         <Link

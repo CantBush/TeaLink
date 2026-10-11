@@ -13,6 +13,7 @@ export function BobaCard({
   accent,
   color,
   stats,
+  yours = true,
 }: {
   name: string;
   handle: string;
@@ -21,6 +22,8 @@ export function BobaCard({
   /** Card background you picked; defaults to your profile accent. */
   color?: string;
   stats: Partial<BobaStats>;
+  /** False when this is someone else's public card. */
+  yours?: boolean;
 }) {
   const weights = stats.priorities;
   const top: Dimension | null = weights
@@ -43,7 +46,9 @@ export function BobaCard({
         </div>
       </div>
 
-      <p className="relative mt-8 text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">Your boba personality</p>
+      <p className="relative mt-8 text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">
+        {yours ? "Your boba personality" : "Boba personality"}
+      </p>
       <h2 className="relative mt-2 font-display text-4xl leading-[1.05]">{stats.personality || "Still steeping"}</h2>
 
       {stats.top_notes?.length ? (
@@ -61,7 +66,9 @@ export function BobaCard({
 
       {top && weights ? (
         <div className="relative mt-6 rounded-2xl bg-foam/10 px-4 py-3">
-          <p className="text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">What matters most to you</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-foam/70 lowercase">
+            {yours ? "What matters most to you" : "What matters most"}
+          </p>
           <p className="mt-1 font-display text-2xl">
             {dimensionLabel(top).toLowerCase()}
           </p>

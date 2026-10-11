@@ -7,12 +7,14 @@ gives a new user their own taste profile and starting priorities.
 
 from __future__ import annotations
 
+import base64
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from tealink.agents.scoring import user_profile
+from tealink.auth import store as accounts
 from tealink.core import quiz as quiz_core
 from tealink.core.preferences import PRIOR, normalize
 from tealink.core.similarity import cosine_similarity
@@ -24,6 +26,8 @@ from tealink.schemas import (
     BobaStats,
     DeliberationRequest,
     FeedItem,
+    Notification,
+    PastOrder,
     QuizResult,
     StatKey,
     User,
@@ -69,6 +73,17 @@ class Actor(BaseModel):
 class CommentBody(BaseModel):
     viewer: str
     text: str = Field(max_length=MAX_COMMENT)
+
+
+class PostBody(BaseModel):
+    text: str
+    photo_url: str | None = None
+    drink_id: str | None = None
+    shop_id: str | None = None
+
+
+class ReadBody(BaseModel):
+    ids: list[str] | None = None
 
 
 class RecBody(BaseModel):
@@ -134,7 +149,9 @@ async def compute_stats(runtime, user_id: str) -> BobaStats:
         for item in runtime.social.activity(user_id)
         if item.kind in ACTIVITY_KINDS
     ]
-    return boba_stats(
+    from tealink.store.orders import history
+
+    stats = boba_stats(
         runtime.catalog,
         user_id,
         profile=user_profile(runtime.catalog, user_id),
@@ -145,6 +162,18 @@ async def compute_stats(runtime, user_id: str) -> BobaStats:
         quiz_toppings=record.toppings if record else None,
         quiz_flavors=record.flavors if record else None,
     )
+    stats.past_orders = [PastOrder.model_validate(row) for row in history(runtime, user_id)]
+    return stats
+
+
+def _session(request: Request) -> dict:
+    runtime = _runtime()
+    account = accounts.account_for_token(request.cookies.get(accounts.COOKIE))
+    if account is None:
+        raise HTTPException(status_code=401, detail="sign in required")
+    if account["user_id"] not in runtime.catalog.users_by_id:
+        raise HTTPException(status_code=403, detail="sign in as a customer")
+    return account
 
 
 def taste_match(runtime, viewer: str | None, user_id: str) -> float | None:
@@ -182,6 +211,8 @@ async def profile_view(runtime, user_id: str, viewer: str | None) -> UserProfile
         followed_by_me=runtime.social.is_following(viewer, user_id),
         taste_match=taste_match(runtime, viewer, user_id),
         stats=shown,
+        bestea=runtime.social.bestea_status(viewer, user_id),
+        besteas=runtime.social.bestea_count(user_id),
     )
 
 
@@ -358,7 +389,7 @@ def feed(user_id: str, author: str | None = None, limit: int = 50) -> list[FeedI
     else:
         target = _resolve(runtime, author)
         items = sorted(
-            runtime.social.activity(target),
+            (item for item in runtime.social.activity(target) if item.kind != "pick"),
             key=lambda item: (parse_time(item.created_at), item.id),
             reverse=True,
         )[:limit]
@@ -411,3 +442,168 @@ def send_rec(body: RecBody) -> FeedItem:
         raise HTTPException(status_code=422, detail="drink not found")
     item = runtime.social.add(sender, "rec", drink_id=body.drink_id, text=body.text.strip() or None, to_user_id=receiver)
     return _feed(runtime, item, sender)
+
+
+def _check_photo(value: str | None) -> str | None:
+    if not value:
+        return None
+    prefix = "data:image/jpeg;base64,"
+    if not value.startswith(prefix):
+        raise ValueError("photo must be a JPEG")
+    try:
+        raw = base64.b64decode(value[len(prefix) :], validate=True)
+    except Exception as exc:
+        raise ValueError("photo must be a JPEG") from exc
+    width, height = _jpeg_size(raw)
+    if width > 1080 or height > 1080:
+        raise ValueError("photo must be at most 1080 px a side")
+    return value
+
+
+def _jpeg_size(data: bytes) -> tuple[int, int]:
+    if len(data) < 4 or data[:2] != b"\xff\xd8":
+        raise ValueError("photo must be a JPEG")
+    index = 2
+    while index + 8 < len(data):
+        if data[index] != 0xFF:
+            raise ValueError("photo must be a JPEG")
+        marker = data[index + 1]
+        if marker in (0xC0, 0xC1, 0xC2):
+            height = int.from_bytes(data[index + 5 : index + 7], "big")
+            width = int.from_bytes(data[index + 7 : index + 9], "big")
+            return width, height
+        if marker == 0x01 or 0xD0 <= marker <= 0xD9:
+            index += 2
+            continue
+        if index + 4 > len(data):
+            break
+        length = int.from_bytes(data[index + 2 : index + 4], "big")
+        if length < 2:
+            break
+        index += 2 + length
+    raise ValueError("photo must be a JPEG")
+
+
+@router.post("/posts")
+def create_post(body: PostBody, request: Request) -> FeedItem:
+    runtime = _runtime()
+    account = _session(request)
+    text = body.text.strip()
+    if not 1 <= len(text) <= 500:
+        raise HTTPException(status_code=422, detail="a post needs 1 to 500 characters")
+    try:
+        photo = _check_photo(body.photo_url)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    if body.drink_id is not None and runtime.catalog.drink(body.drink_id) is None:
+        raise HTTPException(status_code=422, detail="drink not found")
+    if body.shop_id is not None and runtime.catalog.shop(body.shop_id) is None:
+        raise HTTPException(status_code=422, detail="shop not found")
+    item = runtime.social.add(
+        account["user_id"],
+        "post",
+        text=text,
+        photo_url=photo,
+        drink_id=body.drink_id,
+        shop_id=body.shop_id,
+    )
+    return _feed(runtime, item, account["user_id"])
+
+
+@router.delete("/posts/{item_id}", status_code=204)
+def delete_post(item_id: str, request: Request) -> None:
+    runtime = _runtime()
+    account = _session(request)
+    try:
+        runtime.social.delete_post(item_id, account["user_id"])
+    except KeyError:
+        raise HTTPException(status_code=404, detail="post not found") from None
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+
+def _bestea(runtime, viewer: str, other: str) -> dict:
+    return {"user_id": other, "bestea": runtime.social.bestea_status(viewer, other), "besteas": runtime.social.bestea_count(viewer)}
+
+
+@router.post("/bestea/{ref}/request")
+def request_bestea(ref: str, request: Request) -> dict:
+    runtime = _runtime()
+    account = _session(request)
+    other = _resolve(runtime, ref)
+    try:
+        runtime.social.request_bestea(account["user_id"], other)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return _bestea(runtime, account["user_id"], other)
+
+
+@router.post("/bestea/{ref}/accept")
+def accept_bestea(ref: str, request: Request) -> dict:
+    runtime = _runtime()
+    account = _session(request)
+    other = _resolve(runtime, ref)
+    try:
+        runtime.social.accept_bestea(account["user_id"], other)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="no bestea request") from None
+    return _bestea(runtime, account["user_id"], other)
+
+
+@router.post("/bestea/{ref}/decline")
+def decline_bestea(ref: str, request: Request) -> dict:
+    runtime = _runtime()
+    account = _session(request)
+    other = _resolve(runtime, ref)
+    try:
+        runtime.social.decline_bestea(account["user_id"], other)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="no bestea request") from None
+    return _bestea(runtime, account["user_id"], other)
+
+
+@router.delete("/bestea/{ref}")
+def end_bestea(ref: str, request: Request) -> dict:
+    runtime = _runtime()
+    account = _session(request)
+    other = _resolve(runtime, ref)
+    try:
+        runtime.social.end_bestea(account["user_id"], other)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="no bestea") from None
+    return _bestea(runtime, account["user_id"], other)
+
+
+def _notes(runtime, user_id: str) -> dict:
+    items = []
+    unread = 0
+    for raw in runtime.social.notifications_for(user_id):
+        if not raw["read"]:
+            unread += 1
+        note = Notification(
+            id=raw["id"],
+            kind=raw["kind"],
+            from_user=_author(runtime, raw["from_user"]),
+            drink_id=raw.get("drink_id"),
+            shop_id=raw.get("shop_id"),
+            created_at=raw["created_at"],
+            read=raw["read"],
+        )
+        dumped = note.model_dump(mode="json", by_alias=True, exclude_none=True)
+        items.append(dumped)
+    return {"items": items, "unread": unread}
+
+
+@router.get("/notifications")
+def get_notifications(request: Request) -> dict:
+    runtime = _runtime()
+    account = _session(request)
+    return _notes(runtime, account["user_id"])
+
+
+@router.post("/notifications/read")
+def read_notifications(body: ReadBody, request: Request) -> dict:
+    runtime = _runtime()
+    account = _session(request)
+    runtime.social.mark_read(account["user_id"], body.ids)
+    return _notes(runtime, account["user_id"])

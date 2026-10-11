@@ -184,7 +184,8 @@ export type StatKey =
   | "shops_visited"
   | "streak"
   | "top_notes"
-  | "priorities";
+  | "priorities"
+  | "past_orders";
 
 export interface BobaStats {
   fav_drink_id: string | null;
@@ -202,6 +203,8 @@ export interface BobaStats {
   top_notes: string[];
   priorities: DimensionScores;
   personality: string;
+  /** Newest 10. Drink, shop, and date. Never a price. Other people see it only when it's in visible_stats. */
+  past_orders?: { drink_id: string; shop_id: string; ordered_at: string }[];
 }
 
 export interface Avatar {
@@ -231,6 +234,9 @@ export interface UserProfile {
   stats: Partial<BobaStats>;
   /** Reserved for uploads; always null for now. */
   cover_url?: string | null;
+  /** From your side when you look at this profile. */
+  bestea?: "none" | "requested" | "incoming" | "bestea";
+  besteas?: number;
 }
 
 export type ProfilePatch = Partial<
@@ -275,7 +281,7 @@ export interface FeedComment {
   created_at: string;
 }
 
-export type FeedKind = "review" | "pick" | "rec" | "joined";
+export type FeedKind = "review" | "pick" | "rec" | "joined" | "post";
 
 export interface FeedItem {
   id: string;
@@ -283,6 +289,7 @@ export interface FeedItem {
   author: Author;
   kind: FeedKind;
   drink_id: string | null;
+  shop_id?: string | null;
   rating: number | null;
   text: string | null;
   to_user_id?: string;

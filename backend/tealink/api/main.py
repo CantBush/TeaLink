@@ -344,7 +344,7 @@ async def choose(body: ChoiceRequest) -> dict:
     reply = await runtime.transport.send(card, request)
     if reply.preference is None:
         raise HTTPException(status_code=503, detail="preference agent did not answer")
-    runtime.social.add(body.user_id, "pick", drink_id=body.drink_id)
+    runtime.social.remember_choice(body.user_id, body.drink_id)
     return reply.preference.model_dump(mode="json")
 
 

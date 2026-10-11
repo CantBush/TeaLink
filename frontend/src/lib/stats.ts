@@ -9,6 +9,7 @@ export const ALL_STATS: StatKey[] = [
   "shops_visited",
   "streak",
   "priorities",
+  "past_orders",
 ];
 
 /** Stats the backend still serves but the UI no longer shows. */
@@ -32,6 +33,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   shops_visited: "Shops visited",
   streak: "Boba streak",
   priorities: "What matters most",
+  past_orders: "Past orders",
 };
 
 /** "brown_sugar" → "Brown Sugar". */

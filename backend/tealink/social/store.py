@@ -46,6 +46,7 @@ class StoredFeedItem(BaseModel):
     user_id: str
     kind: str
     drink_id: str | None = None
+    shop_id: str | None = None
     rating: int | None = None
     text: str | None = None
     to_user_id: str | None = None
@@ -62,6 +63,7 @@ class StoredFeedItem(BaseModel):
             user_id=self.user_id,
             kind=self.kind,  # type: ignore[arg-type]
             drink_id=self.drink_id,
+            shop_id=self.shop_id,
             rating=self.rating,
             text=self.text,
             to_user_id=self.to_user_id,
@@ -93,6 +95,10 @@ class SocialStore:
         self.follows: set[tuple[str, str]] = set(follows)
         self.feed: dict[str, StoredFeedItem] = {item.id: item for item in feed}
         self.quiz: dict[str, QuizRecord] = {}
+        # Pending (asker, asked) pairs, and accepted pairs. Reset demo reloads this store.
+        self.requests: set[tuple[str, str]] = set()
+        self.pairs: set[frozenset[str]] = set()
+        self.notifications: dict[str, dict] = {}
         self._next_id = 1
 
     # Profiles
@@ -151,19 +157,23 @@ class SocialStore:
         kind: str,
         *,
         drink_id: str | None = None,
+        shop_id: str | None = None,
         rating: int | None = None,
         text: str | None = None,
         to_user_id: str | None = None,
+        photo_url: str | None = None,
     ) -> StoredFeedItem:
         item = StoredFeedItem(
             id=self._new_id("f"),
             user_id=user_id,
             kind=kind,
             drink_id=drink_id,
+            shop_id=shop_id,
             rating=rating,
             text=text,
             to_user_id=to_user_id,
             created_at=now_iso(),
+            photo_url=photo_url,
         )
         self.feed[item.id] = item
         return item
@@ -171,19 +181,131 @@ class SocialStore:
     def feed_for(self, viewer: str, limit: int = 50) -> list[StoredFeedItem]:
         """The viewer's own activity, people they follow, and recs sent to them. Newest first."""
         circle = set(self.following(viewer)) | {viewer}
-        items = [item for item in self.feed.values() if item.user_id in circle or item.to_user_id == viewer]
+        items = [
+            item
+            for item in self.feed.values()
+            if item.kind != "pick" and (item.user_id in circle or item.to_user_id == viewer)
+        ]
         return sorted(items, key=lambda item: (parse_time(item.created_at), item.id), reverse=True)[:limit]
 
     def activity(self, user_id: str) -> list[StoredFeedItem]:
         return [item for item in self.feed.values() if item.user_id == user_id]
 
     def picks(self, user_id: str) -> list[str]:
-        """Drinks the user picked from a top 3, oldest first."""
+        """Drinks the user picked from a top 3, oldest first. Includes seeded history."""
         mine = sorted(
             (item for item in self.activity(user_id) if item.kind == "pick" and item.drink_id),
             key=lambda item: (parse_time(item.created_at), item.id),
         )
         return [item.drink_id for item in mine if item.drink_id]
+
+    def remember_choice(self, user_id: str, drink_id: str) -> None:
+        """A top-3 choice still counts in stats. It is not a feed post."""
+        self.add(user_id, "pick", drink_id=drink_id)
+
+    def delete_post(self, item_id: str, user_id: str) -> None:
+        item = self._item(item_id)
+        if item.kind != "post" or item.user_id != user_id:
+            raise PermissionError("you can only delete your own posts")
+        del self.feed[item_id]
+
+    def bestea_status(self, viewer: str | None, other: str) -> str:
+        if viewer is None or viewer == other:
+            return "none"
+        if frozenset({viewer, other}) in self.pairs:
+            return "bestea"
+        if (viewer, other) in self.requests:
+            return "requested"
+        if (other, viewer) in self.requests:
+            return "incoming"
+        return "none"
+
+    def bestea_count(self, user_id: str) -> int:
+        return sum(1 for pair in self.pairs if user_id in pair)
+
+    def request_bestea(self, viewer: str, other: str) -> str:
+        if viewer == other:
+            raise ValueError("you can't be your own bestea")
+        if frozenset({viewer, other}) in self.pairs:
+            raise ValueError("you're already besteas")
+        if (viewer, other) in self.requests:
+            return "requested"
+        if (other, viewer) in self.requests:
+            self.accept_bestea(viewer, other)
+            return "bestea"
+        self.requests.add((viewer, other))
+        self.notify(other, "bestea_request", viewer)
+        return "requested"
+
+    def accept_bestea(self, viewer: str, other: str) -> str:
+        if (other, viewer) not in self.requests:
+            raise KeyError(other)
+        self.requests.discard((other, viewer))
+        self.pairs.add(frozenset({viewer, other}))
+        self.notify(other, "bestea_accepted", viewer)
+        return "bestea"
+
+    def decline_bestea(self, viewer: str, other: str) -> str:
+        if (other, viewer) not in self.requests:
+            raise KeyError(other)
+        self.requests.discard((other, viewer))
+        return "none"
+
+    def end_bestea(self, viewer: str, other: str) -> str:
+        if (viewer, other) in self.requests:
+            self.requests.discard((viewer, other))
+            return "none"
+        if (other, viewer) in self.requests:
+            self.requests.discard((other, viewer))
+            return "none"
+        pair = frozenset({viewer, other})
+        if pair in self.pairs:
+            self.pairs.discard(pair)
+            return "none"
+        raise KeyError(other)
+
+    def partners(self, user_id: str) -> list[str]:
+        found = []
+        for pair in self.pairs:
+            if user_id in pair:
+                found.append(next(other for other in pair if other != user_id))
+        return sorted(found)
+
+    def notify(
+        self,
+        user_id: str,
+        kind: str,
+        from_user: str,
+        drink_id: str | None = None,
+        shop_id: str | None = None,
+    ) -> dict:
+        item = {
+            "id": self._new_id("n"),
+            "user_id": user_id,
+            "kind": kind,
+            "from_user": from_user,
+            "drink_id": drink_id,
+            "shop_id": shop_id,
+            "created_at": now_iso(),
+            "read": False,
+        }
+        self.notifications[item["id"]] = item
+        return item
+
+    def notify_order(self, user_id: str, drink_id: str, shop_id: str) -> None:
+        for partner in self.partners(user_id):
+            self.notify(partner, "bestea_order", user_id, drink_id=drink_id, shop_id=shop_id)
+
+    def notifications_for(self, user_id: str) -> list[dict]:
+        mine = [item for item in self.notifications.values() if item["user_id"] == user_id]
+        return sorted(mine, key=lambda item: (parse_time(item["created_at"]), item["id"]), reverse=True)
+
+    def mark_read(self, user_id: str, ids: list[str] | None) -> None:
+        for item in self.notifications.values():
+            if item["user_id"] != user_id:
+                continue
+            if ids is None or item["id"] in ids:
+                item["read"] = True
 
     def like(self, item_id: str, user_id: str) -> StoredFeedItem:
         item = self._item(item_id)
