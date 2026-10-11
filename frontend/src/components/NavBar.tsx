@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { logOut } from "../state/logout.ts";
+import { signOut } from "../state/account.ts";
+import { useMe } from "../state/me.ts";
 import { useRole } from "../state/role.ts";
 import { useProfile } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
@@ -49,13 +50,15 @@ export function NavBar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const leave = () => {
-    logOut();
+    void signOut();
     navigate("/welcome");
   };
   const profilePath = profile ? `/u/${profile.handle}` : "/me";
   const role = useRole();
   const store = role === "store" || pathname === "/shop" || pathname.startsWith("/shop/");
-  const hideTabs = pathname === "/welcome" || store;
+  const me = useMe();
+  const signedOut = role === null || (role === "customer" && !me);
+  const hideTabs = pathname === "/welcome" || store || signedOut;
 
   const tabs: Tab[] = [
     { key: "home", to: "/home", label: "Home", icon: <HomeIcon />, active: (path) => path === "/home" },
@@ -82,7 +85,7 @@ export function NavBar() {
           >
             <BobaMark className="h-9 w-12" />
           </NavLink>
-          {store ? null : (
+          {store || hideTabs ? null : (
             <nav className="hidden items-center gap-7 text-[15px] tracking-[0.08em] lowercase md:flex" aria-label="Main">
               {tabs.slice(0, 4).map((tab) => (
                 <NavLink
@@ -97,15 +100,25 @@ export function NavBar() {
               ))}
             </nav>
           )}
-          {store ? (
+          {store || hideTabs ? (
             <span className="ml-auto" />
           ) : (
-            <NavLink to={profilePath} className="ml-auto flex items-center gap-2 text-[15px] tracking-[0.04em] text-ink">
+            <NavLink
+              to="/orders"
+              className={({ isActive }) =>
+                `ml-auto text-[15px] tracking-[0.04em] lowercase ${isActive ? "text-ink" : "text-ink/60 hover:text-ink"}`
+              }
+            >
+              Orders
+            </NavLink>
+          )}
+          {store || hideTabs ? null : (
+            <NavLink to={profilePath} className="flex items-center gap-2 text-[15px] tracking-[0.04em] text-ink">
               <span className="hidden lowercase md:inline">{profile?.display_name ?? "profile"}</span>
               <Avatar avatar={profile?.avatar} size="sm" />
             </NavLink>
           )}
-          {pathname === "/welcome" ? null : (
+          {pathname === "/welcome" || signedOut ? null : (
             <button type="button" onClick={leave} className="text-[15px] tracking-[0.04em] lowercase text-ink/60 hover:text-ink">
               Log out
             </button>

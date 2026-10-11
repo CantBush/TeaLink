@@ -32,6 +32,7 @@ export function useProfile(handle?: string): { profile: UserProfile | null; erro
   }, []);
 
   useEffect(() => {
+    if (!target) return;
     let cancelled = false;
     const key = `${target}:${me}`;
     social

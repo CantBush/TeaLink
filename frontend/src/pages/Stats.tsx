@@ -8,7 +8,7 @@ import { StatsReceipt } from "../components/StatsReceipt.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
 import { CARD_COLORS, cardColor, setCardColor } from "../lib/cardColor.ts";
 import { ALL_STATS, shownStats } from "../lib/stats.ts";
-import { hasChosenAccount } from "../state/me.ts";
+import { isSignedIn } from "../state/account.ts";
 import { useRole } from "../state/role.ts";
 import { loadProfile, useSession } from "../state/session.ts";
 import { useProfile } from "../state/social.ts";
@@ -25,7 +25,7 @@ export function Stats() {
   }, [session.userId]);
 
   if (role === "store") return <Navigate to="/shop" replace />;
-  if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
+  if (!isSignedIn()) return <Navigate to="/welcome" replace />;
   if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-mute">Loading your stats…</main>;
 
   const visible = shownStats(profile.visible_stats);

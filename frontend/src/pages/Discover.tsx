@@ -6,11 +6,13 @@ import type { FeedItem, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
+import { OrderSheet } from "../components/OrderSheet.tsx";
 import { SendRec } from "../components/SendRec.tsx";
 import { type CatalogDrink, type DrinkBase, allDrinks, drinkBase, drinkInfo } from "../lib/catalog.ts";
 import { SHOP_IDS, matchPercent, price, shopLabel } from "../lib/format.ts";
 import { drinkPhoto, shopPhoto } from "../lib/images.ts";
 import { drinkMatch, shopMatch } from "../lib/match.ts";
+import { useShopProfiles } from "../lib/shopProfile.ts";
 import { noteLabel } from "../lib/stats.ts";
 import { useMe } from "../state/me.ts";
 import { loadProfile, useSession } from "../state/session.ts";
@@ -110,7 +112,9 @@ function PersonCard({ person, onFollow }: { person: UserProfile; onFollow: () =>
 
 function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews: FeedItem[]; onClose: () => void }) {
   const [sharing, setSharing] = useState(false);
+  const [ordering, setOrdering] = useState(false);
   if (sharing) return <SendRec drinkId={drink.id} onClose={onClose} />;
+  if (ordering) return <OrderSheet drinkId={drink.id} onClose={onClose} />;
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
       <section
@@ -142,13 +146,18 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
           </ul>
         ) : null}
 
-        <button
-          type="button"
-          onClick={() => setSharing(true)}
-          className="mt-5 min-h-11 w-full rounded-full border border-ink font-semibold text-ink"
-        >
-          Send to a friend
-        </button>
+        <div className="mt-5 flex gap-3">
+          <button type="button" onClick={() => setOrdering(true)} className="min-h-11 flex-1 rounded-full bg-ink font-semibold text-foam">
+            Order for pickup
+          </button>
+          <button
+            type="button"
+            onClick={() => setSharing(true)}
+            className="min-h-11 flex-1 rounded-full border border-ink font-semibold text-ink"
+          >
+            Send to a friend
+          </button>
+        </div>
 
         <h3 className="mt-6 mb-3 font-display text-xl">How it tastes</h3>
         <TasteBars profile={drink.attributes} />
@@ -178,6 +187,7 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
 export function Discover() {
   const me = useMe();
   const { profile: taste, userId } = useSession();
+  const shopProfiles = useShopProfiles();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") ?? "");
   const scope = (params.get("scope") as Scope | null) ?? "all";
@@ -329,12 +339,15 @@ export function Discover() {
                     }}
                     className={`block w-52 overflow-hidden rounded-3xl border text-left ${shop === id ? "border-ink" : "border-line"} bg-foam`}
                   >
-                    <img src={shopPhoto(id) ?? ""} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                    <img src={shopProfiles[id]?.photo ?? shopPhoto(id) ?? ""} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
                     <span className="block px-4 pt-3 font-display text-lg leading-tight">{shopLabel(id)}</span>
                     <span className="block px-4 pb-3 text-sm text-mute">
                       {menu.length} drinks · {price(low)}–{price(high)}
                     </span>
                     <span className="block px-4 pb-3 -mt-2 text-xs text-moss">{matchPercent(match)}% for you</span>
+                    {shopProfiles[id]?.description ? (
+                      <span className="-mt-1 line-clamp-2 block px-4 pb-3 text-xs text-mute">{shopProfiles[id].description}</span>
+                    ) : null}
                   </button>
                 </li>
               );

@@ -5,7 +5,8 @@
 ## Before you start
 
 - **Run on AGNTCY:** start NATS (`make bus`, or `nats-server -p 4222`), then `TRANSPORT=agntcy make agents`, `TRANSPORT=agntcy make api`, and `make web`. Open http://localhost:5173 and check that the badge next to **the team** on **at the counter** says **"AGNTCY · 10 agents over NATS"**. If it says "In-process fallback", the bus isn't answering. The demo still works, but skip the AGNTCY line at the end.
-- Press **Reset demo** on the **at the counter** sub-tab (`/counter`) before every run. It works in both AGNTCY and local mode. The TeaLink tab has four sub-tabs: **today's picks** (the top 3), **at the counter** (the agents' chat and the what-if buttons), **why this order**, and **evidence**.
+- **Sign in first.** The app shows only the sign-in page until you have an account. On `/welcome`, click **Customer: Andrew** under "demo accounts" (or type `andrew@tealink.demo`, password `boba`). Don't sign up a fresh account for the demo: the numbers below are Andrew's.
+- Press **Reset demo** on the **at the counter** sub-tab (`/counter`) before every run. Reset clears menu edits, discount rules, orders, and sold-out marks, but keeps accounts, so you stay signed in. It works in both AGNTCY and local mode. The TeaLink tab has four sub-tabs: **today's picks** (the top 3), **at the counter** (the agents' chat and the what-if buttons), **why this order**, and **evidence**.
 - Have a second tab on `/evidence`.
 - Backup: if the API dies, the frontend replays a saved real round, labelled "Saved round" next to the team. Explain the flow over the saved round, and switch to the backup video for the adaptation part.
 
@@ -68,12 +69,22 @@ Switch to the **evidence** sub-tab.
 
 AGNTCY passed its go/no-go. If the badge showed AGNTCY, add: "Every agent is a separate service talking A2A over NATS on Cisco's AGNTCY, and if the bus goes down, the same agents answer in-process, so the demo never breaks."
 
+## Optional, if there's time: the shop side and ordering (about 30 seconds)
+
+Only do this after the close, or if a judge asks how shops fit in. It doesn't change the numbers above.
+
+1. On **today's picks**, click **Order for pickup** on Wintermelon Tea. Choose pearls and **Place order**. "Checkout shows the price, any close-call offer, and the pickup fee. Card payments go through Stripe on the server; the browser never sees a key."
+2. **Log out**, then click **Shop: Sunright Tea Studio**. Open **Orders**: the order is there. Click **Accept**, **Mark ready**, **Picked up**.
+3. Open **Offers**: "The four platform rules are locked, so a shop can never buy a win outside a close call. Shops can only narrow when an offer goes out, for example weekdays only."
+4. Open **Demand** and toggle **past year**: "Shops see taste trends, anonymized, with groups under 5 people hidden."
+
 ## Likely judge questions
 
 - **"Why not let one LLM decide?"** One model hides the trade-off. Separate agents make the disagreement visible and auditable, and the shop agents hold information nobody else has (inventory).
 - **"How does it learn?"** Each pick from the top 3 is compared with the drinks passed over. Weight moves toward the priorities where the pick scored higher. A minimum weight of 5% means no priority is ever ignored completely.
 - **"What if everything is ruled out?"** The team says so and asks the user instead of recommending something unavailable.
 - **"What's the human-in-the-loop rule?"** If the top two are within 0.02, or nothing survives, the team asks.
+- **"Can a shop pay to win?"** No. An offer only goes out in a close call that passes the four locked platform rules, it's capped at 10% or $1, it's computed in code, and it's labelled on the card. A shop's own rules can only make offers rarer.
 
 ## Dry runs
 

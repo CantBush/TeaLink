@@ -8,7 +8,8 @@ import { FeedCard } from "../components/FeedCard.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { matchPercent } from "../lib/format.ts";
 import { tint } from "../lib/palette.ts";
-import { hasChosenAccount, useMe } from "../state/me.ts";
+import { useMe } from "../state/me.ts";
+import { isSignedIn } from "../state/account.ts";
 import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
@@ -83,7 +84,7 @@ export function Home() {
   const newcomer = profile !== null && (profile.stats.tried_count ?? 0) === 0;
 
   if (role === "store") return <Navigate to="/shop" replace />;
-  if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
+  if (!isSignedIn()) return <Navigate to="/welcome" replace />;
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-4 py-5 sm:px-5 sm:py-8">

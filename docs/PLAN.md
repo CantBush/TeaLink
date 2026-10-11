@@ -580,13 +580,15 @@ Andrew wrote the first shop pages in `frontend/src/pages/shop/`. B builds on the
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Sign in and sign up on `/welcome` with "use the demo account" buttons; remove the default profile in `state/me.ts`; every customer and shop route requires a session | A fresh browser sees only `/welcome` until it signs in, and signing in elsewhere restores the same account |
-| 2 | ⬜ Shop menu editor: drinks (add, edit, remove, sold out), sections (add, rename, reorder, move drinks) | A shop can build a section and move a drink into it |
-| 3 | ⬜ Close-call discount rules page: locked platform rules, plus the shop's own rules to add, edit, remove, and switch on or off | Changes save to the API and survive a reload |
-| 4 | ⬜ Demand: taste trends with a week, month, and year toggle (drink types, flavors, most popular overall and the shop's own) | All three ranges render, with no names shown |
-| 5 | ⬜ Shop profile: change the picture and add a description; show them on Discover's shop cards | |
-| 6 | ⬜ Ordering: Order for pickup, options, checkout (offer and pickup fee), payment or pay at pickup, an Orders page with status, and the shop's incoming orders | A demo order completes end to end |
-| 7 | ⬜ Update `docs/demo-script.md` for sign in, and add a short shop-side moment if there's time | The script's clicks match the app |
+| 1 | ✅ Sign in and sign up on `/welcome` with "use the demo account" buttons; remove the default profile in `state/me.ts`; every customer and shop route requires a session | A fresh browser sees only `/welcome` until it signs in, and signing in elsewhere restores the same account |
+| 2 | ✅ Shop menu editor: drinks (add, edit, remove, sold out), sections (add, rename, reorder, move drinks) | A shop can build a section and move a drink into it |
+| 3 | ✅ Close-call discount rules page: locked platform rules, plus the shop's own rules to add, edit, remove, and switch on or off | Changes save to the API and survive a reload |
+| 4 | ✅ Demand: taste trends with a week, month, and year toggle (drink types, flavors, most popular overall and the shop's own) | All three ranges render, with no names shown |
+| 5 | ✅ Shop profile: change the picture and add a description; show them on Discover's shop cards | The new picture and description show on Discover |
+| 6 | ✅ Ordering: Order for pickup, options, checkout (offer and pickup fee), payment or pay at pickup, an Orders page with status, and the shop's incoming orders | A demo order completes end to end |
+| 7 | ✅ Update `docs/demo-script.md` for sign in, and add a short shop-side moment if there's time | The script's clicks match the app |
+
+All seven run on in-browser mocks until Track A's routes land, and switch to the API with no frontend change. The differences A should know about are in `PROGRESS.md`.
 
 ### Custom what-if at the counter (added 8:20 PM)
 
@@ -690,6 +692,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## Plan change log
 
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
+- **8:50 PM:** Track B finished its seven "Accounts, store tools, and ordering" rows on in-browser mocks, including sign-in, the shop pages, and pickup orders. Reset demo now keeps whoever is signed in.
 - **8:15 PM:** Added "Accounts, store tools, and ordering":
   - Real sign in, with no default profile before it, and no access without an account. The demo keeps one-tap demo account buttons.
   - Shops can edit their menu and its sections, add their own close-call discount rules on top of locked platform rules, see taste trends by week, month, or year, and change their picture and description.

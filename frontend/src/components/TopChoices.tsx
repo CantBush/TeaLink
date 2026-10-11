@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Sprig, TeaBowl } from "./Doodles.tsx";
+import { OrderSheet } from "./OrderSheet.tsx";
 import { Link } from "react-router-dom";
 import type { Decision, Dimension, RankedDrink } from "../api/types.ts";
 import { topOptions } from "../lib/diff.ts";
@@ -88,6 +90,7 @@ export function TopChoices({
   running: boolean;
   onPick: (option: RankedDrink) => void;
 }) {
+  const [ordering, setOrdering] = useState<string | null>(null);
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
@@ -176,11 +179,19 @@ export function TopChoices({
               >
                 Pick this
               </button>
+              <button
+                type="button"
+                onClick={() => setOrdering(option.drink_id)}
+                className="mt-2 min-h-10 w-full rounded-full border border-ink px-4 py-2 text-sm font-semibold text-ink"
+              >
+                Order for pickup
+              </button>
             </div>
           </li>
         ))}
       </ol>
       <p className="mt-4 text-[15px] leading-relaxed text-mute">{decision.explanation}</p>
+      {ordering ? <OrderSheet drinkId={ordering} onClose={() => setOrdering(null)} /> : null}
     </section>
   );
 }

@@ -13,8 +13,11 @@ import type {
 import { social } from "../api/social.ts";
 import { resetCovers } from "../lib/images.ts";
 import { sampleSession } from "../mocks/sample.ts";
+import { orderMock } from "../mocks/orderStore.ts";
+import { shopMock } from "../mocks/shopStore.ts";
 import { resetSocialMock } from "../mocks/socialStore.ts";
-import { DEMO_USER, getMe, setMe } from "./me.ts";
+import { shopProfilesChanged } from "../lib/shopProfile.ts";
+import { getMe } from "./me.ts";
 import { profilesChanged } from "./social.ts";
 
 function guessName(userId: string): string {
@@ -225,11 +228,11 @@ export function switchUser() {
 export async function resetAll() {
   await client.resetDemo().catch(() => {});
   resetSocialMock();
+  shopMock.reset();
+  orderMock.reset();
+  shopProfilesChanged();
   resetCovers();
-  const switched = getMe() !== DEMO_USER;
-  setMe(DEMO_USER);
   profilesChanged();
-  if (switched) switchUser();
   set({ learned: null, previousDecision: null, decision: null, change: null });
   rerun("Demo reset to the seeded state.");
 }

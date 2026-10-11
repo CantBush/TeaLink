@@ -2,7 +2,7 @@ import { BobaMark } from "./BobaMark.tsx";
 import { Shell } from "./OnboardingShell.tsx";
 
 /** Asked once, before name and handle. Customers continue; stores never take the quiz. */
-export function RoleChoice({ onCustomer, onStore }: { onCustomer: () => void; onStore: () => void }) {
+export function RoleChoice({ onCustomer, onStore, onBack }: { onCustomer: () => void; onStore: () => void; onBack?: () => void }) {
   return (
     <Shell>
       <div className="flex items-center gap-2 font-display text-2xl tracking-[0.14em]">
@@ -17,7 +17,7 @@ export function RoleChoice({ onCustomer, onStore }: { onCustomer: () => void; on
           className="rounded-3xl border-2 border-line bg-foam px-5 py-5 text-left hover:border-ink/30"
         >
           <span className="block font-display text-2xl">I'm a customer</span>
-          <span className="mt-1 block text-base font-normal text-mute">Continue to your name, handle, and the quiz.</span>
+          <span className="mt-1 block text-base font-normal text-mute">Continue to your name, handle, sign-in details, and the quiz.</span>
         </button>
         <button
           type="button"
@@ -28,6 +28,11 @@ export function RoleChoice({ onCustomer, onStore }: { onCustomer: () => void; on
           <span className="mt-1 block text-base font-normal text-mute">Pick your shop. No quiz and no customer profile.</span>
         </button>
       </div>
+      {onBack ? (
+        <button type="button" onClick={onBack} className="mt-4 py-2 text-sm font-semibold text-mute hover:text-ink">
+          Already have an account? Sign in
+        </button>
+      ) : null}
     </Shell>
   );
 }

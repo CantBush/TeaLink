@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, auth } from "../api/auth.ts";
 import { social } from "../api/social.ts";
-import type { QuizAnswers, QuizQuestion, UserProfile } from "../api/types.ts";
+import type { Account, QuizAnswers, QuizQuestion, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaMark } from "../components/BobaMark.tsx";
@@ -9,10 +10,13 @@ import { Shell } from "../components/OnboardingShell.tsx";
 import { RoleChoice } from "../components/RoleChoice.tsx";
 import { AVATAR_COLORS as STARTER_COLORS } from "../lib/palette.ts";
 import { ShopPicker } from "./shop/ShopPicker.tsx";
-import { DEMO_USER, getMe, hasChosenAccount, setMe } from "../state/me.ts";
-import { getRole, setRole, useRole, useShopId } from "../state/role.ts";
+import { isSignedIn, signIn } from "../state/account.ts";
+import { getMe } from "../state/me.ts";
+import { getRole, useRole, useShopId } from "../state/role.ts";
 import { switchUser } from "../state/session.ts";
 import { profilesChanged } from "../state/social.ts";
+
+const input = "w-full rounded-2xl border border-line bg-foam px-4 py-3 text-lg outline-none focus:border-moss";
 
 const STARTER_EMOJIS = ["🧋", "🍵", "🐯", "🌸", "🍓", "🐼", "🦊", "🌙"];
 
@@ -24,23 +28,174 @@ function handleFrom(name: string): string {
 }
 
 type Step =
+  | { kind: "signin" }
   | { kind: "role" }
   | { kind: "shop" }
+  | { kind: "store"; shopId: string }
   | { kind: "account" }
   | { kind: "question"; index: number }
   | { kind: "saving" }
   | { kind: "result"; profile: UserProfile };
 
-/** Role is asked once. A retake (already a customer, not Andrew) and the demo account skip it. */
+/** Signed out: sign in first. A signed-in customer reaching /welcome is retaking the quiz. */
 function firstStep(): Step {
-  if (getRole() === "store") return { kind: "shop" };
-  if (hasChosenAccount() && getMe() !== DEMO_USER) return { kind: "question", index: 0 };
-  if (getRole() === "customer" || (hasChosenAccount() && getMe() === DEMO_USER)) return { kind: "account" };
-  return { kind: "role" };
+  if (isSignedIn() && getRole() === "customer") return { kind: "question", index: 0 };
+  return { kind: "signin" };
 }
 
-function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
+function Credentials({
+  email,
+  password,
+  onEmail,
+  onPassword,
+  newPassword,
+}: {
+  email: string;
+  password: string;
+  onEmail: (value: string) => void;
+  onPassword: (value: string) => void;
+  newPassword?: boolean;
+}) {
+  return (
+    <>
+      <label className="block">
+        <span className="mb-2 block text-sm font-semibold">Email</span>
+        <input type="email" value={email} onChange={(event) => onEmail(event.target.value)} autoComplete="email" required className={input} />
+      </label>
+      <label className="block">
+        <span className="mb-2 block text-sm font-semibold">Password</span>
+        <input
+          type="password"
+          value={password}
+          onChange={(event) => onPassword(event.target.value)}
+          autoComplete={newPassword ? "new-password" : "current-password"}
+          minLength={newPassword ? 6 : undefined}
+          required
+          className={input}
+        />
+        {newPassword ? <span className="mt-1 block text-xs text-mute">At least 6 characters.</span> : null}
+      </label>
+    </>
+  );
+}
+
+function SignInStep({ onCreate }: { onCreate: () => void }) {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const enter = (next: Promise<Account>) => {
+    setBusy(true);
+    setError(null);
+    next
+      .then((account) => {
+        signIn(account);
+        navigate(account.role === "store" ? "/shop" : "/");
+      })
+      .catch((reason: unknown) => {
+        setError(reason instanceof Error ? reason.message : "Couldn't sign you in.");
+        setBusy(false);
+      });
+  };
+
+  return (
+    <Shell>
+      <div className="flex items-center gap-2 font-display text-2xl tracking-[0.14em]">
+        <BobaMark /> TeaLink
+      </div>
+      <h1 className="mt-6 font-display text-4xl leading-tight sm:text-5xl">welcome back</h1>
+      <p className="mt-3 text-lg text-mute">Sign in to see your top 3, your stats, and your friends.</p>
+
+      <form
+        className="mt-8 space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          enter(auth.login(email, password));
+        }}
+      >
+        <Credentials email={email} password={password} onEmail={setEmail} onPassword={setPassword} />
+        {error ? <p className="text-sm font-semibold text-[#b33]">{error}</p> : null}
+        <button type="submit" disabled={busy || !email || !password} className="w-full rounded-full bg-ink py-3.5 text-lg font-semibold text-foam disabled:opacity-40">
+          {busy ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+
+      <button type="button" onClick={onCreate} className="mt-4 w-full rounded-full border border-line py-3 font-semibold">
+        Create an account
+      </button>
+
+      <div className="mt-8 rounded-3xl bg-sage/70 p-4">
+        <p className="text-xs tracking-[0.14em] text-mute">demo accounts</p>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => enter(auth.login(DEMO_ACCOUNTS.customer.email, DEMO_PASSWORD))}
+            className="rounded-full bg-foam px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+          >
+            Customer: {DEMO_ACCOUNTS.customer.label}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => enter(auth.login(DEMO_ACCOUNTS.store.email, DEMO_PASSWORD))}
+            className="rounded-full bg-foam px-4 py-2.5 text-sm font-semibold disabled:opacity-40"
+          >
+            Shop: {DEMO_ACCOUNTS.store.label}
+          </button>
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
+function StoreStep({ shopId, onBack }: { shopId: string; onBack: () => void }) {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <Shell>
+      <h1 className="font-display text-4xl leading-tight">Create your shop account</h1>
+      <p className="mt-3 text-lg text-mute">You'll use this to sign back in to your shop's page.</p>
+      <form
+        className="mt-8 space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setBusy(true);
+          setError(null);
+          auth
+            .signup({ email, password, role: "store", shop_id: shopId })
+            .then((account) => {
+              signIn(account);
+              navigate("/shop");
+            })
+            .catch((reason: unknown) => {
+              setError(reason instanceof Error ? reason.message : "Couldn't create the account.");
+              setBusy(false);
+            });
+        }}
+      >
+        <Credentials email={email} password={password} onEmail={setEmail} onPassword={setPassword} newPassword />
+        {error ? <p className="text-sm font-semibold text-[#b33]">{error}</p> : null}
+        <button type="submit" disabled={busy || !email || password.length < 6} className="w-full rounded-full bg-ink py-3.5 text-lg font-semibold text-foam disabled:opacity-40">
+          {busy ? "Creating your account…" : "Create shop account"}
+        </button>
+      </form>
+      <button type="button" onClick={onBack} className="mt-4 py-2 text-sm font-semibold text-mute hover:text-ink">
+        Pick a different shop
+      </button>
+    </Shell>
+  );
+}
+
+function AccountStep({ onReady, onSignIn }: { onReady: (account: Account) => void; onSignIn: () => void }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
   const [edited, setEdited] = useState(false);
@@ -56,19 +211,12 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
     social
       .createUser(shownHandle, name.trim())
       .then((profile) => social.patchUser(profile.user_id, { avatar: { emoji, color } }))
-      .then((profile) => onReady(profile.user_id))
+      .then((profile) => auth.signup({ email, password, role: "customer", user_id: profile.user_id }))
+      .then(onReady)
       .catch((reason: unknown) => {
         setError(reason instanceof Error ? reason.message : "Couldn't create your account.");
         setBusy(false);
       });
-  };
-
-  const useDemo = () => {
-    setRole("customer");
-    setMe(DEMO_USER);
-    switchUser();
-    profilesChanged();
-    navigate("/home");
   };
 
   return (
@@ -85,7 +233,7 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
         className="mt-8 space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          if (name.trim() && shownHandle) start();
+          if (name.trim() && shownHandle && email && password.length >= 6) start();
         }}
       >
         <div>
@@ -132,18 +280,19 @@ function AccountStep({ onReady }: { onReady: (userId: string) => void }) {
             />
           </span>
         </label>
+        <Credentials email={email} password={password} onEmail={setEmail} onPassword={setPassword} newPassword />
         {error ? <p className="text-sm font-semibold text-[#b33]">{error}</p> : null}
         <button
           type="submit"
-          disabled={busy || !name.trim() || !shownHandle}
+          disabled={busy || !name.trim() || !shownHandle || !email || password.length < 6}
           className="w-full rounded-full bg-ink py-3.5 text-lg font-semibold text-foam disabled:opacity-40"
         >
           {busy ? "Creating your account…" : "Start the quiz"}
         </button>
       </form>
 
-      <button type="button" onClick={useDemo} className="mt-4 py-2 text-sm font-semibold text-mute hover:text-ink">
-        Skip and use the demo account (Andrew)
+      <button type="button" onClick={onSignIn} className="mt-4 py-2 text-sm font-semibold text-mute hover:text-ink">
+        Already have an account? Sign in
       </button>
     </Shell>
   );
@@ -253,7 +402,7 @@ function Result({ profile }: { profile: UserProfile }) {
 export function Welcome() {
   const role = useRole();
   const shopId = useShopId();
-  const retake = hasChosenAccount() && getMe() !== DEMO_USER;
+  const retake = isSignedIn() && getRole() === "customer";
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   // Single-choice questions advance on a timer, so finish() must read the latest answers, not a render's copy.
@@ -288,29 +437,28 @@ export function Welcome() {
 
   if (role === "store" && shopId) return <Navigate to="/shop" replace />;
 
+  if (step.kind === "signin") return <SignInStep onCreate={() => setStep({ kind: "role" })} />;
+
   if (step.kind === "role") {
     return (
       <RoleChoice
-        onCustomer={() => {
-          setRole("customer");
-          setStep({ kind: "account" });
-        }}
-        onStore={() => {
-          setRole("store");
-          setStep({ kind: "shop" });
-        }}
+        onCustomer={() => setStep({ kind: "account" })}
+        onStore={() => setStep({ kind: "shop" })}
+        onBack={() => setStep({ kind: "signin" })}
       />
     );
   }
 
-  if (step.kind === "shop") return <ShopPicker />;
+  if (step.kind === "shop") return <ShopPicker onChoose={(id) => setStep({ kind: "store", shopId: id })} />;
+
+  if (step.kind === "store") return <StoreStep shopId={step.shopId} onBack={() => setStep({ kind: "shop" })} />;
 
   if (step.kind === "account") {
     return (
       <AccountStep
-        onReady={(userId) => {
-          setMe(userId);
-          profilesChanged();
+        onSignIn={() => setStep({ kind: "signin" })}
+        onReady={(account) => {
+          signIn(account);
           setStep({ kind: "question", index: 0 });
         }}
       />

@@ -73,12 +73,21 @@ function save() {
   }
 }
 
+/** Back to the seed, keeping people who signed up in this browser (their accounts outlive a reset). */
 export function resetSocialMock() {
-  store = seed();
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* Nothing saved. */
+  const fresh = seed();
+  const seeded = new Set(fresh.users.map((user) => user.user_id));
+  const signedUp = store.users.filter((user) => !seeded.has(user.user_id));
+  const known = new Set([...seeded, ...signedUp.map((user) => user.user_id)]);
+  fresh.users.push(...signedUp.map((user) => ({ ...user, following: user.following.filter((id) => known.has(id)) })));
+  store = fresh;
+  if (signedUp.length > 0) save();
+  else {
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* Nothing saved. */
+    }
   }
 }
 

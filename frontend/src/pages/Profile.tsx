@@ -13,7 +13,8 @@ import { matchPercent, price, shopLabel } from "../lib/format.ts";
 import { coverPhoto, drinkPhoto } from "../lib/images.ts";
 import { tint } from "../lib/palette.ts";
 import { ALL_STATS, shownStats } from "../lib/stats.ts";
-import { hasChosenAccount, useMe } from "../state/me.ts";
+import { useMe } from "../state/me.ts";
+import { isSignedIn } from "../state/account.ts";
 import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
 
@@ -31,7 +32,7 @@ export function MyProfile() {
   const { profile } = useProfile();
   const role = useRole();
   if (role === "store") return <Navigate to="/shop" replace />;
-  if (!hasChosenAccount()) return <Navigate to="/welcome" replace />;
+  if (!isSignedIn()) return <Navigate to="/welcome" replace />;
   if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-sm text-mute">Loading your profile…</main>;
   return <Navigate to={`/u/${profile.handle}`} replace />;
 }

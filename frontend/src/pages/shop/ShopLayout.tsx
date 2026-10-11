@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { client } from "../../api/client.ts";
 import type { DrinkListing, ShopListing } from "../../api/types.ts";
-import { hasChosenAccount } from "../../state/me.ts";
+import { isSignedIn } from "../../state/account.ts";
 import { useRole, useShopId } from "../../state/role.ts";
 
 interface ShopCatalog {
@@ -19,6 +19,7 @@ export function useShopCatalog(): ShopCatalog {
 
 const TABS = [
   { to: "/shop", label: "Today", end: true },
+  { to: "/shop/orders", label: "Orders", end: false },
   { to: "/shop/menu", label: "Menu", end: false },
   { to: "/shop/offers", label: "Offers", end: false },
   { to: "/shop/demand", label: "Demand", end: false },
@@ -54,7 +55,7 @@ export function ShopLayout() {
   }, [role, shopId]);
 
   if (role !== "store" || !shopId) {
-    if (hasChosenAccount()) return <Navigate to="/home" replace />;
+    if (isSignedIn()) return <Navigate to="/home" replace />;
     return <Navigate to="/welcome" replace />;
   }
 
@@ -80,7 +81,7 @@ export function ShopLayout() {
         aria-label="Shop tabs"
         className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-foam/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
       >
-        <div className="mx-auto grid max-w-md grid-cols-5 text-[11px] tracking-[0.06em] lowercase">
+        <div className="mx-auto grid max-w-md grid-cols-6 text-[11px] tracking-[0.06em] lowercase">
           {TABS.map((tab) => (
             <NavLink
               key={tab.to}

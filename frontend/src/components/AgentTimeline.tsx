@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Health, LensEvent } from "../api/types.ts";
 import { agentInfo, agentKind } from "../lib/agents.ts";
+import { drinkInfo } from "../lib/catalog.ts";
 import { price, readableShops } from "../lib/format.ts";
 import { AgentSymbol } from "./AgentSymbol.tsx";
 import { LeafPair, TeaBowl } from "./Doodles.tsx";
@@ -47,9 +48,21 @@ function firstPerson(agentId: string, text: string): string {
   return readableShops(trimmed);
 }
 
+/** Drinks this agent softened on this round; a summary event lists them on `objections[].revised_from`. */
+function softened(event: LensEvent): string[] {
+  const items = Array.isArray(event.payload.objections) ? (event.payload.objections as Record<string, unknown>[]) : [];
+  return items
+    .filter((item) => item.revised_from)
+    .map((item) => {
+      const id = typeof item.target_drink_id === "string" ? item.target_drink_id : "";
+      return drinkInfo(id)?.name ?? id;
+    })
+    .filter(Boolean);
+}
+
 function objectionTone(event: LensEvent): { tone: Tone; tag: string | null } {
   const payload = event.payload;
-  if (payload.revised_from) return { tone: "soften", tag: "softens" };
+  if (payload.revised_from || softened(event).length > 0) return { tone: "soften", tag: "softens" };
   if (payload.kind === "veto" || event.message.startsWith("Veto:")) return { tone: "veto", tag: "veto" };
   if (agentKind(event.agent_id ?? "") === "shop") return { tone: "back", tag: null };
   if (payload.kind === "concern") return { tone: "doubt", tag: null };
@@ -107,11 +120,19 @@ function buildChat(events: LensEvent[]): { items: ChatItem[]; selections: LensEv
           items.push({
             kind: "divider",
             key: `${key}-round`,
-            text: round === 1 ? "round 1 · everyone weighs in on the shortlist" : `round ${round} · they answer each other`,
+            text: round <= 1 ? "round 1 · everyone weighs in on the shortlist" : `rebuttal ${round - 1} · they answer each other`,
           });
         }
         const { tone, tag } = objectionTone(event);
-        items.push({ kind: "message", key, agentId, tag, tone, text: firstPerson(agentId, event.message) });
+        const gaveWay = softened(event);
+        items.push({
+          kind: "message",
+          key,
+          agentId,
+          tag,
+          tone,
+          text: firstPerson(agentId, event.message) + (gaveWay.length ? ` Softens on ${gaveWay.join(", ")}.` : ""),
+        });
         break;
       }
       case "offer":

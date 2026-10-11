@@ -317,4 +317,141 @@ export interface ShopListing {
   name: string;
   neighborhood: string;
   photo_url: string | null;
+  /** Planned: set by the shop on its Shop tab. */
+  description?: string;
+}
+
+/* Accounts. Contract in docs/PLAN.md, "Accounts, store tools, and ordering"; served by Track A, mocked in api/auth.ts. */
+
+export type AccountRole = "customer" | "store";
+
+export interface Account {
+  email: string;
+  user_id: string;
+  role: AccountRole;
+  shop_id?: string;
+}
+
+export interface SignupRequest {
+  email: string;
+  password: string;
+  role: AccountRole;
+  shop_id?: string;
+  /** Customers: the profile created by POST /users just before sign-up. */
+  user_id?: string;
+}
+
+/* Store tools. Contract in docs/PLAN.md, "Accounts, store tools, and ordering"; mocked in mocks/shopStore.ts. */
+
+export interface MenuSection {
+  id: string;
+  name: string;
+  order: number;
+  drink_ids: string[];
+}
+
+export interface DrinkOptions {
+  sugar: string[];
+  ice: string[];
+  toppings: { name: string; price: number }[];
+}
+
+export interface DrinkInput {
+  name: string;
+  price: number;
+  description?: string;
+  photo_url?: string | null;
+  flavor_tags: string[];
+  attributes: TasteProfile;
+  options?: DrinkOptions;
+}
+
+export interface ShopDrink extends DrinkInput {
+  id: string;
+  shop_id: string;
+  available: boolean;
+}
+
+export type OfferRule =
+  | { id: string; enabled: boolean; kind: "max_discount"; value: { percent: number; dollars: number } }
+  | { id: string; enabled: boolean; kind: "drinks"; value: { drink_ids: string[] } }
+  | { id: string; enabled: boolean; kind: "sections"; value: { section_ids: string[] } }
+  | { id: string; enabled: boolean; kind: "hours"; value: { start: number; end: number } }
+  | { id: string; enabled: boolean; kind: "days"; value: { days: number[] } }
+  | { id: string; enabled: boolean; kind: "daily_limit"; value: { count: number } };
+
+export type OfferRuleKind = OfferRule["kind"];
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+export type OfferRuleInput = DistributiveOmit<OfferRule, "id">;
+
+export interface OfferRules {
+  platform: { id: string; text: string }[];
+  rules: OfferRule[];
+  cap: { percent: number; dollars: number };
+}
+
+export type DemandRange = "week" | "month" | "year";
+
+export interface Demand {
+  range: DemandRange;
+  people: number;
+  bases: { base: "milk" | "fruit" | "tea"; share: number }[];
+  flavors: { tag: string; share: number }[];
+  top_drinks: { drink_id: string; count: number }[];
+  own_top_drinks: { drink_id: string; count: number }[];
+  priorities: DimensionScores;
+}
+
+export interface ShopProfilePatch {
+  description?: string;
+  photo_url?: string | null;
+}
+
+/* Orders. Request and receipt are from the contract; the full Order shape is B's proposal (see PROGRESS.md). */
+
+export type OrderStatus = "placed" | "accepted" | "ready" | "picked_up" | "cancelled";
+export type PayMethod = "card" | "pickup";
+
+export interface OrderItemInput {
+  drink_id: string;
+  sugar?: string;
+  ice?: string;
+  toppings?: string[];
+}
+
+export interface OrderRequest {
+  shop_id: string;
+  items: OrderItemInput[];
+  offer_id?: string;
+  pay: PayMethod;
+}
+
+export interface OrderReceipt {
+  order_id: string;
+  total: number;
+  status: "placed";
+  payment_url?: string | null;
+}
+
+export interface OrderItem extends OrderItemInput {
+  name: string;
+  /** The drink plus its toppings, before any offer. */
+  price: number;
+}
+
+export interface Order {
+  order_id: string;
+  user_id: string;
+  /** What the shop calls out at pickup. */
+  customer_name: string;
+  shop_id: string;
+  items: OrderItem[];
+  subtotal: number;
+  discount: number;
+  pickup_fee: number;
+  total: number;
+  pay: PayMethod;
+  status: OrderStatus;
+  created_at: string;
+  rating?: number | null;
 }

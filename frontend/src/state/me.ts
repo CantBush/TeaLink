@@ -1,15 +1,15 @@
 import { useSyncExternalStore } from "react";
 
-/** Who is using the app. No real accounts: the id lives in localStorage, and the demo runs as Andrew. */
+/** The signed-in customer's user id, or "" when nobody is signed in. There is no default user. */
 
 const KEY = "tealink.user_id";
 export const DEMO_USER = "andrew";
 
 function read(): string {
   try {
-    return localStorage.getItem(KEY) || DEMO_USER;
+    return localStorage.getItem(KEY) ?? "";
   } catch {
-    return DEMO_USER;
+    return "";
   }
 }
 
@@ -18,15 +18,6 @@ const listeners = new Set<() => void>();
 
 export function getMe(): string {
   return me;
-}
-
-/** False until this browser has picked an account (signed up, or chose the demo account). */
-export function hasChosenAccount(): boolean {
-  try {
-    return localStorage.getItem(KEY) !== null;
-  } catch {
-    return true;
-  }
 }
 
 export function setMe(userId: string) {
@@ -39,9 +30,9 @@ export function setMe(userId: string) {
   listeners.forEach((listener) => listener());
 }
 
-/** Forget the signed-in user. The in-memory id falls back to the demo user, but nothing is stored. */
+/** Forget the signed-in user. */
 export function clearMe() {
-  me = DEMO_USER;
+  me = "";
   try {
     localStorage.removeItem(KEY);
   } catch {
