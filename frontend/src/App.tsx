@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { CustomerOnly } from "./components/CustomerOnly.tsx";
 import { GardenBackdrop, Vine } from "./components/Doodles.tsx";
 import { NavBar } from "./components/NavBar.tsx";
 import { Counterfactual } from "./pages/Counterfactual.tsx";
@@ -24,12 +25,18 @@ export default function App() {
       <NavBar />
       <div className="pb-24 md:pb-0">
         <Routes>
-          <Route path="/" element={<TeaLink />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/discover" element={<Discover />} />
-          <Route path="/stats" element={<Stats />} />
-          <Route path="/me" element={<MyProfile />} />
-          <Route path="/u/:handle" element={<Profile />} />
+          <Route element={<CustomerOnly />}>
+            <Route path="/" element={<TeaLink />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/discover" element={<Discover />} />
+            <Route path="/stats" element={<Stats />} />
+            <Route path="/me" element={<MyProfile />} />
+            <Route path="/u/:handle" element={<Profile />} />
+            <Route path="/why" element={<WhyThis />} />
+            <Route path="/counterfactual" element={<Counterfactual />} />
+            <Route path="/evidence" element={<Evidence />} />
+            <Route path="/friends" element={<Navigate to="/discover?scope=people" replace />} />
+          </Route>
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/shop" element={<ShopLayout />}>
             <Route index element={<ShopHome />} />
@@ -38,10 +45,6 @@ export default function App() {
             <Route path="demand" element={<ShopDemand />} />
             <Route path="account" element={<ShopAccount />} />
           </Route>
-          <Route path="/why" element={<WhyThis />} />
-          <Route path="/counterfactual" element={<Counterfactual />} />
-          <Route path="/evidence" element={<Evidence />} />
-          <Route path="/friends" element={<Navigate to="/discover?scope=people" replace />} />
         </Routes>
         <footer className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-5 pt-6 pb-10 text-moss/60">
           <Vine className="h-5 w-40" />
