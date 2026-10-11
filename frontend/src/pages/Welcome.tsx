@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, auth } from "../api/auth.ts";
 import { social } from "../api/social.ts";
-import type { Account, QuizAnswers, QuizQuestion, UserProfile } from "../api/types.ts";
+import type { Account, FavoritePick, QuizAnswers, QuizKind, QuizQuestion, UserProfile } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaMark } from "../components/BobaMark.tsx";
 import { Shell } from "../components/OnboardingShell.tsx";
+import { ChooseQuizStep, FavoritesStep } from "../components/QuizSteps.tsx";
 import { RoleChoice } from "../components/RoleChoice.tsx";
 import { AVATAR_COLORS as STARTER_COLORS } from "../lib/palette.ts";
 import { ShopPicker } from "./shop/ShopPicker.tsx";
@@ -33,13 +34,14 @@ type Step =
   | { kind: "shop" }
   | { kind: "store"; shopId: string }
   | { kind: "account" }
+  | { kind: "choose" }
   | { kind: "question"; index: number }
   | { kind: "saving" }
   | { kind: "result"; profile: UserProfile };
 
 /** Signed out: sign in first. A signed-in customer reaching /welcome is retaking the quiz. */
 function firstStep(): Step {
-  if (isSignedIn() && getRole() === "customer") return { kind: "question", index: 0 };
+  if (isSignedIn() && getRole() === "customer") return { kind: "choose" };
   return { kind: "signin" };
 }
 
@@ -226,7 +228,7 @@ function AccountStep({ onReady, onSignIn }: { onReady: (account: Account) => voi
       </div>
       <h1 className="mt-6 font-display text-4xl leading-tight sm:text-5xl">Find your next favorite boba.</h1>
       <p className="mt-3 text-lg text-mute">
-        Six quick questions, then a team of AI teagents argues over what you should order. Every pick teaches them more.
+        A short taste quiz, then a team of AI teagents argues over what you should order. Every pick teaches them more.
       </p>
 
       <form
@@ -317,7 +319,8 @@ function QuestionStep({
 }) {
   const toggle = (id: string) => {
     if (question.multi) {
-      onChoose(chosen.includes(id) ? chosen.filter((item) => item !== id) : [...chosen, id]);
+      if (chosen.includes(id)) onChoose(chosen.filter((item) => item !== id));
+      else onChoose(id === "none" ? [id] : [...chosen.filter((item) => item !== "none"), id]);
       return;
     }
     onChoose([id]);
@@ -371,7 +374,7 @@ function QuestionStep({
   );
 }
 
-function Result({ profile }: { profile: UserProfile }) {
+function Result({ profile, kind }: { profile: UserProfile; kind: QuizKind }) {
   return (
     <Shell progress={1}>
       <p className="text-center text-sm font-semibold tracking-[0.16em] text-moss lowercase">You're all set</p>
@@ -384,7 +387,10 @@ function Result({ profile }: { profile: UserProfile }) {
         stats={profile.stats}
       />
       <p className="mx-auto mt-6 max-w-sm text-center text-mute">
-        Your answers set where the Preference teagent starts. From here, every drink you pick teaches it more.
+        {kind === "full"
+          ? "Your answers and favorite drinks set where the Preference teagent starts. Favorites count most."
+          : "Your answers set where the Preference teagent starts."}{" "}
+        From here, every order teaches it more, recent ones most, and so does every rating you give.
       </p>
       <div className="mx-auto mt-6 grid w-full max-w-sm gap-3">
         <Link to="/" className="rounded-full bg-ink py-3.5 text-center text-lg font-semibold text-foam">
@@ -402,27 +408,50 @@ function Result({ profile }: { profile: UserProfile }) {
 export function Welcome() {
   const role = useRole();
   const shopId = useShopId();
-  const retake = isSignedIn() && getRole() === "customer";
+  const [retake] = useState(() => isSignedIn() && getRole() === "customer");
+  const [kind, setKind] = useState<QuizKind | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [answers, setAnswers] = useState<QuizAnswers>({});
+  const [favorites, setFavorites] = useState<FavoritePick[]>([]);
   // Single-choice questions advance on a timer, so finish() must read the latest answers, not a render's copy.
   const latest = useRef<QuizAnswers>({});
   const [step, setStep] = useState<Step>(firstStep);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (getRole() === "store") return;
+    if (!kind) return;
+    let live = true;
     social
-      .getQuiz()
-      .then(setQuestions)
-      .catch(() => setError("Couldn't load the quiz."));
-  }, []);
+      .getQuiz(kind)
+      .then((loaded) => live && setQuestions(loaded))
+      .catch(() => live && setError(kind === "full" ? "Couldn't load the full quiz. It needs the TeaLink API." : "Couldn't load the quiz."));
+    return () => {
+      live = false;
+    };
+  }, [kind]);
 
-  const finish = () => {
+  const choose = (chosen: QuizKind) => {
+    if (chosen !== kind) {
+      setQuestions(null);
+      setError(null);
+    }
+    setKind(chosen);
+    setStep({ kind: "question", index: 0 });
+  };
+
+  const finish = (shown: QuizQuestion[], quizKind: QuizKind) => {
     setStep({ kind: "saving" });
+    setError(null);
     const userId = getMe();
+    const ids = new Set(shown.map((question) => question.id));
+    const chosen = Object.fromEntries(Object.entries(latest.current).filter(([id]) => ids.has(id)));
     social
-      .submitQuiz(userId, latest.current)
+      .submitQuiz(
+        userId,
+        chosen,
+        quizKind,
+        favorites.filter((group) => group.drink_ids.length > 0),
+      )
       .then(() => social.getUser(userId, userId))
       .then((profile) => {
         switchUser();
@@ -431,7 +460,7 @@ export function Welcome() {
       })
       .catch((reason: unknown) => {
         setError(reason instanceof Error ? reason.message : "Couldn't save your answers.");
-        setStep({ kind: "question", index: (questions?.length ?? 1) - 1 });
+        setStep({ kind: "question", index: shown.length - 1 });
       });
   };
 
@@ -459,18 +488,27 @@ export function Welcome() {
         onSignIn={() => setStep({ kind: "signin" })}
         onReady={(account) => {
           signIn(account);
-          setStep({ kind: "question", index: 0 });
+          setStep({ kind: "choose" });
         }}
       />
     );
   }
 
-  if (step.kind === "result") return <Result profile={step.profile} />;
+  if (step.kind === "choose" || !kind) return <ChooseQuizStep retake={retake} onChoose={choose} />;
+
+  if (step.kind === "result") return <Result profile={step.profile} kind={kind} />;
 
   if (error && !questions) {
     return (
       <Shell>
         <p className="rounded-3xl border border-line bg-foam p-6">{error}</p>
+        <button
+          type="button"
+          onClick={() => setStep({ kind: "choose" })}
+          className="mt-4 self-start rounded-full px-4 py-3 font-semibold text-mute hover:text-ink"
+        >
+          Back to the quiz choice
+        </button>
       </Shell>
     );
   }
@@ -487,22 +525,36 @@ export function Welcome() {
   }
 
   const question = questions[step.index];
+  const back = () => setStep(step.index === 0 ? { kind: "choose" } : { kind: "question", index: step.index - 1 });
+  const next = () => (step.index + 1 < questions.length ? setStep({ kind: "question", index: step.index + 1 }) : finish(questions, kind));
   return (
     <>
       {error ? <p className="mx-auto max-w-xl px-5 pt-4 text-sm font-semibold text-[#b33]">{error}</p> : null}
-      <QuestionStep
-        key={question.id}
-        question={question}
-        index={step.index}
-        total={questions.length}
-        chosen={answers[question.id] ?? []}
-        onChoose={(ids) => {
-          latest.current = { ...latest.current, [question.id]: ids };
-          setAnswers(latest.current);
-        }}
-        onBack={() => setStep(step.index === 0 ? (retake ? step : { kind: "account" }) : { kind: "question", index: step.index - 1 })}
-        onNext={() => (step.index + 1 < questions.length ? setStep({ kind: "question", index: step.index + 1 }) : finish())}
-      />
+      {question.kind === "favorites" ? (
+        <FavoritesStep
+          question={question}
+          index={step.index}
+          total={questions.length}
+          favorites={favorites}
+          onChange={setFavorites}
+          onBack={back}
+          onNext={next}
+        />
+      ) : (
+        <QuestionStep
+          key={question.id}
+          question={question}
+          index={step.index}
+          total={questions.length}
+          chosen={answers[question.id] ?? []}
+          onChoose={(ids) => {
+            latest.current = { ...latest.current, [question.id]: ids };
+            setAnswers(latest.current);
+          }}
+          onBack={back}
+          onNext={next}
+        />
+      )}
     </>
   );
 }

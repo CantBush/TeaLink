@@ -240,6 +240,8 @@ export interface PastOrder {
   drink_id: string;
   shop_id: string;
   ordered_at: string;
+  /** 0..5 or null. Only on your own profile. */
+  rating?: number | null;
 }
 
 export interface Avatar {
@@ -276,6 +278,8 @@ export interface UserProfile {
   stats: Partial<BobaStats>;
   /** A placeholder id ("pearls", "leaves", …) or a JPEG data URL. Absent keeps the flavor cover. */
   cover_url?: string | null;
+  /** Which quiz they last took, or null before any. */
+  quiz_kind?: QuizKind | null;
 }
 
 export type ProfilePatch = Partial<
@@ -291,15 +295,26 @@ export interface QuizOption {
   emoji?: string;
 }
 
+/** "basic" is the six questions; "full" adds more taste questions and favorites. */
+export type QuizKind = "basic" | "full";
+
 export interface QuizQuestion {
   id: string;
   prompt: string;
   options: QuizOption[];
   multi?: boolean;
+  /** "favorites": pick shops, then drinks from each menu. Options are empty. */
+  kind?: "choice" | "favorites";
 }
 
 /** Question id → chosen option ids. */
 export type QuizAnswers = Record<string, string[]>;
+
+/** Favorite drinks from one shop, from the full quiz. */
+export interface FavoritePick {
+  shop_id: string;
+  drink_ids: string[];
+}
 
 export interface QuizResult {
   user_id: string;
@@ -398,6 +413,8 @@ export interface ShopListing {
   photo_url: string | null;
   /** Planned: set by the shop on its Shop tab. */
   description?: string;
+  /** 0..1 from reviews and orders; the busiest shop is 1. */
+  popularity?: number;
 }
 
 /* Accounts. Contract in docs/PLAN.md, "Accounts, store tools, and ordering"; served by Track A, mocked in api/auth.ts. */
@@ -551,5 +568,6 @@ export interface Order {
   pay: PayMethod;
   status: OrderStatus;
   created_at: string;
+  /** 0..5 after pickup, or null when unrated. */
   rating?: number | null;
 }

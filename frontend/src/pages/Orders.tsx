@@ -6,28 +6,71 @@ import type { Order } from "../api/types.ts";
 import { OrderCard } from "../components/OrderCard.tsx";
 import { shopLabel } from "../lib/format.ts";
 import { useOrders } from "../state/orders.ts";
+import { rerun } from "../state/session.ts";
+import { profilesChanged } from "../state/social.ts";
 import { Loading } from "../components/Loading.tsx";
 
+/** 0–5 after pickup. The teagents weigh it on the next round, and your taste profile learns from it. */
 function Rate({ order, onDone }: { order: Order; onDone: () => void }) {
-  const [hover, setHover] = useState(0);
-  const shown = hover || order.rating || 0;
+  const [hover, setHover] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const rated = order.rating ?? null;
+  const shown = hover ?? rated ?? -1;
+  const name = order.items[0]?.name ?? "drink";
+
+  const rate = (rating: number | null) => {
+    setBusy(true);
+    setError(null);
+    ordersApi
+      .rate(order.order_id, rating)
+      .then(() => {
+        onDone();
+        profilesChanged();
+        rerun(rating === null ? `You cleared your rating for ${name}.` : `You rated ${name} ${rating}/5.`);
+      })
+      .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Couldn't save your rating."))
+      .finally(() => setBusy(false));
+  };
+
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-sage px-4 py-2.5">
-      <span className="text-sm">{order.rating ? "Your rating" : `How was the ${order.items[0]?.name ?? "drink"}?`}</span>
-      <div className="flex" onMouseLeave={() => setHover(0)}>
-        {[1, 2, 3, 4, 5].map((star) => (
+    <div className="rounded-2xl bg-sage px-4 py-2.5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="text-sm">{rated !== null ? `You gave it ${rated}/5` : `How was the ${name}?`}</span>
+        <div className="flex items-center" onMouseLeave={() => setHover(null)}>
           <button
-            key={star}
             type="button"
-            aria-label={`${star} star${star > 1 ? "s" : ""}`}
-            onMouseEnter={() => setHover(star)}
-            onClick={() => void ordersApi.rate(order.order_id, star).then(onDone)}
-            className={`px-0.5 text-xl leading-none ${star <= shown ? "text-moss" : "text-ink/25"}`}
+            disabled={busy}
+            aria-label="0 stars"
+            aria-pressed={rated === 0}
+            onMouseEnter={() => setHover(0)}
+            onClick={() => rate(0)}
+            className={`mr-1 min-h-9 rounded-full px-2 text-xs font-semibold ${shown === 0 ? "bg-ink text-foam" : "text-ink/40"}`}
           >
-            ★
+            0
           </button>
-        ))}
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              disabled={busy}
+              aria-label={`${star} star${star > 1 ? "s" : ""}`}
+              aria-pressed={rated === star}
+              onMouseEnter={() => setHover(star)}
+              onClick={() => rate(star)}
+              className={`px-0.5 text-xl leading-none ${star <= shown ? "text-moss" : "text-ink/25"}`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+        {rated !== null ? (
+          <button type="button" disabled={busy} onClick={() => rate(null)} className="text-xs font-semibold text-mute hover:text-ink">
+            Clear
+          </button>
+        ) : null}
       </div>
+      {error ? <p className="mt-1 text-xs font-semibold text-[#b4533c]">{error}</p> : null}
     </div>
   );
 }
@@ -51,7 +94,7 @@ export function Orders() {
       <header>
         <h1 className="font-display text-4xl">your orders</h1>
         <p className="mt-2 text-mute">
-          Pickup orders and where they are. The shop moves them along.
+          Pickup orders and where they are. The shop moves them along. Rate a drink after pickup and your teagents take it into account.
           {preview ? " Orders live in this browser until the API serves them." : ""}
         </p>
       </header>

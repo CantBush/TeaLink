@@ -49,7 +49,15 @@ function RecentOrders({ orders, own }: { orders: PastOrder[]; own: boolean }) {
                 <span className="block truncate font-semibold">{drinkInfo(order.drink_id)?.name ?? order.drink_id}</span>
                 <span className="block text-sm text-mute">{shopLabel(order.shop_id)}</span>
               </span>
-              <span className="shrink-0 text-xs text-mute">{timeAgo(order.ordered_at)}</span>
+              <span className="shrink-0 text-right text-xs text-mute">
+                {own && order.rating != null ? (
+                  <span className="block text-sm text-moss" aria-label={`Rated ${order.rating} out of 5`}>
+                    {"★".repeat(order.rating)}
+                    <span className="text-ink/20">{"★".repeat(5 - order.rating)}</span>
+                  </span>
+                ) : null}
+                {timeAgo(order.ordered_at)}
+              </span>
             </li>
           ))}
         </ol>

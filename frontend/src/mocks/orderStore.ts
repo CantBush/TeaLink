@@ -90,7 +90,7 @@ export const orderMock = {
     });
   },
 
-  rate(orderId: string, rating: number): Order {
+  rate(orderId: string, rating: number | null): Order {
     return update(orderId, (order) => ({ ...order, rating }));
   },
 

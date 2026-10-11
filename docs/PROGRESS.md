@@ -24,6 +24,16 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 
 ## Done
 
+### Full quiz, favorites, and ratings (Emily, Track B rows 4, 5, 6, 7, and 8 of the Sun 10:55 AM plan)
+
+Browser-checked against Andrew's API as Andrew, then Reset demo to put the seed back. No scripted numbers change.
+
+- **Quiz chooser.** After **Start the quiz**, and on **Retake the taste quiz**, a "which quiz?" step offers Basic (six quick questions) or Full (ice, tea, milk, toppings, what you skip, and favorite drinks). Back from the first question returns to the chooser. The full quiz needs the API: if it can't load, the screen says so and offers the chooser again. Basic still falls back to the browser quiz.
+- **Full quiz screens.** The 14 questions render from `GET /quiz?kind=full`. On multi-choice questions, "none" clears the other picks and vice versa. The favorites question uses `ShopSearch`: type a shop, pick it, tap its drinks, add more shops, remove any. Shops with no drinks picked aren't sent, so the 422 for an empty `drink_ids` list can't happen. `POST /quiz` sends `kind` and `favorites`; a run with Kung Fu Tea's Jasmine and Classic Milk Tea saved `quiz_kind: "full"`.
+- **Shop suggestions.** `ShopSearch` loads `popularity` from `GET /shops` once. Ties on name match break by popularity, and with an empty box it lists the most popular shops first (Kung Fu Tea, Tiger Sugar, Sharetea, Boba Guys, Sunright, Lantern Leaf). Used by post tags and the favorites question.
+- **Ratings.** On Orders, a picked-up order takes 0 or 1–5 stars, and **Clear** removes the rating. Saving re-runs the round with a note like "You rated Hojicha Cream Tea 5/5." Your own profile's recent orders show the stars. Rating from the profile itself isn't possible yet, because `PastOrder` has no `order_id`.
+- **Copy.** Why this order and the quiz result say the weights come from the quiz and favorites, orders (recent ones count more), and ratings.
+
 ### Ordering fixes and tags (Emily, Track B rows 1, 2, 3, and 6 of the Sun 10:55 AM plan)
 
 Browser-checked over AGNTCY. Demo numbers unchanged: ordering Pearl from the top 3 still gives Thai Tea 79, Wintermelon 75, Pearl 73, taste 45%.

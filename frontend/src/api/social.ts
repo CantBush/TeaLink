@@ -2,7 +2,19 @@ import { useSyncExternalStore } from "react";
 import { paintAuthor, paintProfile } from "../lib/images.ts";
 import { socialMock } from "../mocks/socialStore.ts";
 import { apiBase } from "./client.ts";
-import type { FeedComment, FeedItem, Notifications, PostInput, ProfilePatch, QuizAnswers, QuizQuestion, QuizResult, UserProfile } from "./types.ts";
+import type {
+  FavoritePick,
+  FeedComment,
+  FeedItem,
+  Notifications,
+  PostInput,
+  ProfilePatch,
+  QuizAnswers,
+  QuizKind,
+  QuizQuestion,
+  QuizResult,
+  UserProfile,
+} from "./types.ts";
 
 /**
  * Social-layer calls (contract in docs/PLAN.md). Each one tries Track A's endpoint first and
@@ -169,7 +181,11 @@ const q = (viewer: string) => `viewer=${encodeURIComponent(viewer)}`;
 const id = (value: string) => encodeURIComponent(value);
 
 export const social = {
-  getQuiz: () => withFallback(() => request<QuizQuestion[]>("GET", "/quiz"), () => socialMock.getQuiz()),
+  /** The full quiz only comes from the API; the browser mock has just the basic six. */
+  getQuiz: (kind: QuizKind = "basic") =>
+    kind === "full"
+      ? request<QuizQuestion[]>("GET", "/quiz?kind=full")
+      : withFallback(() => request<QuizQuestion[]>("GET", "/quiz"), () => socialMock.getQuiz()),
 
   createUser: (handle: string, displayName: string) =>
     withFallback(
@@ -177,11 +193,13 @@ export const social = {
       () => socialMock.createUser(handle, displayName),
     ),
 
-  submitQuiz: (userId: string, answers: QuizAnswers) =>
-    withFallback(
-      () => request<QuizResult>("POST", "/quiz", { user_id: userId, answers }),
-      () => socialMock.submitQuiz(userId, answers),
-    ),
+  submitQuiz: (userId: string, answers: QuizAnswers, kind: QuizKind = "basic", favorites?: FavoritePick[]) =>
+    kind === "full"
+      ? request<QuizResult>("POST", "/quiz", { user_id: userId, answers, kind, favorites: favorites ?? [] })
+      : withFallback(
+          () => request<QuizResult>("POST", "/quiz", { user_id: userId, answers, kind }),
+          () => socialMock.submitQuiz(userId, answers),
+        ),
 
   listUsers: (viewer: string) =>
     withFallback(
