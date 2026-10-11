@@ -11,6 +11,9 @@ import type {
   TasteProfile,
 } from "../api/types.ts";
 import { social } from "../api/social.ts";
+import { startAgent, stopAgent } from "../api/agents.ts";
+import { agentInfo } from "../lib/agents.ts";
+import { resolveWithout } from "../lib/withoutAgents.ts";
 import { resetCovers, resetPortraits } from "../lib/images.ts";
 import { sampleSession } from "../mocks/sample.ts";
 import { orderMock } from "../mocks/orderStore.ts";
@@ -49,6 +52,10 @@ export interface SessionState {
   started: boolean;
   running: boolean;
   round: number;
+  /** Agents taken out with "kill an agent", in the order they were stopped. */
+  stopped: string[];
+  /** The subset the API can't stop yet, so the browser leaves them out of each round. */
+  browserStopped: string[];
 }
 
 let state: SessionState = {
@@ -70,6 +77,8 @@ let state: SessionState = {
   started: false,
   running: false,
   round: 0,
+  stopped: [],
+  browserStopped: [],
 };
 
 const listeners = new Set<() => void>();
@@ -103,6 +112,18 @@ export function pushEvent(event: LensEvent) {
   const key = eventKey(event);
   if (seen.has(key)) return;
   seen.add(key);
+  if (event.agent_id && state.browserStopped.includes(event.agent_id)) return;
+  if (event.type === "decision" && state.browserStopped.length > 0) {
+    const decision = resolveWithout(
+      event.payload as unknown as Decision,
+      state.proposals,
+      state.events.filter((item) => item.type === "objection"),
+      state.browserStopped,
+    );
+    event = { ...event, message: decision.explanation, payload: decision as unknown as Record<string, unknown> };
+  } else if (event.type === "decision" && state.stopped.length > 0 && !event.payload.missing_agents) {
+    event = { ...event, payload: { ...event.payload, missing_agents: state.stopped } };
+  }
   const patch: Partial<SessionState> = { events: [...state.events, event] };
   if (event.type === "proposal") {
     patch.proposals = [...state.proposals, event.payload as unknown as Proposal];
@@ -137,8 +158,12 @@ function replayMock() {
 }
 
 function run(note?: string) {
+  const round = state.round + 1;
+  const forThisRound = (event: LensEvent) => {
+    if (state.round === round) pushEvent(event);
+  };
   set({
-    round: state.round + 1,
+    round,
     events: [],
     proposals: [],
     previousDecision: state.decision ?? state.previousDecision,
@@ -155,11 +180,12 @@ function run(note?: string) {
   }
 
   void client
-    .recommend({ user_id: state.userId, query: "What should I get next?", preference_overrides: {} }, pushEvent)
+    .recommend({ user_id: state.userId, query: "What should I get next?", preference_overrides: {} }, forThisRound)
     .catch(() => {
-      if (state.decision === null) replayMock();
+      if (state.round === round && state.decision === null) replayMock();
     })
     .finally(() => {
+      if (state.round !== round) return;
       set({ running: false });
       refreshHealth();
     });
@@ -238,7 +264,34 @@ export function switchUser() {
   loadProfile(userId);
 }
 
+/**
+ * "Kill an agent": take it out of the team, or bring it back, and re-plan. Stopping during a round
+ * abandons that round and starts the next one without the agent.
+ */
+export async function toggleAgent(agentId: string) {
+  const name = agentInfo(agentId).name;
+  const midRound = state.running;
+  if (state.stopped.includes(agentId)) {
+    await startAgent(agentId);
+    set({
+      stopped: state.stopped.filter((id) => id !== agentId),
+      browserStopped: state.browserStopped.filter((id) => id !== agentId),
+    });
+    rerun(`${name} is back at the counter.`);
+    return;
+  }
+  const mode = await stopAgent(agentId);
+  set({
+    stopped: [...state.stopped, agentId],
+    browserStopped: mode === "browser" ? [...state.browserStopped, agentId] : state.browserStopped,
+  });
+  rerun(`${name} dropped out${midRound ? " mid-round" : ""}. The team re-plans without it.`);
+}
+
 export async function resetAll() {
+  const serverStopped = state.stopped.filter((id) => !state.browserStopped.includes(id));
+  await Promise.all(serverStopped.map((id) => startAgent(id).catch(() => {})));
+  set({ stopped: [], browserStopped: [] });
   await client.resetDemo().catch(() => {});
   resetSocialMock();
   shopMock.reset();

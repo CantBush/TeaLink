@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { AgentTimeline } from "../components/AgentTimeline.tsx";
 import { ControlPanel } from "../components/ControlPanel.tsx";
 import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
-import { loadProfile, startRecommendation, useSession } from "../state/session.ts";
+import { loadProfile, startRecommendation, toggleAgent, useSession } from "../state/session.ts";
 
 /** At the counter: the agents, their conversation about your order, and the what-if buttons. */
 export function Counter() {
@@ -28,6 +28,8 @@ export function Counter() {
         started={session.started}
         health={session.health}
         busAgents={session.busAgents}
+        stopped={session.stopped}
+        onToggleAgent={toggleAgent}
       />
     </main>
   );

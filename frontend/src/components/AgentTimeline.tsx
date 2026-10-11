@@ -145,6 +145,9 @@ function buildChat(events: LensEvent[]): { items: ChatItem[]; selections: LensEv
           text: firstPerson(agentId, event.message),
         });
         break;
+      case "agent_lost":
+        items.push({ kind: "system", key, text: event.message, tone: "dropped" });
+        break;
       case "decision":
         decision = event;
         break;
@@ -182,37 +185,78 @@ const TAG: Record<Tone, string> = {
   priorities: "text-moss",
 };
 
-function TeamGrid({ selections, overBus }: { selections: LensEvent[]; overBus: Set<string> }) {
+/** Agents "kill an agent" can take out. Preference stays, since every score is weighted by it. */
+function stoppable(agentId: string): boolean {
+  return agentKind(agentId) !== "preference";
+}
+
+function TeamGrid({
+  selections,
+  overBus,
+  stopped,
+  onToggle,
+}: {
+  selections: LensEvent[];
+  overBus: Set<string>;
+  stopped: string[];
+  onToggle?: (agentId: string) => Promise<void>;
+}) {
   const [openId, setOpenId] = useState<string | null>(null);
-  const open = selections.find((event) => event.agent_id === openId) ?? null;
-  const info = open ? agentInfo(open.agent_id ?? "", open.payload) : null;
+  const [busy, setBusy] = useState(false);
+  const members = [
+    ...selections.map((event) => ({ id: event.agent_id ?? "", key: `s${event.seq}`, payload: event.payload })),
+    ...stopped
+      .filter((id) => !selections.some((event) => event.agent_id === id))
+      .map((id) => ({ id, key: `x${id}`, payload: {} as Record<string, unknown> })),
+  ];
+  const open = members.find((member) => member.id === openId) ?? null;
+  const info = open ? agentInfo(open.id, open.payload) : null;
+  const openStopped = open ? stopped.includes(open.id) : false;
+
+  const toggle = (agentId: string) => {
+    if (!onToggle) return;
+    setBusy(true);
+    onToggle(agentId)
+      .catch(() => {})
+      .finally(() => setBusy(false));
+  };
 
   return (
     <div>
       <ul className="grid grid-cols-4 gap-3 sm:grid-cols-6">
-        {selections.map((event) => {
-          const id = event.agent_id ?? "";
-          const { name } = agentInfo(id, event.payload);
+        {members.map((member) => {
+          const { id } = member;
+          const { name } = agentInfo(id, member.payload);
           const on = id === openId;
+          const off = stopped.includes(id);
           return (
-            <li key={event.seq} className="timeline-in">
+            <li key={member.key} className="timeline-in">
               <button
                 type="button"
                 onClick={() => setOpenId(on ? null : id)}
                 aria-expanded={on}
+                aria-label={off ? `${name}, offline` : name}
                 className="flex w-full flex-col items-center gap-1.5 rounded-2xl p-1.5 text-center normal-case"
               >
                 <span
                   className={`relative grid h-12 w-12 place-items-center rounded-full transition-colors ${
-                    on ? "bg-ink text-foam" : "bg-sage text-ink hover:bg-ink/10"
+                    off
+                      ? `border border-dashed border-ink/40 text-ink/35 ${on ? "bg-ink/10" : "bg-cream"}`
+                      : on
+                        ? "bg-ink text-foam"
+                        : "bg-sage text-ink hover:bg-ink/10"
                   }`}
                 >
                   <AgentSymbol agentId={id} className="h-6 w-6" />
-                  {overBus.has(id) ? (
+                  {off ? (
+                    <span className="absolute inset-0 grid place-items-center" aria-hidden>
+                      <span className="h-px w-9 rotate-45 bg-[#b4533c]" />
+                    </span>
+                  ) : overBus.has(id) ? (
                     <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-foam bg-moss" aria-label="answered over NATS" />
                   ) : null}
                 </span>
-                <span className="w-full truncate text-xs tracking-[0.04em] text-ink/80 lowercase">{name}</span>
+                <span className={`w-full truncate text-xs tracking-[0.04em] lowercase ${off ? "text-mute line-through" : "text-ink/80"}`}>{name}</span>
               </button>
             </li>
           );
@@ -220,20 +264,35 @@ function TeamGrid({ selections, overBus }: { selections: LensEvent[]; overBus: S
       </ul>
       {open && info ? (
         <div className="timeline-in mt-3 flex gap-4 rounded-2xl bg-mist p-4">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ink text-foam">
-            <AgentSymbol agentId={open.agent_id ?? ""} className="h-6 w-6" />
+          <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-full ${openStopped ? "bg-cream text-ink/40" : "bg-ink text-foam"}`}>
+            <AgentSymbol agentId={open.id} className="h-6 w-6" />
           </span>
-          <div className="min-w-0">
-            <p className="font-display text-xl leading-tight">{info.name}</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-xl leading-tight">
+              {info.name}
+              {openStopped ? <span className="ml-2 font-sans text-sm text-[#b4533c]">offline</span> : null}
+            </p>
             <p className="mt-1 text-[15px]">{info.description}</p>
-            {overBus.has(open.agent_id ?? "") ? (
+            {!openStopped && overBus.has(open.id) ? (
               <p className="mt-2 text-xs text-mute">Answered this round over the AGNTCY bus.</p>
+            ) : null}
+            {onToggle && stoppable(open.id) ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => toggle(open.id)}
+                className={`mt-3 min-h-10 rounded-full px-4 text-sm font-semibold disabled:opacity-50 ${
+                  openStopped ? "bg-ink text-foam" : "border border-[#b4533c]/50 text-[#8a3b2a] hover:bg-[#fbeee9]"
+                }`}
+              >
+                {busy ? "…" : openStopped ? `Bring ${info.name} back` : `Stop ${info.name}`}
+              </button>
             ) : null}
           </div>
         </div>
       ) : (
         <p className="mt-2 text-xs text-mute">
-          Picked by capability. Tap an agent to see what it does.
+          Picked by capability. Tap an agent to see what it does, or to stop it and watch the team re-plan.
           {overBus.size > 0 ? " A green dot means it answered over the AGNTCY bus." : ""}
         </p>
       )}
@@ -307,6 +366,8 @@ function DecisionCard({ decision }: { decision: LensEvent }) {
   const rounds = typeof payload.rounds === "number" ? payload.rounds : 0;
   const byAgents = payload.decided_by === "agents";
   const askHuman = payload.ask_human === true;
+  const missing = Array.isArray(payload.missing_agents) ? (payload.missing_agents as string[]) : [];
+  const without = missing.map((id) => agentInfo(id).name).join(", ");
   const who = byAgents ? "the agents agreed" : "the arbiter decided";
   const how = byAgents
     ? `They settled it themselves after ${rounds} ${rounds === 1 ? "round" : "rounds"} of back-and-forth.`
@@ -319,6 +380,7 @@ function DecisionCard({ decision }: { decision: LensEvent }) {
       <p className="flex items-center gap-2 font-display text-2xl leading-none">
         <LeafPair className="h-6 w-6 shrink-0 text-moss" />
         {who}
+        {without ? <span className="font-sans text-base text-[#8a3b2a]">without {without.toLowerCase()}</span> : null}
       </p>
       <p className="mt-2 text-sm text-mute">{how}</p>
       <p className="mt-3 text-[15px] leading-relaxed">{decision.message}</p>
@@ -340,12 +402,16 @@ export function AgentTimeline({
   started,
   health = null,
   busAgents = [],
+  stopped = [],
+  onToggleAgent,
 }: {
   events: LensEvent[];
   usingMock: boolean;
   started: boolean;
   health?: Health | null;
   busAgents?: string[];
+  stopped?: string[];
+  onToggleAgent?: (agentId: string) => Promise<void>;
 }) {
   const overBus = new Set(busAgents);
   const { items, selections, decision } = buildChat(events);
@@ -367,7 +433,7 @@ export function AgentTimeline({
             <h2 className="font-display text-2xl leading-none">the team</h2>
             {started || usingMock ? <TransportBadge health={health} busCount={busAgents.length} usingMock={usingMock} /> : null}
           </div>
-          <TeamGrid selections={selections} overBus={overBus} />
+          <TeamGrid selections={selections} overBus={overBus} stopped={stopped} onToggle={onToggleAgent} />
         </section>
       ) : null}
 

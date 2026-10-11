@@ -101,6 +101,8 @@ export interface Decision {
   decided_by?: "agents" | "arbiter";
   /** Planned: rebuttal rounds that ran before the decision. */
   rounds?: number;
+  /** Planned: agents the arbiter decided without, after "kill an agent". */
+  missing_agents?: string[];
 }
 
 export interface PreferenceReport {
@@ -124,7 +126,8 @@ export type LensEventType =
   | "decision"
   | "status"
   | "preference"
-  | "offer";
+  | "offer"
+  | "agent_lost";
 
 export interface LensEvent {
   type: LensEventType;
