@@ -13,6 +13,7 @@ import type {
 import { social } from "../api/social.ts";
 import { startAgent, stopAgent } from "../api/agents.ts";
 import { agentInfo } from "../lib/agents.ts";
+import { critique } from "../lib/critic.ts";
 import { resolveWithout } from "../lib/withoutAgents.ts";
 import { resetCovers, resetPortraits } from "../lib/images.ts";
 import { sampleSession } from "../mocks/sample.ts";
@@ -58,6 +59,8 @@ export interface SessionState {
   browserStopped: string[];
   /** When each phase of the latest round first reached the browser, in ms after the round started. */
   phases: { phase: Phase; ms: number }[];
+  /** The Critic challenges each #1 before it's final. Off by default. */
+  critic: boolean;
 }
 
 export type Phase = "selected" | "proposed" | "scored" | "decided";
@@ -92,6 +95,7 @@ let state: SessionState = {
   stopped: [],
   browserStopped: [],
   phases: [],
+  critic: false,
 };
 
 const listeners = new Set<() => void>();
@@ -156,6 +160,13 @@ export function pushEvent(event: LensEvent) {
     patch.preferenceSummary = event.message;
   }
   set(patch);
+  if (event.type === "decision" && state.critic && !state.events.some((item) => item.type === "critique")) {
+    const challenge = critique(event.payload as unknown as Decision);
+    if (challenge) {
+      localSeq += 1;
+      pushEvent({ type: "critique", agent_id: "critic", message: challenge.message, payload: { ...challenge.payload, reply: challenge.reply }, seq: localSeq });
+    }
+  }
 }
 
 export function pushStatus(message: string) {
@@ -199,7 +210,10 @@ function run(note?: string) {
   }
 
   void client
-    .recommend({ user_id: state.userId, query: "What should I get next?", preference_overrides: {} }, forThisRound)
+    .recommend(
+      { user_id: state.userId, query: "What should I get next?", preference_overrides: {}, critic: state.critic },
+      forThisRound,
+    )
     .catch(() => {
       if (state.round === round && state.decision === null) replayMock();
     })
@@ -307,10 +321,15 @@ export async function toggleAgent(agentId: string) {
   rerun(`${name} dropped out${midRound ? " mid-round" : ""}. The team re-plans without it.`);
 }
 
+export function toggleCritic() {
+  set({ critic: !state.critic });
+  rerun(state.critic ? "The Critic joins the table and will challenge the #1." : "The Critic leaves the table.");
+}
+
 export async function resetAll() {
   const serverStopped = state.stopped.filter((id) => !state.browserStopped.includes(id));
   await Promise.all(serverStopped.map((id) => startAgent(id).catch(() => {})));
-  set({ stopped: [], browserStopped: [] });
+  set({ stopped: [], browserStopped: [], critic: false });
   await client.resetDemo().catch(() => {});
   resetSocialMock();
   shopMock.reset();

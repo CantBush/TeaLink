@@ -148,6 +148,18 @@ function buildChat(events: LensEvent[]): { items: ChatItem[]; selections: LensEv
       case "agent_lost":
         items.push({ kind: "system", key, text: event.message, tone: "dropped" });
         break;
+      case "critique": {
+        const reply =
+          typeof event.payload.reply === "string"
+            ? event.payload.reply
+            : event.payload.changed_pick
+              ? "The Critic was right, so the arbiter changed the pick."
+              : "The arbiter answered it, and the pick holds.";
+        items.push({ kind: "divider", key: `${key}-critic`, text: "the critic checks the #1" });
+        items.push({ kind: "message", key, agentId: "critic", tag: "challenges", tone: "doubt", text: event.message });
+        items.push({ kind: "system", key: `${key}-reply`, text: `arbiter: ${reply}`, tone: "note" });
+        break;
+      }
       case "decision":
         decision = event;
         break;

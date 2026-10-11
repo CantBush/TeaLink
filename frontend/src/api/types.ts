@@ -127,7 +127,8 @@ export type LensEventType =
   | "status"
   | "preference"
   | "offer"
-  | "agent_lost";
+  | "agent_lost"
+  | "critique";
 
 export interface LensEvent {
   type: LensEventType;
@@ -362,6 +363,8 @@ export interface RecommendRequest {
   user_id: string;
   query: string;
   preference_overrides: Record<string, number>;
+  /** Planned: ask the Critic to challenge the #1. Older APIs ignore it. */
+  critic?: boolean;
 }
 
 /** GET /drinks. photo_url stays null until real photos exist. */
