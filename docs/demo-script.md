@@ -77,7 +77,7 @@ Do this after the close, or if a judge asks about failure or observability. Pres
    > "Agents fail. Budget just went down, and the team re-plans without it: the chat says Budget is unavailable, and the decision is marked 'without budget'. Nobody speaks for price now, so it counts for nothing, every score drops, and Pearl Milk Tea, the best taste match, moves up to #1."
    Tap **Budget** again, then **Bring Budget back**: Thai Tea is back at 78.
 2. **The Critic.** Flip the **Critic** switch under the what-if buttons.
-   > "Before the pick is final, a Critic looks for its weakest point: Wintermelon beats Thai Tea on price, 90 to 70. The arbiter has to answer, and here it agrees it's too close to call, so Andrew decides." Flip the switch off again.
+   > "Before the pick is final, a Critic agent attacks it: Thai Tea's weakest case is that it isn't new to him, only 56%. The arbiter has to answer in the open, and here it keeps the pick, because Thai Tea still has the highest combined score." Flip the switch off again.
 3. **The trace.** Open **evidence** and scroll to **inside the last round**.
    > "Every call from the concierge to an agent is traced: how long it took, retries, and whether it went over Cisco's AGNTCY bus or fell back to in-process. Here all 20 calls went over the bus, with no retries and no fallbacks."
    If Budget was still stopped for the last round, the trace shows 9 agents and "not called: budget".
@@ -102,7 +102,7 @@ Only do this after the close, or if a judge asks how shops fit in. It comes afte
 - **"How do you know which agents are trustworthy?"** Only a shop's own agent can confirm its stock, and a drink with no confirming agent is dropped. Signed identities, so a fake shop agent gets rejected, are next on the plan, not built yet.
 - **"Is the team discovered or hard-coded?"** The concierge picks agents by capability from their agent cards, and a new shop agent joins mid-session (Lantern Leaf). Publishing the cards to an AGNTCY directory is planned, not built yet.
 - **"Can you see what the agents are doing?"** Yes: the evidence page shows the server's trace of the last round, with every call's time, retries, and whether it went over AGNTCY or fell back to in-process.
-- **"Isn't the Critic just another scorer?"** It doesn't score. It argues against the #1 using the runner-up's strongest point, and the arbiter has to answer. Today it runs in the browser on the arbiter's real scores; the server-side Critic agent is planned.
+- **"Isn't the Critic just another scorer?"** It doesn't vote or score. It runs after scoring, names the #1's weakest case, and the arbiter has to answer it in the chat. It's deterministic and off by default.
 - **"Can a shop pay to win?"** No. An offer only goes out in a close call that passes the four locked platform rules, it's capped at 10% or $1, it's computed in code, and it's labelled on the card. A shop's own rules can only make offers rarer.
 
 ## Dry runs
