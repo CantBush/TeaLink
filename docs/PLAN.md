@@ -474,6 +474,170 @@ Health.deliberation?: "dialogue" | "single";
 | 5 | ✅ "You" copy pass across all frontend text, and transition animations everywhere | |
 | 6 | ✅ Update `docs/demo-script.md` for the new sub-tabs (Reset demo and the what-if buttons now live in at the counter) | The script's clicks match the app |
 
+### Accounts, store tools, and ordering (added 8:15 PM)
+
+**Goal:**
+- Real accounts: you sign in to get into the app, and you can sign back in to the same account from any browser.
+- Shops run their own page: menu, discount rules, demand trends, and their shop profile.
+- You can order and pay for a drink from a shop, and the shop sees the order.
+
+**General:**
+- **No default profile before sign in.**
+  - Today `state/me.ts` falls back to the demo user (`andrew`) when nothing is stored, so some screens can show Andrew's data before anyone signs in.
+  - After this change there is no current user until you sign in or sign up. Nothing personal renders before that.
+  - The demo still needs a one-tap way in, so the sign-in screen keeps **"use the demo account"** buttons (Andrew as a customer, and Sunright Tea Studio as a shop). They sign in to real seeded accounts; they are not a silent fallback.
+
+**Customer side:**
+- **Accounts with sign in:**
+  - Users, shop accounts, and sessions live in a database (SQLite is enough). The social profiles and choices that are in JSON today move into it, or link to it by `user_id`.
+  - Sign up takes email (or handle) and a password, then runs the existing quiz. Sign in restores that account on any browser. Log out ends the session.
+  - Passwords are hashed (bcrypt or argon2), never stored or logged in plain text. Sessions use an httpOnly cookie or a bearer token.
+  - Seeded users get a demo password so the demo accounts can sign in.
+- **No access without an account:**
+  - Every customer and shop route sends you to `/welcome` (sign in or sign up) until you have a session.
+  - The API takes the user from the session, not from a `user_id` in the request, for everything that writes data or reads private data. The public catalog (`GET /drinks`, `GET /shops`) can stay open.
+- **Buying drinks from shops:**
+  - **Order for pickup** on today's picks cards, the drink sheet in Discover, and a shop's menu.
+  - Choose sugar, ice, and toppings from the shop's menu options. One shop per order.
+  - **Checkout:** the price, any close-call offer you were shown (applied only before it expires, and only for that drink), and the pickup fee.
+  - **Payment:** Stripe in test mode, with the secret key on the server only. The browser never sees a secret key or raw card numbers. "Pay at pickup" is the fallback, and it is what the demo uses if Stripe isn't set up.
+  - **Order status:** placed → accepted → ready → picked up. You see it on an Orders page. The shop sees incoming orders and moves them along.
+  - A completed order counts as a pick for the Preference agent, and afterwards you're asked to rate the drink.
+
+**Shops side:**
+- **Menu editing:**
+  - Add, edit, and remove drinks: name, price, photo, description, flavor tags, taste attributes (sliders), and the sugar, ice, and topping options.
+  - Add, rename, reorder, and remove **menu sections** (for example "milk teas", "fruit teas", "seasonal"), and move drinks between them.
+  - Sold out and restock reach the recommender. Today they're saved only in that browser.
+- **Close-call discount rules:**
+  - The four current rules (runner-up, within 0.02, a different shop, losing on price) become **platform rules**. They're shown with a lock and can't be removed, so a shop can never buy a win outside a close call.
+  - The shop adds, edits, and removes its **own rules** on top, from a fixed set of rule types with settings: max percent and max dollars (never above the platform cap), which drinks or sections, which days and hours (for example off-peak only), and max offers per day.
+  - An offer goes out only when the platform rules and every one of the shop's rules hold. The offer is computed in code. An LLM never sets the number. Offers stay labelled on the cards.
+- **Taste trends in Demand:**
+  - What kinds of drinks people choose (milk tea, fruit tea, tea-forward, and top flavors), the most popular drinks overall and the shop's own, and how the priorities people weigh are shifting.
+  - Toggle between **past week, past month, and past year**.
+  - Built from choices, orders, and reviews, anonymized and aggregated. Buckets with fewer than 5 people are hidden, and no names are shown.
+  - The seed adds timestamps across the past year so all three ranges have data.
+- **Shop profile:** change the shop picture and add a description. Both show on Discover's shop cards and the shop's page.
+
+**Demo safety:**
+- The scripted demo must still run exactly as written. You sign in with the demo button, and Reset demo returns menus, rules, sold-out marks, and orders to the seed without deleting accounts.
+- The single-mode demo numbers must not change: Thai Tea 78, Wintermelon 77, Pearl 71.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`):
+
+```ts
+// Auth. Session cookie (httpOnly) or bearer token; A picks one and notes it in PROGRESS.md.
+POST /auth/signup   { email, password, role: "customer" | "store", shop_id? } -> { user_id, role, shop_id? }
+POST /auth/login    { email, password } -> { user_id, role, shop_id? }
+POST /auth/logout   -> { ok: true }
+GET  /auth/me       -> { user_id, role, shop_id? } | 401
+
+// Menu
+GET    /shops/{id}/menu -> { sections: { id, name, order, drink_ids: string[] }[] }
+PUT    /shops/{id}/menu/sections                { sections: { id?, name, order, drink_ids }[] }
+POST   /shops/{id}/drinks                       DrinkInput -> Drink
+PATCH  /shops/{id}/drinks/{drink_id}            Partial<DrinkInput & { available: boolean }> -> Drink
+DELETE /shops/{id}/drinks/{drink_id}
+// DrinkInput: { name, price, description?, photo_url?, flavor_tags, attributes, options?: { sugar: string[]; ice: string[]; toppings: { name, price }[] } }
+
+// Discount rules (platform rules are read-only)
+GET    /shops/{id}/offer-rules -> { platform: { id, text }[]; rules: OfferRule[]; cap: { percent, dollars } }
+POST   /shops/{id}/offer-rules                  OfferRuleInput -> OfferRule
+PATCH  /shops/{id}/offer-rules/{rule_id}        Partial<OfferRuleInput> -> OfferRule
+DELETE /shops/{id}/offer-rules/{rule_id}
+// OfferRule: { id, kind: "max_discount" | "drinks" | "sections" | "hours" | "days" | "daily_limit", value, enabled }
+
+// Demand
+GET /shops/{id}/demand?range=week|month|year
+  -> { bases: { base, share }[]; flavors: { tag, share }[]; top_drinks: { drink_id, count }[];
+       own_top_drinks: { drink_id, count }[]; priorities: DimensionScores; people: number }
+
+// Shop profile
+PATCH /shops/{id} { description?, photo_url? } -> Shop   // GET /shops gains description
+
+// Orders
+POST  /orders { shop_id, items: { drink_id, sugar?, ice?, toppings?: string[] }[], offer_id?, pay: "card" | "pickup" }
+        -> { order_id, total, status: "placed", payment_url? }
+GET   /orders            -> Order[]   // yours as a customer; the shop's incoming ones as a store
+PATCH /orders/{id}       { status: "accepted" | "ready" | "picked_up" | "cancelled" } -> Order
+```
+
+#### Track A: accounts, store tools, and ordering
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Database plus auth: users, shop accounts, hashed passwords, sessions, and `/auth/*`; seed demo passwords | The demo accounts sign in. Private endpoints return 401 without a session and read the user from it |
+| 2 | ⬜ Menu and shop profile: drinks CRUD, menu sections, shop `description` and `photo_url`; sold out from the shop menu reaches the recommender | An edited price or a new drink shows up in the next recommendation |
+| 3 | ⬜ Offer rules: platform rules locked, shop rules CRUD, and the offer engine checks both | A shop rule can stop an offer but never allows one outside a close call or above the cap. Demo numbers unchanged |
+| 4 | ⬜ Demand trends over week, month, and year from choices, orders, and reviews, with timestamps in the seed | Each range returns data, and small buckets are hidden |
+| 5 | ⬜ Orders: create, status changes, offers applied at checkout, Stripe test mode with pay at pickup as the fallback; a completed order teaches the Preference agent | A demo order goes from placed to picked up, and the shop sees it |
+| 6 | ⬜ Reset demo restores menus, rules, sold-out marks, and orders, but keeps accounts | The scripted demo runs twice in a row unchanged |
+
+#### Track B: accounts, store tools, and ordering
+
+Andrew wrote the first shop pages in `frontend/src/pages/shop/`. B builds on them; tell A before reworking them.
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Sign in and sign up on `/welcome` with "use the demo account" buttons; remove the default profile in `state/me.ts`; every customer and shop route requires a session | A fresh browser sees only `/welcome` until it signs in, and signing in elsewhere restores the same account |
+| 2 | ⬜ Shop menu editor: drinks (add, edit, remove, sold out), sections (add, rename, reorder, move drinks) | A shop can build a section and move a drink into it |
+| 3 | ⬜ Close-call discount rules page: locked platform rules, plus the shop's own rules to add, edit, remove, and switch on or off | Changes save to the API and survive a reload |
+| 4 | ⬜ Demand: taste trends with a week, month, and year toggle (drink types, flavors, most popular overall and the shop's own) | All three ranges render, with no names shown |
+| 5 | ⬜ Shop profile: change the picture and add a description; show them on Discover's shop cards | |
+| 6 | ⬜ Ordering: Order for pickup, options, checkout (offer and pickup fee), payment or pay at pickup, an Orders page with status, and the shop's incoming orders | A demo order completes end to end |
+| 7 | ⬜ Update `docs/demo-script.md` for sign in, and add a short shop-side moment if there's time | The script's clicks match the app |
+
+### Custom what-if at the counter (added 8:20 PM)
+
+**Goal:** the what-if box on at the counter takes your own changes, not just the five preset buttons. You describe a change, and the agents re-plan around it.
+
+**How it works:**
+- **A change builder:** pick the kind of change, then the target from lists of real drinks, shops, and flavors. Kinds:
+  - a drink sells out, or is back in stock;
+  - a shop goes offline, comes back online, or joins;
+  - you don't want a flavor or ingredient, or you want more or less of a taste (sweeter, less milky, more tea);
+  - a price limit for this order;
+  - a drink's price changes.
+- **Or type it:** a text box such as "taro is sold out at boba guys" or "I want something less sweet under $6."
+  - The backend turns the text into the same structured changes the builder makes, and the UI shows them as chips ("Taro Milk Tea: sold out", "sweetness: lower", "under $6.00") for you to confirm or remove before anything runs.
+  - An LLM may do the parsing, but it can only choose from the known change kinds and real ids. Anything it can't match is shown as "not understood" and is never applied. Without an LLM key, a simple keyword matcher does the same job.
+  - The LLM never sets scores. Scores and rankings stay in code.
+- **Several changes at once:** you can stack changes, and one re-plan runs for all of them.
+- **The chat shows them:** each applied change appears as a note at the top of "they argue" ("You: taro is sold out at Boba Guys"), as the preset buttons do now.
+- **The presets stay:** #1 sells out, #1's shop goes offline, Lantern Leaf joins, no brown sugar, and Reset demo remain as one-tap chips, so the demo script doesn't change.
+- **Reset demo** clears every custom change.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`):
+
+```ts
+type WhatIf =
+  | { kind: "sold_out" | "restock"; drink_id: string }
+  | { kind: "shop_offline" | "shop_online" | "shop_join"; shop_id: string }
+  | { kind: "avoid"; tag: string }                                   // flavor or ingredient, e.g. "brown_sugar"
+  | { kind: "taste"; attribute: TasteAttribute; direction: "more" | "less" }
+  | { kind: "max_price"; dollars: number }                           // this order only
+  | { kind: "price"; drink_id: string; dollars: number };
+
+POST /whatif/parse { text } -> { changes: WhatIf[]; not_understood: string[] }
+POST /whatif       { user_id, changes: WhatIf[] } -> { ok: true; applied: WhatIf[] }   // then the frontend re-runs /recommend
+```
+
+#### Track A: custom what-if
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ `POST /whatif` applies the structured changes, including the new kinds (restock, shop back online, taste direction, a price limit for this order, a price change); Reset demo clears them | Each kind changes the next recommendation, and the preset buttons give the same numbers as before |
+| 2 | ⬜ `POST /whatif/parse`: text to changes, limited to the known kinds and real ids, with a keyword fallback when there's no LLM key | "taro is sold out at boba guys" returns one `sold_out` change, and nonsense returns only `not_understood` |
+
+#### Track B: custom what-if
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Change builder on at the counter: kind, then target from real lists; stack several; apply runs one re-plan | A custom sold-out and a taste change both show up in the chat and the new top 3 |
+| 2 | ⬜ Text box: parse, show the changes as chips to confirm or remove, and show what wasn't understood | Nothing runs until you confirm |
+| 3 | ⬜ Keep the five presets as chips, and make sure the demo script still matches | The scripted demo is unchanged |
+
 ### Sync points
 
 | Time | Both of you |
@@ -494,18 +658,26 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## If we fall behind, cut in this order
 
 1. UI round 2 extras, in this order:
+   - typed custom what-ifs (keep the change builder), then the change builder (keep the preset buttons);
    - agent dialogue (keep `single`);
    - the Stats receipt layout and card color;
    - transition animations;
    - Discover match ordering.
    Keep the at the counter sub-tab and the trimmed today's picks.
-2. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-3. Shop images and cover images (keep the drink images)
-4. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-5. Friends tab (once profiles exist, it folds into them)
-6. Counterfactual page (Why This and the timeline already show the before/after)
-7. LLM wording
-8. AGNTCY (use the local transport)
+2. Accounts, store tools, and ordering, in this order:
+   - card payments (keep pay at pickup);
+   - the month and year ranges in demand trends (keep the week);
+   - menu sections (keep editing drinks);
+   - the shop picture and description;
+   - ordering.
+   Keep sign in, the demo account buttons, and the discount rules.
+3. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+4. Shop images and cover images (keep the drink images)
+5. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+6. Friends tab (once profiles exist, it folds into them)
+7. Counterfactual page (Why This and the timeline already show the before/after)
+8. LLM wording
+9. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
@@ -517,6 +689,12 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
+- **8:15 PM:** Added "Accounts, store tools, and ordering":
+  - Real sign in, with no default profile before it, and no access without an account. The demo keeps one-tap demo account buttons.
+  - Shops can edit their menu and its sections, add their own close-call discount rules on top of locked platform rules, see taste trends by week, month, or year, and change their picture and description.
+  - Customers can order and pay for pickup.
+  - New contracts for both tracks. These go second on the cut list, after the round 2 extras.
 - **7:40 PM:** Track B finished its UI round 2 rows:
   - At the counter (`/counter`) has the what-if buttons, the team grid, the group chat, and the decision. `/counterfactual` now redirects there.
   - The frontend already reads the planned fields (`name`/`description`, `round`/`revised_from`, `decided_by`/`rounds`, `match`, `card_color`). Until they're served, it falls back to its own agent descriptions, round 1, "the arbiter decided," client-side taste matching, and a card color saved in the browser.
