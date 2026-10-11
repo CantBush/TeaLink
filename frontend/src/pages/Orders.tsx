@@ -6,6 +6,7 @@ import type { Order } from "../api/types.ts";
 import { OrderCard } from "../components/OrderCard.tsx";
 import { shopLabel } from "../lib/format.ts";
 import { useOrders } from "../state/orders.ts";
+import { Loading } from "../components/Loading.tsx";
 
 function Rate({ order, onDone }: { order: Order; onDone: () => void }) {
   const [hover, setHover] = useState(0);
@@ -57,7 +58,7 @@ export function Orders() {
       {error ? <p className="rounded-3xl border border-line bg-foam p-5">{error}</p> : null}
       {cancelError ? <p className="text-sm text-[#a33]">{cancelError}</p> : null}
       {orders === null ? (
-        <p className="text-mute">Loading orders…</p>
+        <Loading label="Loading your orders…" />
       ) : orders.length === 0 ? (
         <div className="rounded-[28px] border border-line bg-foam p-6 text-center">
           <p className="font-display text-2xl">no orders yet</p>

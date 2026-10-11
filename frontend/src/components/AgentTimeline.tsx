@@ -7,6 +7,7 @@ import { dimensionLabel, price, readableShops } from "../lib/format.ts";
 import { DIMENSION_OF } from "../lib/withoutAgents.ts";
 import { AgentSymbol } from "./AgentSymbol.tsx";
 import { LeafPair, TeaBowl } from "./Doodles.tsx";
+import { BobaMark } from "./BobaMark.tsx";
 
 /** Notes the frontend adds itself (e.g. "Thai Tea just sold out.") use seq numbers from here up. */
 const LOCAL_SEQ_START = 100000;
@@ -441,7 +442,7 @@ export function AgentTimeline({
   if (events.length === 0) {
     return (
       <section className="flex items-center gap-3 rounded-[28px] border border-line bg-foam p-6 text-mute">
-        <TeaBowl steaming className="h-7 w-7 shrink-0 text-moss" />
+        {started ? <BobaMark clinking className="h-8 w-10 shrink-0 text-moss" /> : <TeaBowl className="h-7 w-7 shrink-0 text-moss" />}
         {started ? "Calling the agents to the counter…" : "The round has not started."}
       </section>
     );

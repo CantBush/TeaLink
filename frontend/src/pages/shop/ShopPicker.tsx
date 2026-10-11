@@ -5,6 +5,7 @@ import type { ShopListing } from "../../api/types.ts";
 import { Shell } from "../../components/OnboardingShell.tsx";
 import { shopPhoto } from "../../lib/images.ts";
 import { setShopId } from "../../state/role.ts";
+import { Loading } from "../../components/Loading.tsx";
 
 /** Every shop from GET /shops, including ones that have not joined yet. */
 export function ShopPicker({ onChoose }: { onChoose?: (shopId: string) => void } = {}) {
@@ -38,7 +39,7 @@ export function ShopPicker({ onChoose }: { onChoose?: (shopId: string) => void }
       <h1 className="font-display text-4xl leading-tight sm:text-5xl">Which shop is yours?</h1>
       <p className="mt-3 text-lg text-mute">Pick one. Next you'll create the account you sign in with. No quiz and no customer profile.</p>
       {error ? <p className="mt-6 rounded-3xl border border-line bg-foam p-6">{error}</p> : null}
-      {shops === null && !error ? <p className="mt-8 text-mute">Loading shops…</p> : null}
+      {shops === null && !error ? <Loading label="Loading shops…" /> : null}
       <ul className="mt-8 grid gap-3">
         {shops?.map((shop) => {
           const photo = shop.photo_url || shopPhoto(shop.id);

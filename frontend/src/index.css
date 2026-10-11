@@ -161,3 +161,49 @@
 .steam {
   animation: steam 2.4s ease-in-out infinite;
 }
+
+/* The logo's cups swing apart and meet again; at rest they touch, like the static logo. */
+@keyframes clink-cup {
+  0%,
+  100% {
+    transform: none;
+  }
+  12% {
+    transform: none;
+  }
+  45% {
+    transform: rotate(-22deg);
+  }
+  78% {
+    transform: rotate(2deg);
+  }
+  86% {
+    transform: rotate(-1deg);
+  }
+}
+
+@keyframes clink-spark {
+  0%,
+  12% {
+    opacity: 1;
+    transform: none;
+  }
+  30%,
+  76% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  84% {
+    opacity: 1;
+    transform: translateY(-0.6px);
+  }
+}
+
+.clink-cup {
+  transform-origin: 0 10px;
+  animation: clink-cup 1.3s ease-in-out infinite;
+}
+
+.clink-spark {
+  animation: clink-spark 1.3s ease-out infinite;
+}

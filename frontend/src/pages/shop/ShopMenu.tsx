@@ -6,6 +6,7 @@ import { TASTE_ORDER, attributeLabel, price } from "../../lib/format.ts";
 import { drinkPhoto } from "../../lib/images.ts";
 import { useShopId } from "../../state/role.ts";
 import { ShopPage } from "./ShopLayout.tsx";
+import { Loading } from "../../components/Loading.tsx";
 
 const small = "rounded-full border border-line px-3 py-1.5 text-xs font-semibold disabled:opacity-30";
 const field = "w-full rounded-2xl border border-line bg-foam px-4 py-2.5 outline-none focus:border-moss";
@@ -176,7 +177,7 @@ export function ShopMenu() {
   };
 
   if (!menu) {
-    return <ShopPage>{error ? <p className="rounded-3xl border border-line bg-foam p-5">{error}</p> : <p className="text-mute">Loading your menu…</p>}</ShopPage>;
+    return <ShopPage>{error ? <p className="rounded-3xl border border-line bg-foam p-5">{error}</p> : <Loading label="Loading your menu…" />}</ShopPage>;
   }
 
   const byId = new Map(menu.drinks.map((drink) => [drink.id, drink]));

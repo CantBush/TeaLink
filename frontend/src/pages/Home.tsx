@@ -13,6 +13,7 @@ import { useMe } from "../state/me.ts";
 import { isSignedIn } from "../state/account.ts";
 import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
+import { Loading } from "../components/Loading.tsx";
 
 function Suggested({ users, onFollow }: { users: UserProfile[]; onFollow: (user: UserProfile) => void }) {
   if (users.length === 0) return null;
@@ -120,7 +121,7 @@ export function Home() {
 
       <section className="space-y-3">
         {feed === null ? (
-          <p className="text-sm text-mute">Loading your feed…</p>
+          <Loading label="Loading your feed…" />
         ) : feed.length === 0 ? (
           <p className="rounded-3xl border border-dashed border-line p-6 text-center text-sm text-mute">
             Follow a few people to fill your feed.

@@ -11,6 +11,7 @@ import { drinkPhoto } from "../lib/images.ts";
 import { quote } from "../lib/order.ts";
 import { orderedFromTop3, useSession } from "../state/session.ts";
 import { Sheet } from "./Sheet.tsx";
+import { Loading } from "./Loading.tsx";
 
 function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
   return (
@@ -128,7 +129,11 @@ export function OrderSheet({ drinkId, onClose }: { drinkId: string; onClose: () 
             </div>
           </div>
         ) : !drink ? (
-          <p className="mt-6 text-mute">{error ?? "Loading the menu…"}</p>
+          error ? (
+            <p className="mt-6 text-mute">{error}</p>
+          ) : (
+            <Loading label="Loading the menu…" className="py-8" />
+          )
         ) : !drink.available ? (
           <p className="mt-6 rounded-3xl bg-sage p-5">{drink.name} is sold out right now. Try another of your picks.</p>
         ) : (

@@ -12,6 +12,7 @@ import { isSignedIn } from "../state/account.ts";
 import { useRole } from "../state/role.ts";
 import { loadProfile, useSession } from "../state/session.ts";
 import { useProfile } from "../state/social.ts";
+import { Loading } from "../components/Loading.tsx";
 
 /** Your own numbers: the shareable card, every stat (public or not), and the taste profile the agents use. */
 export function Stats() {
@@ -26,7 +27,7 @@ export function Stats() {
 
   if (role === "store") return <Navigate to="/shop" replace />;
   if (!isSignedIn()) return <Navigate to="/welcome" replace />;
-  if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-mute">Loading your stats…</main>;
+  if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8"><Loading label="Loading your stats…" /></main>;
 
   const visible = shownStats(profile.visible_stats);
   const color = cardColor(profile);

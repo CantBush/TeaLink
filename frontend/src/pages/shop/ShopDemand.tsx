@@ -7,6 +7,7 @@ import { DIMENSIONS, dimensionLabel, shopLabel } from "../../lib/format.ts";
 import { noteLabel } from "../../lib/stats.ts";
 import { useShopId } from "../../state/role.ts";
 import { ShopPage } from "./ShopLayout.tsx";
+import { Loading } from "../../components/Loading.tsx";
 
 const RANGES: { id: DemandRange; label: string }[] = [
   { id: "week", label: "past week" },
@@ -149,7 +150,7 @@ export function ShopDemand() {
           </section>
         </div>
       ) : (
-        <p className="text-mute">Loading demand…</p>
+        <Loading label="Loading demand…" />
       )}
     </ShopPage>
   );

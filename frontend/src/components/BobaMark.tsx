@@ -28,8 +28,8 @@ function HandAndCup() {
   );
 }
 
-/** Two hands clinking boba cups, drawn as one-weight line art. */
-export function BobaMark({ className = "h-8 w-10" }: { className?: string }) {
+/** Two hands clinking boba cups, drawn as one-weight line art. `clinking` loops the cheers. */
+export function BobaMark({ className = "h-8 w-10", clinking = false }: { className?: string; clinking?: boolean }) {
   return (
     <svg
       viewBox="0 2 40 26"
@@ -42,12 +42,16 @@ export function BobaMark({ className = "h-8 w-10" }: { className?: string }) {
       aria-hidden="true"
     >
       <g transform="translate(13 18) rotate(16)">
-        <HandAndCup />
+        <g className={clinking ? "clink-cup" : undefined}>
+          <HandAndCup />
+        </g>
       </g>
       <g transform="translate(27 18) rotate(-16) scale(-1 1)">
-        <HandAndCup />
+        <g className={clinking ? "clink-cup" : undefined}>
+          <HandAndCup />
+        </g>
       </g>
-      <path d="M20 8.2V5.6M17.4 9l-1.3-1.7M22.6 9l1.3-1.7" />
+      <path className={clinking ? "clink-spark" : undefined} d="M20 8.2V5.6M17.4 9l-1.3-1.7M22.6 9l1.3-1.7" />
     </svg>
   );
 }

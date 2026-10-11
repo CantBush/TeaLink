@@ -5,6 +5,7 @@ import type { Order, OrderStatus } from "../../api/types.ts";
 import { OrderCard } from "../../components/OrderCard.tsx";
 import { useOrders } from "../../state/orders.ts";
 import { ShopPage } from "./ShopLayout.tsx";
+import { Loading } from "../../components/Loading.tsx";
 
 const ADVANCE: Partial<Record<OrderStatus, { to: OrderStatus; label: string }>> = {
   placed: { to: "accepted", label: "Accept" },
@@ -45,7 +46,7 @@ export function ShopOrders() {
       {error ? <p className="rounded-3xl border border-line bg-foam p-5">{error}</p> : null}
       {actionError ? <p className="text-sm text-[#a33]">{actionError}</p> : null}
       {orders === null ? (
-        <p className="text-mute">Loading orders…</p>
+        <Loading label="Loading orders…" />
       ) : open.length === 0 ? (
         <p className="rounded-[28px] border border-line bg-foam p-6 text-center text-mute">No open orders right now.</p>
       ) : (

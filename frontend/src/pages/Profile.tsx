@@ -20,6 +20,7 @@ import { useMe } from "../state/me.ts";
 import { isSignedIn } from "../state/account.ts";
 import { useRole } from "../state/role.ts";
 import { profilesChanged, useProfile } from "../state/social.ts";
+import { Loading } from "../components/Loading.tsx";
 
 function Count({ value, label }: { value: number; label: string }) {
   return (
@@ -104,7 +105,7 @@ export function MyProfile() {
   const role = useRole();
   if (role === "store") return <Navigate to="/shop" replace />;
   if (!isSignedIn()) return <Navigate to="/welcome" replace />;
-  if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-sm text-mute">Loading your profile…</main>;
+  if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8"><Loading label="Loading your profile…" /></main>;
   return <Navigate to={`/u/${profile.handle}`} replace />;
 }
 
@@ -146,7 +147,7 @@ export function Profile() {
       </main>
     );
   }
-  if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8 text-sm text-mute">Loading profile…</main>;
+  if (!profile) return <main className="mx-auto max-w-3xl px-5 py-8"><Loading label="Loading the profile…" /></main>;
 
   const own = profile.user_id === me;
   const pinned = drinkInfo(profile.pinned_drink_id);

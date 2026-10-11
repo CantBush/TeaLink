@@ -5,6 +5,7 @@ import type { MenuSection, OfferRuleInput, OfferRuleKind, OfferRules, ShopDrink 
 import { useShopId } from "../../state/role.ts";
 import { setAutoOffer, useAutoOffer } from "../../state/shopLocal.ts";
 import { ShopPage, useShopCatalog } from "./ShopLayout.tsx";
+import { Loading } from "../../components/Loading.tsx";
 
 const DAYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 const field = "rounded-full border border-line bg-foam px-3 py-2 text-sm";
@@ -308,7 +309,7 @@ export function ShopOffers() {
           </section>
         </>
       ) : (
-        <p className="text-mute">Loading your rules…</p>
+        <Loading label="Loading your rules…" />
       )}
 
       <section className="flex items-center justify-between gap-4 rounded-[28px] border border-line bg-foam p-5">

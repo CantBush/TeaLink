@@ -479,9 +479,7 @@ export function Welcome() {
     return (
       <Shell progress={step.kind === "saving" ? 1 : 0}>
         <div className="m-auto text-center">
-          <p className="animate-bounce text-6xl" aria-hidden>
-            🧋
-          </p>
+          <BobaMark clinking className="mx-auto h-20 w-24 text-moss" />
           <p className="mt-4 font-display text-2xl">{step.kind === "saving" ? "Steeping your results…" : "Loading the quiz…"}</p>
         </div>
       </Shell>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sprig, TeaBowl } from "./Doodles.tsx";
+import { Sprig } from "./Doodles.tsx";
 import { OrderSheet } from "./OrderSheet.tsx";
 import { Link } from "react-router-dom";
 import type { Decision, Dimension, RankedDrink } from "../api/types.ts";
@@ -7,6 +7,7 @@ import { topOptions } from "../lib/diff.ts";
 import { drinkInfo } from "../lib/catalog.ts";
 import { DIMENSIONS, dimensionLabel, matchPercent, price, readableShops, shopLabel } from "../lib/format.ts";
 import { drinkPhoto } from "../lib/images.ts";
+import { BobaMark } from "./BobaMark.tsx";
 
 /** Score gaps below this aren't worth calling out as a trade-off. */
 const EDGE_MIN = 0.05;
@@ -104,7 +105,7 @@ function Choices({
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
-        <p className="flex items-center gap-2 font-display text-2xl leading-none text-moss"><TeaBowl steaming className="h-7 w-7" />just for you</p>
+        <p className="flex items-center gap-2 font-display text-2xl leading-none text-moss"><BobaMark clinking className="h-8 w-10" />just for you</p>
         <h2 className="mt-3 font-display text-3xl text-ink">steeping your top 3…</h2>
         <p className="mt-2 max-w-md text-mute">
           The agents are weighing in on your picks, and the shops are checking stock.
