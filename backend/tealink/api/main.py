@@ -164,7 +164,7 @@ def _taste_matches(runtime: Runtime, user_id: str | None) -> dict[str, float] | 
         return None
     _require_user(runtime, user_id)
     profile = user_profile(runtime.catalog, user_id)
-    overrides = runtime.preferences.get(user_id, {})
+    overrides = social.effective_overrides(runtime, user_id)
     matches: dict[str, float] = {}
     for drink in runtime.catalog.drinks:
         score, _factors = score_drink(profile, drink, overrides)
@@ -204,6 +204,7 @@ def shops(user: str | None = None) -> list[dict]:
     """
     runtime = get_runtime()
     matches = _taste_matches(runtime, user)
+    popularity = _shop_popularity(runtime)
     best: dict[str, float] = {}
     if matches is not None:
         for drink in runtime.catalog.drinks:
@@ -219,9 +220,29 @@ def shops(user: str | None = None) -> list[dict]:
             "description": runtime.shop_profiles.get(shop.id, {}).get("description", ""),
             "photo_url": runtime.shop_profiles.get(shop.id, {}).get("photo_url"),
             "match": None if matches is None else best.get(shop.id, 0.0),
+            "popularity": popularity.get(shop.id, 0.0),
         }
         for shop in runtime.catalog.shops
     ]
+
+
+def _shop_popularity(runtime) -> dict[str, float]:
+    """0–1 from reviews and orders placed in the app. The busiest shop is 1."""
+    counts = {shop.id: 0.0 for shop in runtime.catalog.shops}
+    for review in runtime.catalog.reviews:
+        drink = runtime.catalog.drink(review.drink_id)
+        if drink is not None and drink.shop_id in counts:
+            counts[drink.shop_id] += 1
+    for order in runtime.orders:
+        if order.get("status") == "cancelled":
+            continue
+        shop_id = order.get("shop_id")
+        if shop_id in counts:
+            counts[shop_id] += len(order.get("items") or [])
+    peak = max(counts.values(), default=0.0)
+    if peak <= 0:
+        return {shop_id: 0.0 for shop_id in counts}
+    return {shop_id: round(value / peak, 4) for shop_id, value in counts.items()}
 
 
 @app.get("/eval")
@@ -282,7 +303,7 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
     runtime = get_runtime()
     _require_user(runtime, body.user_id)
     await _prepare(runtime)
-    overrides = dict(runtime.preferences.get(body.user_id, {}))
+    overrides = social.effective_overrides(runtime, body.user_id)
     overrides.update(body.preference_overrides)
 
     from tealink.store.rules import constrain

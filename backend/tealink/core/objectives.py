@@ -48,15 +48,21 @@ def social(
         for review in catalog.reviews_for(other_id):
             if review.drink_id != drink.id:
                 continue
-            total += similarity * (review.rating - 1) / 4.0
-            weight += similarity
+            strength = 1.0
+            if review.evidence_weight is not None and review.rating > 0:
+                base = review.rating / 5.0
+                if base > 0 and review.evidence_weight > base:
+                    strength = review.evidence_weight / base
+            total += strength * similarity * (review.rating - 1) / 4.0
+            weight += strength * similarity
             if best is None or (similarity, review.rating) > (best[0], best[2]):
                 best = (similarity, other_id, review.rating)
     if weight == 0.0 or best is None:
         return NEUTRAL, "No one with similar taste has rated it yet."
     user = catalog.users_by_id.get(best[1])
     name = user.name if user else best[1]
-    return total / weight, f"{name} ({round(best[0] * 100)}% similar) rated it {best[2]}/5."
+    score = max(0.0, min(1.0, total / weight))
+    return score, f"{name} ({round(best[0] * 100)}% similar) rated it {best[2]}/5."
 
 
 def novelty(catalog: Catalog, user_id: str, drink: Drink) -> tuple[float, str]:

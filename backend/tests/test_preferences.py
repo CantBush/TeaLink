@@ -38,6 +38,28 @@ def test_pick_outside_the_options_changes_nothing():
     assert update(PRIOR, choice) == fit([], PRIOR)
 
 
+def test_one_live_pick_uses_the_full_rate_and_older_live_picks_fade():
+    live = _cheap_over_tasty()
+    historic = live.model_copy(update={"source": "history"})
+    assert fit([live]) == fit([historic])
+
+    tasty = ChoiceRecord(
+        user_id="u",
+        chosen_drink_id="tasty",
+        source="live",
+        options=[_option("cheap", taste=0.7, cost=0.9), _option("tasty", taste=0.95, cost=0.1)],
+    )
+    cheap = _cheap_over_tasty()
+    both_full = fit(
+        [
+            tasty.model_copy(update={"source": "history"}),
+            cheap.model_copy(update={"source": "history"}),
+        ]
+    )
+    newer_cheap = fit([tasty, cheap])
+    assert newer_cheap["cost"] > both_full["cost"]
+
+
 def test_agent_learns_from_seeded_history_and_live_picks():
     write_dataset()
     catalog = load_catalog()

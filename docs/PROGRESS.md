@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sun Oct 11, 1:20 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sun Oct 11, 11:30 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -23,6 +23,22 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 7. The app asks the human when the top two are within 0.02 of each other, or when every candidate was ruled out.
 
 ## Done
+
+### Ordering fixes, full quiz, favorites, and ratings (Andrew, Track A of the Sun 10:55 AM plan)
+
+Backend only, on `a/ordering-quiz`. `frontend/src/**` is untouched. After Reset demo the opening is still Thai Tea 78, Wintermelon 77, Pearl 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73. Recency and ratings apply to orders placed in the app. An unrated order counts as it does today: a top-3 order teaches the Preference agent and does not add a taste review; any other order is a 4/5 taste signal and does not move the priority weights.
+
+**Seam for Track B.** Mirror these in `frontend/src/api/types.ts`. The screens stay yours. `GET /quiz` with no `kind` is still the six questions.
+
+- `GET /quiz?kind=basic|full`. No `kind` is basic. Anything else is 422, detail `quiz kind must be basic or full`.
+- `QuizQuestion.kind` is `"choice"` or `"favorites"`. Basic questions are `"choice"`. The full quiz is the six, then `ice`, `temperature`, `tea_base`, `milk_type`, `specific_toppings`, `texture`, `avoid`, then one question with `id: "favorites"`, `kind: "favorites"`, and `options: []`. Prompts and options come from the route, so the screens can render whatever it returns.
+- `POST /quiz` takes `{ user_id, answers, kind?: "basic" | "full", favorites?: { shop_id, drink_ids }[] }`. `kind` defaults to basic. A favorite drink that is not on that shop's menu is 422. Sending `favorites` (or `kind: "full"`) replaces that user's favorites.
+- `UserProfile.quiz_kind` is `"basic"`, `"full"`, or `null`.
+- `PastOrder.rating` is `0..5` or `null`, and only on your own profile. Other viewers get the same rows without the `rating` key. Orders placed in the app are included as soon as they are placed (accepted, ready, and picked up too); cancelled orders are left out. Newest first, at most 10, still hidden unless `past_orders` is in `visible_stats`.
+- `PATCH /orders/{order_id}` `{ rating: 0..5 }` is the customer, only after `picked_up`. `rating: null` clears it. 4 and 5 pull the taste profile toward that drink, 0 and 1 push away, and 2 or 3 is a light pull. The next round uses it. Reset demo clears ratings.
+- `GET /shops` adds `popularity` (`0..1`, from reviews and orders). The busiest shop is 1. The other shop fields are unchanged.
+
+Full-quiz flavors marked "skip" are stored as tag overrides of 0, the same mechanism as "I don't like brown sugar", so those drinks are marked down in the next round. A named favorite counts as a 5-star review at double weight. Newer in-app orders count more: the newest keeps full weight, and each older one weighs half as much. Seeded reviews and seeded picks do not fade.
 
 ### More of the Cisco challenge (Emily, Track B rows 1, 2, 3, and 10 of the Sun 10:00 AM plan, on Andrew's 6266d66)
 
@@ -254,6 +270,7 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Plan change log
 
+- **Sun 11:30 AM:** Track A finished rows 1-6 of "Ordering fixes, a full quiz, favorites, and order ratings". The seam for Track B is in the Done section above. Demo scores stay 78 / 77 / 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73.
 - **1:20 AM:** Track B finished the eight profile-layout rows from 12:55 AM. Details are in the Done section above. Track A's photo and rec routes from 1:10 AM are on main, and the frontend uses them.
 - **Evening:** Track A on `a/dialogue`: second-person selection copy, the round-2 contract fields, and `DELIBERATION=dialogue|single` (default `single`). Single-mode demo numbers are unchanged. Dialogue top-3 numbers are in the Track A section above. Track B: mirror the seam before editing `types.ts`, and update `demo-script.md` from the dialogue table. `options[2]` of the dialogue opening is Osmanthus Oolong, not Pearl.
 - **3:35 PM:** Track A: the social backend is in on `a/social-backend`, covering the quiz, boba stats, profiles, follows, feed, likes, comments, and recs. The quiz seeds the Preference agent's prior and the taste profile. The demo numbers and the eval are unchanged. Track B: see "where the API differs from the contract" above before mirroring `types.ts`.

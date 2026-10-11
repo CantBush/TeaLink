@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 from datetime import UTC, datetime
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -17,6 +18,7 @@ from tealink.agents.scoring import user_profile
 from tealink.auth import store as accounts
 from tealink.core import quiz as quiz_core
 from tealink.core.preferences import PRIOR, normalize
+from tealink.core.taste import FAVORITE_WEIGHT
 from tealink.core.similarity import cosine_similarity
 from tealink.core.stats import boba_stats
 from tealink.schemas import (
@@ -29,6 +31,7 @@ from tealink.schemas import (
     Notification,
     PastOrder,
     QuizResult,
+    Review,
     StatKey,
     User,
     UserProfile,
@@ -47,9 +50,16 @@ class NewUser(BaseModel):
     display_name: str = ""
 
 
+class FavoritePick(BaseModel):
+    shop_id: str
+    drink_ids: list[str]
+
+
 class QuizAnswers(BaseModel):
     user_id: str
     answers: dict[str, str | list[str]]
+    kind: Literal["basic", "full"] = "basic"
+    favorites: list[FavoritePick] | None = None
 
 
 class ProfilePatch(BaseModel):
@@ -198,7 +208,7 @@ async def profile_view(runtime, user_id: str, viewer: str | None) -> UserProfile
         dumped = stats.model_dump(mode="json")
         shown = {STAT_FIELDS[key]: dumped[STAT_FIELDS[key]] for key in settings.visible_stats}
         shown["personality"] = stats.personality
-    return UserProfile(
+    profile = UserProfile(
         user_id=user_id,
         handle=settings.handle,
         display_name=settings.display_name,
@@ -217,7 +227,12 @@ async def profile_view(runtime, user_id: str, viewer: str | None) -> UserProfile
         cover_url=settings.cover_url,
         bestea=runtime.social.bestea_status(viewer, user_id),
         besteas=runtime.social.bestea_count(user_id),
+        quiz_kind=runtime.social.quiz[user_id].kind if user_id in runtime.social.quiz else None,
     )
+    if viewer != user_id and "past_orders" in profile.stats:
+        for row in profile.stats["past_orders"]:
+            row.pop("rating", None)
+    return profile
 
 
 def _author(runtime, user_id: str) -> Author:
@@ -245,9 +260,13 @@ def _summary(runtime, user_id: str, viewer: str | None) -> dict:
 
 
 @router.get("/quiz")
-def get_quiz() -> list:
+def get_quiz(kind: str = "basic") -> list:
+    """No ``kind`` is the six-question quiz. ``kind=full`` adds the longer taste questions and favorites."""
+    if kind not in ("basic", "full"):
+        raise HTTPException(status_code=422, detail="quiz kind must be basic or full")
     runtime = _runtime()
-    return [question.model_dump(mode="json") for question in quiz_core.questions(runtime.catalog.shops)]
+    asked = quiz_core.questions(runtime.catalog.shops) if kind == "basic" else quiz_core.full_questions()
+    return [question.model_dump(mode="json") for question in asked]
 
 
 @router.post("/users")
@@ -268,12 +287,57 @@ async def create_user(body: NewUser) -> UserProfile:
     return await profile_view(runtime, handle, handle)
 
 
+def effective_overrides(runtime, user_id: str) -> dict[str, float]:
+    """Quiz flavors to avoid, then any what-if the user set on top."""
+    overrides: dict[str, float] = {}
+    record = runtime.social.quiz.get(user_id)
+    if record is not None:
+        for tag in record.avoids:
+            overrides[tag] = 0.0
+    overrides.update(runtime.preferences.get(user_id, {}))
+    return overrides
+
+
+def _store_favorites(runtime, user_id: str, favorites: list[FavoritePick] | None) -> None:
+    """Replace this user's favorites. Each drink has to be on that shop's menu.
+
+    A favorite is a 5-star review at double weight, so Taste, Social, and
+    Explorer treat it as stronger evidence than a quiz answer.
+    """
+    groups = favorites or []
+    checked: list[tuple[str, str]] = []
+    for group in groups:
+        if runtime.catalog.shop(group.shop_id) is None:
+            raise ValueError("shop not found")
+        if not group.drink_ids:
+            raise ValueError("pick at least one favorite drink")
+        for drink_id in group.drink_ids:
+            drink = runtime.catalog.drink(drink_id)
+            if drink is None or drink.shop_id != group.shop_id:
+                raise ValueError(f"{drink_id} is not on that shop's menu")
+            checked.append((group.shop_id, drink_id))
+    runtime.catalog.drop_prefixed(user_id, f"fav_{user_id}_")
+    for _shop_id, drink_id in checked:
+        runtime.catalog.upsert_review(
+            Review(
+                id=f"fav_{user_id}_{drink_id}",
+                user_id=user_id,
+                drink_id=drink_id,
+                rating=5,
+                text="A favorite.",
+                evidence_weight=FAVORITE_WEIGHT,
+            )
+        )
+
+
 @router.post("/quiz")
 async def take_quiz(body: QuizAnswers) -> QuizResult:
     runtime = _runtime()
     user_id = _require(runtime, body.user_id)
     try:
-        outcome = quiz_core.score(body.answers, runtime.catalog.shops)
+        outcome = quiz_core.score(body.answers, runtime.catalog.shops, kind=body.kind)
+        if body.kind == "full" or body.favorites is not None:
+            _store_favorites(runtime, user_id, body.favorites)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     runtime.catalog.set_base_profile(user_id, outcome.profile)
@@ -282,6 +346,8 @@ async def take_quiz(body: QuizAnswers) -> QuizResult:
         profile=outcome.profile,
         toppings=outcome.toppings,
         flavors=outcome.flavors,
+        kind=outcome.kind,
+        avoids=outcome.avoids,
     )
     stats = await compute_stats(runtime, user_id)
     return QuizResult(user_id=user_id, personality=stats.personality, stats=stats, weights=stats.priorities)
