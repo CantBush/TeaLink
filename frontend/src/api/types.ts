@@ -184,7 +184,8 @@ export type StatKey =
   | "shops_visited"
   | "streak"
   | "top_notes"
-  | "priorities";
+  | "priorities"
+  | "past_orders";
 
 export interface BobaStats {
   fav_drink_id: string | null;
@@ -202,6 +203,14 @@ export interface BobaStats {
   top_notes: string[];
   priorities: DimensionScores;
   personality: string;
+  /** Newest first, at most 10. Drink, shop, and date only; never prices. */
+  past_orders?: PastOrder[];
+}
+
+export interface PastOrder {
+  drink_id: string;
+  shop_id: string;
+  ordered_at: string;
 }
 
 export interface Avatar {
@@ -225,6 +234,9 @@ export interface UserProfile {
   followers: number;
   following: number;
   followed_by_me: boolean;
+  /** From the viewer's side. Missing until the API serves besteas. */
+  bestea?: BesteaState;
+  besteas?: number;
   /** 0..1 against the viewer, null on your own profile. */
   taste_match: number | null;
   /** Other viewers only receive the visible stats. */
@@ -275,7 +287,35 @@ export interface FeedComment {
   created_at: string;
 }
 
-export type FeedKind = "review" | "pick" | "rec" | "joined";
+/** "pick" is no longer produced; old items are hidden. */
+export type FeedKind = "review" | "pick" | "rec" | "joined" | "post";
+
+export type BesteaState = "none" | "requested" | "incoming" | "bestea";
+
+export interface PostInput {
+  text: string;
+  /** A JPEG data URL, at most 1080 px a side, or null for a caption-only post. */
+  photo_url?: string | null;
+  drink_id?: string;
+  shop_id?: string;
+}
+
+export type NotificationKind = "bestea_request" | "bestea_accepted" | "bestea_order";
+
+export interface AppNotification {
+  id: string;
+  kind: NotificationKind;
+  from: Author;
+  drink_id?: string;
+  shop_id?: string;
+  created_at: string;
+  read: boolean;
+}
+
+export interface Notifications {
+  items: AppNotification[];
+  unread: number;
+}
 
 export interface FeedItem {
   id: string;
@@ -291,8 +331,10 @@ export interface FeedItem {
   likes: number;
   liked_by_me: boolean;
   comments: FeedComment[];
-  /** Reserved for uploads; always null for now. */
+  /** A review's or post's photo, when there is one. */
   photo_url?: string | null;
+  /** A post tagged with a shop. */
+  shop_id?: string | null;
 }
 
 export interface RecommendRequest {
@@ -448,6 +490,8 @@ export interface OrderReceipt {
   total: number;
   status: "placed";
   payment_url?: string | null;
+  /** The Preference agent's update when this order counted as your pick; null when it didn't. */
+  learned?: PreferenceReport | null;
 }
 
 export interface OrderItem extends OrderItemInput {

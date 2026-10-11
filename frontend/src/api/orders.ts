@@ -1,4 +1,5 @@
 import { orderMock } from "../mocks/orderStore.ts";
+import { socialMock } from "../mocks/socialStore.ts";
 import { getMe } from "../state/me.ts";
 import { getRole, getShopId } from "../state/role.ts";
 import { getSession } from "../state/session.ts";
@@ -13,6 +14,7 @@ export const orders = {
       () => request<OrderReceipt>("POST", "/orders", body),
       (): OrderReceipt => {
         const order = orderMock.create({ user_id: getMe(), name: getSession().name || getMe() }, body, offer);
+        socialMock.notifyOrder(order.user_id, order.items[0]?.drink_id ?? "", order.shop_id);
         return { order_id: order.order_id, total: order.total, status: "placed", payment_url: null };
       },
     ),

@@ -100,6 +100,22 @@ export function StatsReceipt({ stats, order, hidden }: { stats: Partial<BobaStat
           </div>,
         );
       }
+    } else if (key === "past_orders") {
+      const orders = stats.past_orders;
+      if (orders?.length)
+        blocks.push(
+          <div key={key}>
+            <Heading hidden={isHidden(key)}>past orders</Heading>
+            {orders.slice(0, 5).map((order) => (
+              <Line
+                key={`${order.drink_id}-${order.ordered_at}`}
+                label={(drinkInfo(order.drink_id)?.name ?? order.drink_id).toLowerCase()}
+                value={shopLabel(order.shop_id)}
+                hidden={false}
+              />
+            ))}
+          </div>,
+        );
     }
   }
 

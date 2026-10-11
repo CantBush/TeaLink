@@ -10,7 +10,7 @@ import { topOptions } from "../lib/diff.ts";
 import { price, shopLabel } from "../lib/format.ts";
 import { drinkPhoto } from "../lib/images.ts";
 import { quote } from "../lib/order.ts";
-import { useSession } from "../state/session.ts";
+import { orderedFromTop3, useSession } from "../state/session.ts";
 
 function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
   return (
@@ -72,7 +72,8 @@ export function OrderSheet({ drinkId, onClose }: { drinkId: string; onClose: () 
     };
   }, [shopId, drinkId]);
 
-  const offer = decision ? (topOptions(decision).find((option) => option.drink_id === drinkId)?.offer ?? null) : null;
+  const fromTop3 = decision ? topOptions(decision).find((option) => option.drink_id === drinkId) : undefined;
+  const offer = fromTop3?.offer ?? null;
   const extras = toppings.reduce((sum, name) => sum + (drink?.options?.toppings.find((item) => item.name === name)?.price ?? 0), 0);
   const totals = drink ? quote(drink.price, extras, offer) : null;
 
@@ -91,6 +92,7 @@ export function OrderSheet({ drinkId, onClose }: { drinkId: string; onClose: () 
           return;
         }
         setPlaced({ total: receipt.total });
+        if (fromTop3) void orderedFromTop3(drinkId, fromTop3.drink_name, receipt.learned);
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Couldn't place the order."))
       .finally(() => setBusy(false));

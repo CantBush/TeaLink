@@ -722,12 +722,12 @@ Notification = {
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Remove "Pick this"; close-call buttons become "Order …"; after an order that returns `learned`, show the summary and re-run the round like a pick | Ordering Pearl from the top 3 re-ranks the same way the old pick did |
-| 2 | ⬜ Stop showing "pick" items, and stop the social mock from adding them | Ordering adds nothing to Home or your profile |
-| 3 | ⬜ New post composer (photo + caption, or caption only, optional drink or shop tag); tweet-style cards for caption-only posts; photo posts in the profile grid; delete your own | Both kinds post, show on Home and your profile, and can be deleted |
-| 4 | ⬜ "Past orders" stat card on the profile, plus its toggle in Edit profile | It can be shown, hidden, and reordered |
-| 5 | ⬜ "Request bestea" next to Follow with its states (requested, incoming, besteas); notification bell with an unread count, accept and decline, and bestea orders | A request, an accept, and a bestea's order all show up in the bell |
-| 6 | ⬜ Update `docs/demo-script.md` (order Pearl instead of picking it) and re-check the numbers | The script's clicks and numbers match the app |
+| 1 | ✅ Remove "Pick this"; close-call buttons become "Order …"; after an order that returns `learned`, show the summary and re-run the round like a pick | Ordering Pearl from the top 3 re-ranks the same way the old pick did |
+| 2 | ✅ Stop showing "pick" items, and stop the social mock from adding them | Ordering adds nothing to Home or your profile |
+| 3 | ✅ New post composer (photo + caption, or caption only, optional drink or shop tag); tweet-style cards for caption-only posts; photo posts in the profile grid; delete your own | Both kinds post, show on Home and your profile, and can be deleted |
+| 4 | ✅ "Past orders" stat card on the profile, plus its toggle in Edit profile | It can be shown, hidden, and reordered |
+| 5 | ✅ "Request bestea" next to Follow with its states (requested, incoming, besteas); notification bell with an unread count, accept and decline, and bestea orders | A request, an accept, and a bestea's order all show up in the bell |
+| 6 | ✅ Update `docs/demo-script.md` (order Pearl instead of picking it) and re-check the numbers | The script's clicks and numbers match the app |
 
 ### Sync points
 
@@ -781,6 +781,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## Plan change log
 
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
+- **9:50 PM:** Track B finished its six "Ordering replaces picking" rows on in-browser mocks: ordering from the top 3 is the pick (same 45% / 36% / Pearl 73), no pick posts, photo and caption posts, a past orders stat, besteas, and a notification bell. The demo script now orders Pearl instead of picking it.
 - **9:30 PM:** Added "Ordering replaces picking, custom posts, and besteas": ordering is the only way to choose (placing an order from your top 3 teaches the Preference agent), orders no longer post automatically, people write their own photo or caption posts, past orders become a profile stat, and besteas get notified of each other's orders. Split into Track A rows 1-4 and Track B rows 1-6. Orders from outside the top 3 (for example Discover) nudge the taste profile but not the priority weights.
 - **9:05 PM:** Track B finished its three custom what-if rows: a text box with confirm chips, a change builder, and the presets unchanged.
 - **8:50 PM:** Track B finished its seven "Accounts, store tools, and ordering" rows on in-browser mocks, including sign-in, the shop pages, and pickup orders. Reset demo now keeps whoever is signed in.

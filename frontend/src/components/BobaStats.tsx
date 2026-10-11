@@ -1,6 +1,6 @@
 import type { BobaStats as Stats, StatKey } from "../api/types.ts";
 import { drinkInfo } from "../lib/catalog.ts";
-import { DIMENSIONS, dimensionLabel, shopLabel } from "../lib/format.ts";
+import { DIMENSIONS, dimensionLabel, shopLabel, timeAgo } from "../lib/format.ts";
 import { tint } from "../lib/palette.ts";
 import { RUN_STATS, STAT_LABELS, noteLabel, shownStats } from "../lib/stats.ts";
 
@@ -56,6 +56,24 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string, shown: StatKe
         </div>
       );
     }
+    case "past_orders": {
+      const orders = stats.past_orders;
+      if (!orders) return null;
+      if (orders.length === 0) return <p className="mt-1 text-sm text-mute">No orders yet.</p>;
+      return (
+        <ol className="mt-2 space-y-1.5 text-sm">
+          {orders.slice(0, 5).map((order) => (
+            <li key={`${order.drink_id}-${order.ordered_at}`} className="flex items-baseline justify-between gap-2">
+              <span className="min-w-0 truncate">
+                <span className="font-semibold">{drinkInfo(order.drink_id)?.name ?? order.drink_id}</span>
+                <span className="text-mute"> · {shopLabel(order.shop_id)}</span>
+              </span>
+              <span className="shrink-0 text-xs text-mute">{timeAgo(order.ordered_at)}</span>
+            </li>
+          ))}
+        </ol>
+      );
+    }
     case "priorities": {
       const weights = stats.priorities;
       if (!weights) return null;
@@ -73,7 +91,7 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string, shown: StatKe
   }
 }
 
-const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", ...RUN_STATS];
+const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", "past_orders", ...RUN_STATS];
 
 /** The stats a profile chose to show, in the order it chose. Keys in `hidden` are marked as private. */
 export function BobaStatsGrid({

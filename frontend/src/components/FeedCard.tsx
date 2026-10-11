@@ -35,14 +35,39 @@ function headline(item: FeedItem): string {
       return `recommended to ${item.to_author?.display_name ?? "a friend"}`;
     case "joined":
       return "joined TeaLink";
+    case "post":
+      return "";
   }
 }
 
-export function FeedCard({ item: initial }: { item: FeedItem }) {
+/** A post's tag: the drink or shop it mentions, linked to Discover. */
+function Tag({ item }: { item: FeedItem }) {
+  const drink = drinkInfo(item.drink_id);
+  if (drink) {
+    return (
+      <Link to={`/discover?drink=${drink.id}`} className="mt-3 inline-flex rounded-full bg-sage px-3 py-1 text-sm font-semibold">
+        {drink.name} · {shopLabel(drink.shop_id)}
+      </Link>
+    );
+  }
+  if (item.shop_id) {
+    return (
+      <Link to={`/discover?q=${encodeURIComponent(shopLabel(item.shop_id))}`} className="mt-3 inline-flex rounded-full bg-sage px-3 py-1 text-sm font-semibold">
+        {shopLabel(item.shop_id)}
+      </Link>
+    );
+  }
+  return null;
+}
+
+export function FeedCard({ item: initial, onDeleted }: { item: FeedItem; onDeleted?: () => void }) {
   const me = useMe();
   const [item, setItem] = useState(initial);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [deleted, setDeleted] = useState(false);
+  const post = item.kind === "post";
+  const mine = post && item.user_id === me;
   const drink = drinkInfo(item.drink_id);
   const photo = drinkPhoto(item.drink_id, item.photo_url);
 
@@ -59,6 +84,19 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
     social.comment(item.id, me, text).then(setItem).catch(() => setDraft(text));
   };
 
+  const remove = () => {
+    if (!window.confirm("Delete this post?")) return;
+    social
+      .deletePost(me, item.id)
+      .then(() => {
+        setDeleted(true);
+        onDeleted?.();
+      })
+      .catch(() => window.alert("Couldn't delete the post."));
+  };
+
+  if (deleted) return null;
+
   return (
     <article className="rounded-[28px] border border-line bg-foam p-4 sm:p-5">
       <header className="flex items-center gap-3">
@@ -74,9 +112,24 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
             @{item.author.handle} · {timeAgo(item.created_at)}
           </span>
         </p>
+        {mine ? (
+          <button type="button" onClick={remove} className="min-h-9 rounded-full px-3 text-sm font-semibold text-mute hover:text-ink">
+            Delete
+          </button>
+        ) : null}
       </header>
 
-      {drink ? (
+      {post ? (
+        <>
+          {item.photo_url ? (
+            <img src={item.photo_url} alt="" loading="lazy" className="mt-3 aspect-square w-full rounded-2xl bg-cream object-cover" />
+          ) : null}
+          {item.text ? (
+            <p className={`mt-3 whitespace-pre-line ${item.photo_url ? "text-[15px]" : "text-xl leading-snug"}`}>{item.text}</p>
+          ) : null}
+          <Tag item={item} />
+        </>
+      ) : drink ? (
         <div className="mt-3 overflow-hidden rounded-2xl bg-cream">
           {photo ? (
             <img src={photo} alt={drink.name} loading="lazy" className="aspect-[4/3] w-full object-cover" />
@@ -92,7 +145,7 @@ export function FeedCard({ item: initial }: { item: FeedItem }) {
           </div>
         </div>
       ) : null}
-      {item.text ? <p className="mt-3 text-[15px]">{item.text}</p> : null}
+      {!post && item.text ? <p className="mt-3 text-[15px]">{item.text}</p> : null}
       {item.kind === "rec" && item.to_user_id === me && drink ? (
         <Link
           to={`/discover?drink=${drink.id}`}
