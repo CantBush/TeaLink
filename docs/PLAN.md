@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sun Oct 11, 1:20 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sun Oct 11, 10:00 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -798,6 +798,97 @@ Notification.text?: string                        // the note that came with it
 | 7 | ✅ Top 3 cards lead with the score as "78% match", in front of "no. 1" | The scripted 78 / 77 / 71 now read as percents with the word match, and the order is unchanged |
 | 8 | ✅ Side doodles stay until the margins are almost too narrow for them | They remain visible on a wide laptop and hide only when the drawings would collide with the page |
 
+### More of the Cisco challenge (added Sun 10:00 AM)
+
+**Goal:** show more of "When AI Agents Disagree" on screen: agents that are discovered, verified, traced, and allowed to fail; agents that negotiate rather than only score; and a team that learns whom to trust. Submission is at 12:30 today, so the rows are in demo-value order. Do the top ones first, and stop wherever time runs out.
+
+**The ideas:**
+1. **Failure on stage.** A "kill an agent" button drops Budget or a shop agent partway through a round. The team visibly re-plans, and the arbiter explains what it decided without that agent.
+2. **Observability.** Each round is traced with AGNTCY's observability tooling: latency per agent, retries, and fallbacks. A small trace view sits on the Evidence page.
+3. **Adversarial check.** A Critic agent looks for the weakest reason in the winning case before the decision is final. The arbiter either answers it or changes the pick, and the chat shows which.
+4. **More baselines.** Compare the agent team with a single LLM choosing alone, and report where the team wins and where it loses.
+5. **Agent directory.** Each agent publishes its card to an AGNTCY directory, and the concierge finds agents by capability at runtime instead of from a hard-coded list.
+6. **Agent identity and permissions.** Agents have signed identities, so only a verified shop agent can veto its own stock. A fake shop agent is rejected, on screen.
+7. **Real negotiation, not just scoring.** Agents trade concessions ("I'll drop price if you drop novelty this round"), with a capped number of rounds and the arbiter as tiebreaker.
+8. **Trust that shifts over time.** The arbiter gives less weight to an agent whose past advice users kept passing over, and says so.
+9. **Tool-using agents over MCP.** A shop agent reads live inventory or opening hours through MCP. A Weather or Time agent nudges toward iced or hot.
+10. **Feedback after the fact.** After pickup, "Was this a good pick?" feeds learning, separately from what was ordered.
+11. **Group orders.** Several friends' Preference agents negotiate one shared order or shop over an AGNTCY group channel (SLIM). The result shows the compromise and who gave ground.
+
+**Demo safety:**
+- None of this runs in the scripted 3 minutes unless it's switched on. After Reset demo, single mode still opens at Thai Tea 78, Wintermelon 77, Pearl 71, and ordering Pearl still gives taste 45%, price 36%, Pearl 73.
+- Anything that can fail live (the directory, identity checks, MCP tools, the bus) falls back to today's behaviour and says so in the chat. The demo never depends on it.
+- Kill an agent, the Critic, negotiation, trust, and group orders are each off by default and switched on by a button or setting. Reset demo brings back every agent and clears trust changes and feedback.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`). These are proposals; A finalises the shapes.
+
+```ts
+// Failure on stage
+POST /agents/{agent_id}/stop      // takes the agent off the bus or out of the roster mid-session
+POST /agents/{agent_id}/start     // brings it back; Reset demo restarts all of them
+LensEventType adds "agent_lost"   // { agent_id, reason, when: "before_round" | "mid_round" }
+Decision.missing_agents?: string[]  // who the arbiter decided without
+
+// Observability
+GET /trace/{session_id} -> { round: number; agent_id: string; transport: "agntcy" | "local";
+                             ms: number; retries: number; fell_back: boolean }[]
+
+// Critic
+LensEventType adds "critique"     // { drink_id, weakest_reason, answered: boolean, changed_pick: boolean }
+
+// More baselines: GET /eval gains a row with method: "single_llm" (same columns as the others)
+
+// Directory and identity
+AgentSelection.discovered_via?: "directory" | "roster"
+AgentSelection.verified?: boolean   // a signed identity checked out
+LensEventType adds "rejected_agent" // { agent_id, reason }  e.g. a fake shop agent
+
+// Negotiation and trust
+Objection.concession?: { gives: Dimension; wants: Dimension }   // "drop price if you drop novelty"
+Decision.trust?: Record<string, number>   // 0..1 per agent; the arbiter's note says when one moved
+
+// Tools over MCP
+Proposal.tool?: { name: string; result: string }   // e.g. "live_inventory" or "weather: 31°C"
+
+// Feedback after the fact
+POST /orders/{id}/feedback { good: boolean }   // only after pickup; feeds learning, separately from the order
+
+// Group orders
+POST /groups { members: string[] } -> { group_id }
+POST /groups/{id}/recommend -> Decision & { compromise: { user_id: string; gave_up: Dimension; amount: number }[] }
+```
+
+#### Track A: more of the Cisco challenge
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Kill an agent: stop and start routes, an `agent_lost` event, and an arbiter note on what it decided without that agent. Works over AGNTCY and local | Stopping Budget mid-session re-ranks, the chat says Budget is gone, and Reset demo brings it back |
+| 2 | ⬜ Trace each round with AGNTCY observability (latency, retries, fallbacks) and serve it at `GET /trace/{session_id}` | A round's trace lists every agent with its time and transport |
+| 3 | ⬜ Critic agent: finds the weakest reason for #1 before the decision; the arbiter answers it or changes the pick. Off by default | With the Critic on, a `critique` event appears and the decision shows whether it held |
+| 4 | ⬜ Single-LLM baseline in `eval/run_eval.py`, served in `GET /eval` alongside the others. No key falls back to the saved results | The Evidence table has a single-LLM row |
+| 5 | ⬜ Publish agent cards to an AGNTCY directory; the concierge discovers by capability and falls back to the roster | The selection says "discovered via directory", and stopping the directory still runs the demo |
+| 6 | ⬜ Signed agent identities: only a verified shop agent can veto its own stock; an unsigned "fake shop" agent is rejected | A demo fake shop joins, and a `rejected_agent` event says why |
+| 7 | ⬜ Concession rounds in dialogue mode ("drop price if you drop novelty"), capped, with the arbiter as tiebreaker | A round shows at least one concession, and the decision names it |
+| 8 | ⬜ Trust per agent from how often users passed over its advice; the arbiter's weighting uses it and says when it moved | After several orders against one agent's advice, its trust drops and the chat says so |
+| 9 | ⬜ MCP tools: a shop agent reads inventory or hours, and a Weather or Time agent nudges iced or hot. Offline tools fall back | A proposal shows the tool it used, and with the tool down the round still runs |
+| 10 | ⬜ `POST /orders/{id}/feedback` after pickup feeds learning separately from the order | Marking a pick as bad moves the weights the other way |
+| 11 | ⬜ Group orders over SLIM: members' Preference agents negotiate one order or shop and report the compromise | Andrew and Sarah's group order names who gave ground and on what |
+
+#### Track B: more of the Cisco challenge
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ "Kill an agent" on at the counter: tap an agent in the team grid to stop or restart it; a greyed-out icon, the `agent_lost` message in the chat, and "decided without Budget" on the decision | Stopping Budget mid-session is visible in the grid, the chat, and the decision |
+| 2 | ⬜ Trace view on the Evidence page: per-round bars of agent latency, retries, and fallbacks, labelled by transport | The latest round's trace renders, with a saved trace when the API is down |
+| 3 | ⬜ Critic in the chat: its message, and whether the arbiter answered it or changed the pick. A Critic switch next to the what-if buttons | Turning the Critic on adds its message and the outcome |
+| 4 | ⬜ Single-LLM row in the Evidence table and chart, with one honest sentence on where it wins or loses | The new row shows, and the copy matches the numbers |
+| 5 | ⬜ "Discovered via directory" and "verified" badges in the team grid; a "fake shop joins" what-if that shows the rejection | The fake shop is visibly turned away |
+| 6 | ⬜ Concessions in the chat ("Budget gives on price if Explorer gives on novelty"), and trust meters per agent with the arbiter's note when one moves | A concession and a trust change both read clearly in one round |
+| 7 | ⬜ Tool results on proposals ("checked live inventory", "31°C, so iced") | A proposal that used a tool says which, and what it found |
+| 8 | ⬜ "Was this a good pick?" on a picked-up order, sending the feedback | Answering it is confirmed, and the next round reflects it |
+| 9 | ⬜ Group order: pick friends, see the shared top 3, and a compromise line for each person | A two-person group order shows who gave ground |
+| 10 | ⬜ Demo script: an optional 30-second Cisco segment (kill an agent, the trace, the Critic), and judge Q&A lines for identity, directory, and observability; write-up rows for the new Level 2 and 3 pieces | The script and write-up match what the app shows |
+
 ### Sync points
 
 | Time | Both of you |
@@ -817,39 +908,40 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
-2. UI round 2 extras, in this order:
+1. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill an agent and the trace view, the two that show adaptation and AGNTCY most directly.
+2. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
+3. UI round 2 extras, in this order:
    - typed custom what-ifs (keep the change builder), then the change builder (keep the preset buttons);
    - agent dialogue (keep `single`);
    - the Stats receipt layout and card color;
    - transition animations;
    - Discover match ordering.
    Keep the at the counter sub-tab and the trimmed today's picks.
-3. Accounts, store tools, and ordering, in this order:
+4. Accounts, store tools, and ordering, in this order:
    - card payments (keep pay at pickup);
    - the month and year ranges in demand trends (keep the week);
    - menu sections (keep editing drinks);
    - the shop picture and description.
    Keep sign in, the demo account buttons, the discount rules, and ordering (it replaces picking).
-4. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
-5. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-6. Shop images and cover images (keep the drink images)
-7. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-8. Friends tab (once profiles exist, it folds into them)
-9. Counterfactual page (Why This and the timeline already show the before/after)
-10. LLM wording
-11. AGNTCY (use the local transport)
+5. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
+6. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+7. Shop images and cover images (keep the drink images)
+8. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+9. Friends tab (once profiles exist, it folds into them)
+10. Counterfactual page (Why This and the timeline already show the before/after)
+11. LLM wording
+12. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
 ## Stretch ideas (only after the freeze-safe build)
 
 - Shop offers: a shop agent may offer a small discount, bounded by the shop's budget, to win a close call. It would show up as a cost change in the resolver.
-- Group mode: several users' Preference agents negotiate over one order (SLIM group chat).
-- TBAC / agent identity from AGNTCY.
+- Group mode and agent identity moved into "More of the Cisco challenge" (Sun 10:00 AM).
 
 ## Plan change log
 
+- **Sun 10:00 AM:** Added "More of the Cisco challenge": kill an agent mid-round, AGNTCY observability traces on the Evidence page, a Critic agent, a single-LLM baseline, an AGNTCY agent directory, signed agent identities that reject a fake shop, concession rounds, trust that shifts per agent, MCP tools (inventory, hours, weather), feedback after pickup, and group orders over SLIM. Split into Track A rows 1-11 and Track B rows 1-10, in demo-value order. All of it is off by default and falls back to today's behaviour, so the scripted 78 / 77 / 71 is unchanged. First on the cut list, except kill an agent and the trace view.
 - **1:20 AM:** Track B finished its eight "Profile layout, photos, and recs" rows. Card and stats sit side by side (stacked and centered on a narrow window). Sheets open in the middle and scroll inside themselves. Profile photo and banner uploads show on the profile, in the feed, and on notifications, with emoji and placeholder covers as the fallback. Favorite shop spans the full row on a narrow window. Send a rec, Follow, and Request bestea sit below the banner. A rec only goes to someone who follows you, and it shows in the bell. Top 3 cards lead with "78% match". Side doodles stay in the margin until it gets too narrow. The scripted scores stay 78 / 77 / 71.
 - **1:10 AM:** Track A finished rows 1-3 of "Profile layout, photos, and recs". `PATCH /users` stores `avatar.photo_url` (JPEG, at most 512 px a side) and `cover_url` (a placeholder id, a JPEG at most 1600 px wide and 1600 px tall, or null). `POST /recs` is 403 unless the recipient follows the sender, and a successful rec writes an unread notification. Post photos round-trip as stored. Demo scores stay 78 / 77 / 71. The `types.ts` notes for Track B are in `PROGRESS.md`.
 - **12:55 AM:** Added "Profile layout, photos, and recs". The boba card and boba stats sit side by side when both are on, and a single one is centered. Popups open in the middle of the screen. People can upload a profile photo, a banner, and post photos. Stat rows stay consistent on a narrow window, including favorite shop. Send a rec and Follow sit below the banner. A rec is allowed only when the recipient follows the sender, and it shows in the notification bell. Top 3 cards read "78% match" in front of the rank. Side doodles hide only when the margins are almost gone. Split into Track A rows 1-3 and Track B rows 1-8. First on the cut list. The scripted scores stay 78 / 77 / 71.
