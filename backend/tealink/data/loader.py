@@ -47,8 +47,36 @@ class Catalog:
 
     def add_review(self, review: Review) -> None:
         """A private taste signal, such as an order from outside the top 3. Not a feed post."""
+        self.upsert_review(review)
+
+    def upsert_review(self, review: Review) -> None:
+        """Insert or replace a review. Remote agents have not seen it, so later rounds for this user stay in-process."""
+        self.runtime_users.add(review.user_id)
+        for index, existing in enumerate(self.reviews):
+            if existing.id != review.id:
+                continue
+            self.reviews[index] = review
+            bucket = [item for item in self.reviews_by_user.get(existing.user_id, []) if item.id != review.id]
+            self.reviews_by_user[existing.user_id] = bucket
+            self.reviews_by_user.setdefault(review.user_id, []).append(review)
+            return
         self.reviews.append(review)
         self.reviews_by_user.setdefault(review.user_id, []).append(review)
+
+    def drop_review(self, review_id: str) -> None:
+        existing = next((item for item in self.reviews if item.id == review_id), None)
+        if existing is None:
+            return
+        self.runtime_users.add(existing.user_id)
+        self.reviews = [item for item in self.reviews if item.id != review_id]
+        self.reviews_by_user[existing.user_id] = [
+            item for item in self.reviews_by_user.get(existing.user_id, []) if item.id != review_id
+        ]
+
+    def drop_prefixed(self, user_id: str, prefix: str) -> None:
+        ids = [item.id for item in self.reviews_for(user_id) if item.id.startswith(prefix)]
+        for review_id in ids:
+            self.drop_review(review_id)
 
     def drink(self, drink_id: str) -> Drink | None:
         return self.drinks_by_id.get(drink_id)

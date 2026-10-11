@@ -147,14 +147,19 @@ def test_past_orders_follow_visible_stats():
     _login(client, "andrew@tealink.demo")
     mine = client.get("/users/andrew", params={"viewer": "andrew"}).json()
     assert mine["stats"]["past_orders"]
-    assert all("price" not in row and set(row) == {"drink_id", "shop_id", "ordered_at"} for row in mine["stats"]["past_orders"])
+    assert all(
+        "price" not in row and set(row) == {"drink_id", "shop_id", "ordered_at", "rating"}
+        for row in mine["stats"]["past_orders"]
+    )
     private = [key for key in mine["visible_stats"] if key != "past_orders"]
     client.patch("/users/andrew", json={"visible_stats": private})
     assert "past_orders" not in client.get("/users/andrew", params={"viewer": "sarah"}).json()["stats"]
 
     client.patch("/users/andrew", json={"visible_stats": [*private, "past_orders"]})
     seen = client.get("/users/andrew", params={"viewer": "sarah"}).json()
-    assert seen["stats"]["past_orders"] == mine["stats"]["past_orders"]
+    own = [{key: value for key, value in row.items() if key != "rating"} for row in mine["stats"]["past_orders"]]
+    assert seen["stats"]["past_orders"] == own
+    assert all("rating" not in row for row in seen["stats"]["past_orders"])
     assert "price" not in str(seen["stats"]["past_orders"])
 
 

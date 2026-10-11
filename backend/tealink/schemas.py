@@ -54,8 +54,11 @@ class Review(BaseModel):
     id: str
     user_id: str
     drink_id: str
-    rating: int = Field(ge=1, le=5)
+    rating: int = Field(ge=0, le=5)
     text: str
+    # Signed taste weight. None means rating/5, which pulls toward the drink.
+    # Favorites use 2 (a 5-star counted twice). A 0 or 1 order rating is negative.
+    evidence_weight: float | None = None
 
 
 class User(BaseModel):
@@ -316,6 +319,8 @@ class PastOrder(BaseModel):
     drink_id: str
     shop_id: str
     ordered_at: str
+    # Only on your own profile. Null until you rate the order after pickup.
+    rating: int | None = Field(default=None, ge=0, le=5)
 
 
 class BobaStats(BaseModel):
@@ -363,6 +368,8 @@ class UserProfile(BaseModel):
     # From the viewer's side. "none" on your own profile.
     bestea: Literal["none", "requested", "incoming", "bestea"] = "none"
     besteas: int = 0
+    # Which quiz they last took. Null until they take one.
+    quiz_kind: Literal["basic", "full"] | None = None
 
 
 class QuizOption(BaseModel):
@@ -376,6 +383,8 @@ class QuizQuestion(BaseModel):
     prompt: str
     options: list[QuizOption]
     multi: bool = False
+    # "favorites" is the shop-then-drinks question. It has no options.
+    kind: Literal["choice", "favorites"] = "choice"
 
 
 class Author(BaseModel):

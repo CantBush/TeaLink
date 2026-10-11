@@ -14,6 +14,8 @@ import urllib.request
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from tealink.core.taste import order_evidence_weight
+from tealink.schemas import Review
 from tealink.store.menu import drink_view
 
 PICKUP_FEE = 0.5
@@ -123,16 +125,44 @@ def update_order(runtime, account: dict, order_id: str, patch: dict) -> dict:
         elif status != "cancelled" or order["user_id"] != account["user_id"]:
             raise PermissionError("only the shop can move this order along")
         order["status"] = status
-    if "rating" in patch and patch["rating"] is not None:
+    if "rating" in patch:
         if account["user_id"] != order["user_id"]:
             raise PermissionError("only you can rate your order")
         if order["status"] != "picked_up":
             raise ValueError("rate the drink after you pick it up")
-        rating = int(patch["rating"])
-        if not 1 <= rating <= 5:
-            raise ValueError("rating must be from 1 to 5")
-        order["rating"] = rating
+        if patch["rating"] is None:
+            order["rating"] = None
+        else:
+            rating = int(patch["rating"])
+            if not 0 <= rating <= 5:
+                raise ValueError("rating must be from 0 to 5")
+            order["rating"] = rating
+        sync_order_review(runtime, order)
     return _public(order)
+
+
+def sync_order_review(runtime, order: dict) -> None:
+    """The taste signal for this order. An unrated order counts as it does today.
+
+    A top-3 order does not add a review until it is rated. Anything else is a
+    4/5 until a rating replaces it. 0 and 1 push away from the drink. Reset
+    demo drops the order and the review with the rest of the runtime.
+    """
+    review_id = f"order_{order['order_id']}"
+    if order.get("rating") is None and order.get("in_top"):
+        runtime.catalog.drop_review(review_id)
+        return
+    stored = 4 if order.get("rating") is None else int(order["rating"])
+    runtime.catalog.upsert_review(
+        Review(
+            id=review_id,
+            user_id=order["user_id"],
+            drink_id=order["items"][0]["drink_id"],
+            rating=stored,
+            text="Ordered this.",
+            evidence_weight=None if order.get("rating") is None else order_evidence_weight(stored),
+        )
+    )
 
 
 def _line_discount(decision, drink_id: str, price: float) -> float:
@@ -145,8 +175,8 @@ def _line_discount(decision, drink_id: str, price: float) -> float:
 
 
 def _public(order: dict) -> dict:
-    shown = {key: value for key, value in order.items() if key != "payment_url"}
-    return shown
+    hidden = {"payment_url", "in_top"}
+    return {key: value for key, value in order.items() if key not in hidden}
 
 
 def receipt(order: dict, learned: dict | None = None) -> dict:
@@ -162,9 +192,11 @@ def receipt(order: dict, learned: dict | None = None) -> dict:
 
 
 def history(runtime, user_id: str) -> list[dict]:
-    """Newest 10 past orders: seeded picks plus orders placed this session. No prices.
+    """Newest 10 past orders: seeded picks plus orders placed in the app. No prices.
 
-    A cancelled order drops out. Learning from a top-3 order does not.
+    Placed, accepted, ready, and picked up all count. A cancelled order drops
+    out. ``rating`` is null until the customer rates it after pickup. The
+    profile route strips ``rating`` for anyone who is not this user.
     """
     rows: list[dict] = []
     for item in runtime.social.feed.values():
@@ -175,13 +207,20 @@ def history(runtime, user_id: str) -> list[dict]:
         drink = runtime.catalog.drink(item.drink_id)
         if drink is None:
             continue
-        rows.append({"drink_id": item.drink_id, "shop_id": drink.shop_id, "ordered_at": item.created_at})
+        rows.append(
+            {"drink_id": item.drink_id, "shop_id": drink.shop_id, "ordered_at": item.created_at, "rating": None}
+        )
     for order in runtime.orders:
         if order["user_id"] != user_id or order["status"] == "cancelled":
             continue
         for line in order["items"]:
             rows.append(
-                {"drink_id": line["drink_id"], "shop_id": order["shop_id"], "ordered_at": order["created_at"]}
+                {
+                    "drink_id": line["drink_id"],
+                    "shop_id": order["shop_id"],
+                    "ordered_at": order["created_at"],
+                    "rating": order.get("rating"),
+                }
             )
     rows.sort(key=lambda row: row["ordered_at"], reverse=True)
     return rows[:10]

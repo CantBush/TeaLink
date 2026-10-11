@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from tealink.auth import store as accounts
-from tealink.schemas import ChoiceRecord, DeliberationRequest, Review
+from tealink.schemas import ChoiceRecord, DeliberationRequest
 from tealink.store import demand as demand_core
 from tealink.store import menu as menu_core
 from tealink.store import orders as orders_core
@@ -62,7 +62,8 @@ class OrderBody(BaseModel):
 
 class OrderPatch(BaseModel):
     status: str | None = None
-    rating: int | None = None
+    # 0 to 5 after pickup. Null clears a rating and restores the unrated signal.
+    rating: int | None = Field(default=None, ge=0, le=5)
 
 
 class WhatIfBody(BaseModel):
@@ -325,10 +326,9 @@ async def _learn_order(runtime, order: dict) -> dict | None:
     user_id = order["user_id"]
     decision = runtime.last_decision.get(user_id)
     in_top = decision is not None and any(option.drink_id == drink_id for option in decision.options)
+    order["in_top"] = in_top
+    orders_core.sync_order_review(runtime, order)
     if not in_top:
-        runtime.catalog.add_review(
-            Review(id=f"order_{order['order_id']}", user_id=user_id, drink_id=drink_id, rating=4, text="Ordered this.")
-        )
         return None
     await _prepare(runtime)
     card = runtime.registry.get("preference")

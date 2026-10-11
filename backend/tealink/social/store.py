@@ -84,6 +84,8 @@ class QuizRecord(BaseModel):
     profile: dict[str, float]
     toppings: float = 0.5
     flavors: list[str] = Field(default_factory=list)
+    kind: str = "basic"
+    avoids: list[str] = Field(default_factory=list)
 
 
 class SocialStore:

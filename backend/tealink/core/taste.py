@@ -22,6 +22,38 @@ def apply_overrides(
 
 
 BASE_PROFILE_WEIGHT = 3.0
+# A named favorite counts as a 5-star review at double weight.
+FAVORITE_WEIGHT = 2.0
+# Each older in-app order weighs half as much as the one after it.
+ORDER_HALF_LIFE = 0.5
+
+
+def order_evidence_weight(rating: int) -> float | None:
+    """Signed weight for an order rating. None keeps the usual rating/5 pull.
+
+    4 and 5 pull toward the drink. 0 and 1 push away from it. 2 and 3 stay
+    a light pull, the same direction as an unrated order's fixed 4.
+    """
+    if rating <= 1:
+        return -1.0 if rating == 0 else -0.5
+    return None
+
+
+def _signal(review: Review) -> float:
+    if review.evidence_weight is not None:
+        return float(review.evidence_weight)
+    return review.rating / 5.0
+
+
+def _order_recency(reviews: list[Review]) -> dict[str, float]:
+    """Newer in-app orders count more. Seeded reviews are not in this map.
+
+    The newest order keeps weight 1, so a single order matches today's
+    rating/5. Each older order is half of the one that came after it.
+    """
+    ordered = [review for review in reviews if review.id.startswith("order_")]
+    last = len(ordered) - 1
+    return {review.id: ORDER_HALF_LIFE ** (last - index) for index, review in enumerate(ordered)}
 
 
 def taste_profile(
@@ -33,11 +65,14 @@ def taste_profile(
 
     ``base`` (a quiz profile) counts as BASE_PROFILE_WEIGHT five-star
     reviews, so a new user's first reviews move it rather than replace it.
+    A negative weight pushes away from that drink. In-app orders (ids
+    starting with ``order_``) fade by half-life; seeded reviews do not.
     Missing drinks are skipped. With no usable reviews or base, every
     attribute is 0.5.
     """
     weighted = np.zeros(len(ATTRIBUTES), dtype=float)
     weight_sum = 0.0
+    recency = _order_recency(reviews)
     if base is not None:
         weighted += np.array([float(base.get(attr, 0.5)) for attr in ATTRIBUTES]) * BASE_PROFILE_WEIGHT
         weight_sum += BASE_PROFILE_WEIGHT
@@ -45,12 +80,12 @@ def taste_profile(
         drink = drinks_by_id.get(review.drink_id)
         if drink is None:
             continue
-        weight = review.rating / 5.0
+        weight = _signal(review) * recency.get(review.id, 1.0)
         vector = np.array(
             [float(drink.attributes[attr]) for attr in ATTRIBUTES], dtype=float
         )
         weighted += vector * weight
-        weight_sum += weight
+        weight_sum += abs(weight)
     if weight_sum == 0.0:
         return {attr: 0.5 for attr in ATTRIBUTES}
     averaged = weighted / weight_sum

@@ -65,9 +65,19 @@ def update(weights: dict[str, float], choice: ChoiceRecord, rate: float = LEARNI
 
 
 def fit(history: list[ChoiceRecord], prior: dict[str, float] | None = None) -> dict[str, float]:
+    """Seeded picks keep LEARNING_RATE. Newer in-app picks count more.
+
+    The newest live pick uses the full rate, so one order learns exactly as
+    it does today. Each older live pick is half of the one that came after it.
+    """
     weights = normalize(prior or PRIOR)
-    for choice in history:
-        weights = update(weights, choice)
+    live_at = [index for index, choice in enumerate(history) if choice.source == "live"]
+    for index, choice in enumerate(history):
+        rate = LEARNING_RATE
+        if choice.source == "live":
+            newer = sum(1 for other in live_at if other > index)
+            rate = LEARNING_RATE * (0.5 ** newer)
+        weights = update(weights, choice, rate=rate)
     return weights
 
 
