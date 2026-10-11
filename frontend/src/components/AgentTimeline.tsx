@@ -157,7 +157,7 @@ export function AgentTimeline({
     .join(" · ");
 
   return (
-    <section className="min-w-0 self-start rounded-[28px] border border-line bg-foam">
+    <section className="w-full min-w-0 rounded-[28px] border border-line bg-foam">
       <button
         type="button"
         onClick={toggle}

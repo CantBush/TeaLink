@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { AgentTimeline } from "../components/AgentTimeline.tsx";
-import { ControlPanel } from "../components/ControlPanel.tsx";
 import { PriorityBars } from "../components/PriorityBars.tsx";
 import { TeaLinkTabs } from "../components/TeaLinkTabs.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
@@ -19,7 +18,7 @@ export function TeaLink() {
   }, [userId, started]);
 
   return (
-    <main className="mx-auto grid max-w-6xl gap-6 px-5 py-6 sm:py-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-6 sm:py-8">
       <TeaLinkTabs />
       <div className="min-w-0 space-y-6">
         <TopChoices
@@ -67,17 +66,15 @@ export function TeaLink() {
           )}
         </section>
 
-        <ControlPanel decision={session.decision} running={session.running} />
+        <AgentTimeline
+          name={session.name}
+          events={session.events}
+          usingMock={session.usingMock}
+          started={session.started}
+          health={session.health}
+          busAgents={session.busAgents}
+        />
       </div>
-
-      <AgentTimeline
-        name={session.name}
-        events={session.events}
-        usingMock={session.usingMock}
-        started={session.started}
-        health={session.health}
-        busAgents={session.busAgents}
-      />
     </main>
   );
 }
