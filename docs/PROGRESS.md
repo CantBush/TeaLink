@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sun Oct 11, 11:30 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sun Oct 11, 11:35 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -280,6 +280,7 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Plan change log
 
+- **Sun 11:35 AM:** Added "Location, a closer-store agent, a logo clink, and quiz back" to the plan. Track A rows 1-3 store an optional location, seed shop coordinates, and add a Location agent that joins only when a location is set. Track B rows 1-4 are the question, the team-grid symbol, the logo clink, and quiz Back on the first question. Spec is in [`PLAN.md`](PLAN.md). Demo scores stay 78 / 77 / 71.
 - **Sun 11:30 AM:** Track A finished rows 1-6 of "Ordering fixes, a full quiz, favorites, and order ratings". The seam for Track B is in the Done section above. Demo scores stay 78 / 77 / 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73.
 - **Sun 11:20 AM:** Track B finished rows 1, 2, 3, and the shop-name half of row 6 (ordering confirmation, past orders, the clinking loader, and post tags). Popularity tie-breaks waited on Track A, which is now on main.
 - **1:20 AM:** Track B finished the eight profile-layout rows from 12:55 AM. Details are in the Done section above. Track A's photo and rec routes from 1:10 AM are on main, and the frontend uses them.

@@ -957,6 +957,57 @@ PastOrder.rating?: number | null                     // only on your own profile
 | 7 | ⬜ Rate past orders 0–5 on the Orders page once picked up, and on your own profile's order history; a rated order shows its stars. The chat notes the next round used it ("You rated Pearl Milk Tea 1/5.") | Rating an order is saved, and the next round reflects it |
 | 8 | ⬜ Copy: "recent orders count more" and "your ratings count" on Why this order and the quiz result. Update `demo-script.md` if A's numbers change, and PROGRESS | The copy matches what the agents do, and the script numbers still match a real run |
 
+### Location, a closer-store agent, a logo clink, and quiz back (added Sun 11:35 AM)
+
+**Goal:** let someone say where they are, and have the team prefer nearer shops when they do. Two small screen fixes ride along: the TeaLink logo clinks when you click it, and Back on the first quiz question leaves the quiz.
+
+**What changes:**
+1. **Location is optional.** On the customer route, after the account step and before the quiz, one screen asks where you are. **Skip** continues with no location. You can pick a shop neighborhood, or use the browser's location if you allow it. Edit profile can set or clear it later. Skipping, and the demo accounts, leave location empty.
+2. **A Location agent joins only when you gave a location.** It sits with Taste, Social, Explorer, and Budget and speaks in the chat. It prioritizes drinks from closer shops. With no location it is not selected, so the scripted round is unchanged.
+3. **Clicking the TeaLink logo clinks.** The header mark (the two cups) plays one clink, the same motion as the loading animation, then rests. The link still goes home. Reduced motion plays nothing.
+4. **Quiz Back on the first question leaves the quiz.** Later questions still go to the previous question. On the first question, Back returns to the page you came from: the profile on **Retake quiz**, otherwise the page before the quiz. Today the first question sends you back to the account step, and a retake's Back stays put.
+
+**Demo safety:**
+- Andrew has no location, and Reset demo clears one set during the session. After Reset demo the opening is still Thai Tea 78, Wintermelon 77, Pearl 71. The Location agent is absent from that round.
+- If A can't keep those numbers once a location is set, A posts the new ones in PROGRESS. The script itself does not set a location.
+- The logo clink and the quiz Back button do not change scores.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`). These are proposals; A finalises the shapes.
+
+```ts
+// Optional. Null means they skipped it. Reset demo clears one set this session.
+UserProfile.location?: { label: string; lat: number; lng: number } | null
+PATCH /users { location?: { label: string; lat?: number; lng?: number } | null }
+// A neighborhood label with no lat/lng uses that neighborhood's seeded point.
+// An unknown label is 422. Null clears it.
+
+// GET /shops adds the seeded point. Neighborhoods are unchanged.
+Shop.lat: number
+Shop.lng: number
+
+// The Location agent is selected only when that user has a location.
+// Its id is "location". Its dimension is "distance": 1 at the nearest shop, 0 at the farthest.
+// Preference weights include "distance" only on those rounds, starting small,
+// with the other four keeping their relative shares.
+```
+
+#### Track A: location and the closer-store agent
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ `PATCH /users` stores `location` (`label`, `lat`, `lng`), or null to clear it. A neighborhood name with no coordinates uses the seeded point for that neighborhood. `UserProfile.location` is null until they set one | Setting "Mission" stores a point, null clears it, and "nowhere" is 422 |
+| 2 | ⬜ Seed a lat/lng for each shop from its neighborhood, and return them on `GET /shops` | The six shops come back with coordinates, and two shops in different neighborhoods are not the same point |
+| 3 | ⬜ Location agent: selected only when the user has a location. It scores drinks by how close the shop is, speaks in the chat, and closer shops rank higher. No location means it is not in the roster and the weights stay the four they are today | A user in the Mission sees a Location line in the chat and a Mission shop's drink above a farther shop that otherwise tied. Andrew's opening round is still 78 / 77 / 71, with no Location agent |
+
+#### Track B: location, the logo clink, and quiz back
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Optional location screen after the account step and before the quiz, in the onboarding style. **Skip** sends no location. A neighborhood list, plus **Use my location** when the browser allows it. Edit profile can set or clear it. Until A's route exists, keep the choice in the browser | Skip reaches the quiz with no location. Picking Mission stores it, and Edit profile can clear it |
+| 2 | ⬜ When the round's team includes `location`, show it in the team grid (`AgentSymbol`) and its line in the chat. No symbol when the agent was not selected | A user with a location sees the Location agent argue for the closer shop. Andrew's round does not |
+| 3 | ⬜ Clicking the header TeaLink logo plays one clink, then rests. The link still goes home. Off for reduced motion | One click clinks once. A second click can clink again. Reduced motion stays still |
+| 4 | ⬜ On the first quiz question, Back leaves the quiz for the previous page: the profile on **Retake quiz**, otherwise the page before the quiz. Later questions still go to the previous question | From question 1 of a retake, Back opens the profile. From question 2, Back opens question 1 |
+
 | Time | Both of you |
 |---|---|
 | 1:15 | Merge the feature branch. Both run the app |
@@ -974,30 +1025,31 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. Ordering fixes, full quiz, favorites, and ratings (Sun 10:55 AM), from the bottom row up: shop popularity, the copy, ratings, recency, favorites, the full quiz and its chooser, post tags, then the loading animation. **Keep:** the two ordering bug fixes (top 3 confirmation and profile order history).
-2. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill an agent and the trace view, the two that show adaptation and AGNTCY most directly.
-3. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
-4. UI round 2 extras, in this order:
+1. Location, a closer-store agent, a logo clink, and quiz back (Sun 11:35 AM), from the bottom row up: quiz Back, the logo clink, then the Location agent. **Keep if you can:** the optional location question and the agent, since the question does nothing without it.
+2. Ordering fixes, full quiz, favorites, and ratings (Sun 10:55 AM), from the bottom row up: shop popularity, the copy, ratings, recency, favorites, the full quiz and its chooser, post tags, then the loading animation. **Keep:** the two ordering bug fixes (top 3 confirmation and profile order history).
+3. More of the Cisco challenge (Sun 10:00 AM), from the bottom row up: group orders, feedback after the fact, MCP tools, trust, negotiation, identity, the directory, then the single-LLM baseline and the Critic. **Keep if at all possible:** kill an agent and the trace view, the two that show adaptation and AGNTCY most directly.
+4. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
+5. UI round 2 extras, in this order:
    - typed custom what-ifs (keep the change builder), then the change builder (keep the preset buttons);
    - agent dialogue (keep `single`);
    - the Stats receipt layout and card color;
    - transition animations;
    - Discover match ordering.
    Keep the at the counter sub-tab and the trimmed today's picks.
-5. Accounts, store tools, and ordering, in this order:
+6. Accounts, store tools, and ordering, in this order:
    - card payments (keep pay at pickup);
    - the month and year ranges in demand trends (keep the week);
    - menu sections (keep editing drinks);
    - the shop picture and description.
    Keep sign in, the demo account buttons, the discount rules, and ordering (it replaces picking).
-6. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
-7. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-8. Shop images and cover images (keep the drink images)
-9. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-10. Friends tab (once profiles exist, it folds into them)
-11. Counterfactual page (Why This and the timeline already show the before/after)
-12. LLM wording
-13. AGNTCY (use the local transport)
+7. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
+8. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+9. Shop images and cover images (keep the drink images)
+10. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+11. Friends tab (once profiles exist, it folds into them)
+12. Counterfactual page (Why This and the timeline already show the before/after)
+13. LLM wording
+14. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
@@ -1008,6 +1060,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **Sun 11:35 AM:** Added "Location, a closer-store agent, a logo clink, and quiz back". An optional location question on the customer route, and a Location agent that joins only when they answer and prioritizes closer shops. Clicking the TeaLink logo plays one clink. Back on the first quiz question leaves the quiz. Split into Track A rows 1-3 and Track B rows 1-4. The scripted 78 / 77 / 71 stays, because the demo accounts have no location. First on the cut list, except the location question and the agent.
 - **Sun 11:30 AM:** Track A finished rows 1-6 of "Ordering fixes, a full quiz, favorites, and order ratings". Shapes for Track B are in `PROGRESS.md`. Demo scores stay 78 / 77 / 71, and ordering Pearl is still taste 45%, price 36%, Pearl 73.
 - **Sun 10:55 AM:** Added "Ordering fixes, a full quiz, favorites, and order ratings". Ordering from the top 3 always confirms and Done closes the sheet; the profile's past orders toggle shows real order history. Onboarding and Retake quiz offer a basic and a full quiz; the full one adds more taste questions and favorite drinks from favorite shops, which count heavily. A clinking-cups loading animation. Post tags are shop first, with type-ahead suggestions. Agents weight recent orders more, and customers can rate past orders 0–5, which replaces the fixed rating of 4 and supersedes the Cisco yes/no feedback rows. Split into Track A rows 1-6 and Track B rows 1-8. The scripted 78 / 77 / 71 stays. First on the cut list, except the two ordering bug fixes.
 - **Sun 10:00 AM:** Added "More of the Cisco challenge": kill an agent mid-round, AGNTCY observability traces on the Evidence page, a Critic agent, a single-LLM baseline, an AGNTCY agent directory, signed agent identities that reject a fake shop, concession rounds, trust that shifts per agent, MCP tools (inventory, hours, weather), feedback after pickup, and group orders over SLIM. Split into Track A rows 1-11 and Track B rows 1-10, in demo-value order. All of it is off by default and falls back to today's behaviour, so the scripted 78 / 77 / 71 is unchanged. First on the cut list, except kill an agent and the trace view.
