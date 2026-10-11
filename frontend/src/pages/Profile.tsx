@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { social } from "../api/social.ts";
-import type { BesteaState, FeedItem } from "../api/types.ts";
+import type { BesteaState, FeedItem, PastOrder } from "../api/types.ts";
 import { Avatar } from "../components/Avatar.tsx";
 import { BobaCard } from "../components/BobaCard.tsx";
 import { BobaStatsGrid } from "../components/BobaStats.tsx";
@@ -11,7 +11,7 @@ import { PostComposer } from "../components/PostComposer.tsx";
 import { PreviewNote } from "../components/PreviewNote.tsx";
 import { SendRec } from "../components/SendRec.tsx";
 import { drinkInfo } from "../lib/catalog.ts";
-import { matchPercent, price, shopLabel } from "../lib/format.ts";
+import { matchPercent, price, shopLabel, timeAgo } from "../lib/format.ts";
 import { coverPhoto, drinkPhoto } from "../lib/images.ts";
 import { tint } from "../lib/palette.ts";
 import { cardColor } from "../lib/cardColor.ts";
@@ -27,6 +27,33 @@ function Count({ value, label }: { value: number; label: string }) {
       <span className="block font-display text-2xl leading-none">{value}</span>
       <span className="text-xs font-semibold text-mute">{value === 1 ? label.replace(/s$/, "") : label}</span>
     </p>
+  );
+}
+
+/** Past orders get their own section, so they show whenever the profile shares them. */
+function RecentOrders({ orders, own }: { orders: PastOrder[]; own: boolean }) {
+  return (
+    <section className="rounded-[28px] border border-line bg-foam p-5">
+      <h2 className="font-display text-2xl">Recent orders</h2>
+      {orders.length === 0 ? (
+        <p className="mt-2 text-sm text-mute">{own ? "Your orders will show up here." : "No orders yet."}</p>
+      ) : (
+        <ol className="mt-3 divide-y divide-line">
+          {orders.map((order) => (
+            <li key={`${order.drink_id}-${order.ordered_at}`} className="flex items-center gap-3 py-2.5">
+              {drinkPhoto(order.drink_id) ? (
+                <img src={drinkPhoto(order.drink_id)!} alt="" className="h-11 w-11 shrink-0 rounded-xl bg-cream object-cover" />
+              ) : null}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold">{drinkInfo(order.drink_id)?.name ?? order.drink_id}</span>
+                <span className="block text-sm text-mute">{shopLabel(order.shop_id)}</span>
+              </span>
+              <span className="shrink-0 text-xs text-mute">{timeAgo(order.ordered_at)}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }
 
@@ -127,8 +154,10 @@ export function Profile() {
   const reviews = [...posted.filter((item) => !loaded.some((entry) => entry.id === item.id)), ...loaded];
   const posts = reviews.filter((item) => item.kind === "post" || (item.kind === "review" && item.drink_id));
   const gridPosts = posts.filter((item) => item.photo_url || (item.kind === "review" && drinkPhoto(item.drink_id, item.photo_url)));
-  const sharedCard = !own && shownStats(profile.visible_stats).some((key) => key === "top_notes" || key === "priorities" || key === "past_orders");
+  const sharedCard = !own && shownStats(profile.visible_stats).some((key) => key === "top_notes" || key === "priorities");
   const hiddenCount = own ? ALL_STATS.length - shownStats(profile.visible_stats).length : 0;
+  const gridStats = shownStats(profile.visible_stats).filter((key) => key !== "past_orders");
+  const pastOrders = profile.visible_stats.includes("past_orders") ? profile.stats.past_orders : undefined;
 
   const toggleFollow = () => {
     setBusy(true);
@@ -278,11 +307,13 @@ export function Profile() {
           </div>
           <BobaStatsGrid
             stats={profile.stats}
-            order={own ? profile.visible_stats.slice(0, 3) : profile.visible_stats}
+            order={own ? gridStats.slice(0, 3) : gridStats}
             accent={profile.accent}
           />
         </section>
       </div>
+
+      {pastOrders ? <RecentOrders orders={pastOrders} own={own} /> : null}
 
       <section>
         <div className="mb-3 flex items-center justify-between gap-3">
