@@ -77,3 +77,25 @@ def test_unavailable_agntcy_route_records_a_local_fallback_trace():
     assert len(trace) == 1
     assert trace[0].agent_id == "taste"
     assert trace[0].transport == "local" and trace[0].fell_back is True
+
+
+def test_critic_is_opt_in_and_reviews_the_tentative_winner():
+    write_dataset()
+    app.state.runtime = None
+    client = TestClient(app)
+    client.post("/events/reset")
+
+    assert client.post("/critic/enable").json() == {"ok": True, "enabled": True}
+    reviewed = _recommend(client)
+    critique = next(event for event in reviewed if event["type"] == "critique")
+    decision = next(event["payload"] for event in reviewed if event["type"] == "decision")
+
+    assert critique["agent_id"] == "critic"
+    assert critique["payload"]["answered"] is True
+    assert critique["payload"]["changed_pick"] is False
+    assert critique["payload"]["drink_id"] == decision["drink_id"]
+    assert decision["critique"] == critique["payload"]
+
+    assert client.post("/critic/disable").json() == {"ok": True, "enabled": False}
+    plain = _recommend(client)
+    assert not any(event["type"] == "critique" for event in plain)

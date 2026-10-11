@@ -862,9 +862,9 @@ POST /groups/{id}/recommend -> Decision & { compromise: { user_id: string; gave_
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Kill an agent: stop and start routes, an `agent_lost` event, and an arbiter note on what it decided without that agent. Works over AGNTCY and local | Stopping Budget mid-session re-ranks, the chat says Budget is gone, and Reset demo brings it back |
-| 2 | ⬜ Trace each round with AGNTCY observability (latency, retries, fallbacks) and serve it at `GET /trace/{session_id}` | A round's trace lists every agent with its time and transport |
-| 3 | ⬜ Critic agent: finds the weakest reason for #1 before the decision; the arbiter answers it or changes the pick. Off by default | With the Critic on, a `critique` event appears and the decision shows whether it held |
+| 1 | ✅ Kill an agent: stop and start routes, an `agent_lost` event, and an arbiter note on what it decided without that agent. Works over AGNTCY and local | Stopping Budget mid-session re-ranks, the chat says Budget is gone, and Reset demo brings it back |
+| 2 | ✅ Trace each round with AGNTCY observability (latency, retries, fallbacks) and serve it at `GET /trace/{session_id}` | A round's trace lists every agent with its time and transport |
+| 3 | ✅ Critic agent: finds the weakest reason for #1 before the decision; the arbiter answers it or changes the pick. Off by default | With the Critic on, a `critique` event appears and the decision shows whether it held |
 | 4 | ⬜ Single-LLM baseline in `eval/run_eval.py`, served in `GET /eval` alongside the others. No key falls back to the saved results | The Evidence table has a single-LLM row |
 | 5 | ⬜ Publish agent cards to an AGNTCY directory; the concierge discovers by capability and falls back to the roster | The selection says "discovered via directory", and stopping the directory still runs the demo |
 | 6 | ⬜ Signed agent identities: only a verified shop agent can veto its own stock; an unsigned "fake shop" agent is rejected | A demo fake shop joins, and a `rejected_agent` event says why |

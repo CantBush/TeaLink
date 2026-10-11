@@ -106,6 +106,9 @@ class Runtime:
     # so a later start or reset can bring the exact same team member back.
     stopped_agents: set[str] = field(default_factory=set)
     traces: dict[str, list[TraceRecord]] = field(default_factory=dict)
+    # The optional deterministic reviewer is a demo control, not part of the
+    # default recommendation path.
+    critic_enabled: bool = False
 
 
 def get_runtime() -> Runtime:
@@ -310,6 +313,7 @@ async def recommend(body: RecommendRequest) -> EventSourceResponse:
             session_id=session_id,
             stopped_agents=runtime.stopped_agents,
             trace_sink=record_trace,
+            critic_enabled=runtime.critic_enabled,
         ):
             if event.type == LensEventType.decision:
                 runtime.last_decision[body.user_id] = Decision.model_validate(event.payload)
@@ -325,6 +329,20 @@ def trace(session_id: str) -> list[dict]:
     if entries is None:
         raise HTTPException(status_code=404, detail="trace not found")
     return [entry.model_dump(mode="json") for entry in entries]
+
+
+@app.post("/critic/enable")
+def enable_critic() -> dict:
+    runtime = get_runtime()
+    runtime.critic_enabled = True
+    return {"ok": True, "enabled": True}
+
+
+@app.post("/critic/disable")
+def disable_critic() -> dict:
+    runtime = get_runtime()
+    runtime.critic_enabled = False
+    return {"ok": True, "enabled": False}
 
 
 @app.get("/preferences/{user_id}")

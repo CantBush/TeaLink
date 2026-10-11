@@ -13,6 +13,7 @@ from typing import Literal, cast
 
 from tealink.concierge.registry import Registry
 from tealink.concierge.transport import AgentTransport, ReviseTimeout
+from tealink.agents.critic_agent import CriticAgent
 from tealink.config import get_settings
 from tealink.core.offers import apply_offer
 from tealink.core.preferences import PRIOR, describe_weights
@@ -53,6 +54,7 @@ async def deliberate(
     session_id: str | None = None,
     stopped_agents: set[str] | None = None,
     trace_sink: Callable[[TraceRecord], None] | None = None,
+    critic_enabled: bool = False,
 ) -> AsyncIterator[LensEvent]:
     log = recorder or LensRecorder()
     seq = 1
@@ -223,6 +225,19 @@ async def deliberate(
                 reply.agent_id,
             )
             decision = apply_offer(decision, runner.drink_id, reply.offer, price_low, price_high)
+    if critic_enabled:
+        critique = CriticAgent().review(decision)
+        if critique is not None:
+            decision = decision.model_copy(update={"critique": critique})
+            yield emit(
+                LensEventType.critique,
+                (
+                    f"Critic: {critique.weakest_reason} "
+                    "The arbiter kept the pick because it still has the highest combined score."
+                ),
+                critique.model_dump(mode="json"),
+                CriticAgent.agent_id,
+            )
     for item in decision.dropped:
         if item.by == "registry":
             yield emit(

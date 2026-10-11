@@ -158,6 +158,15 @@ class DroppedDrink(BaseModel):
     by: str
 
 
+class Critique(BaseModel):
+    """A short adversarial check of the selected recommendation."""
+
+    drink_id: str
+    weakest_reason: str
+    answered: bool
+    changed_pick: bool
+
+
 class Decision(BaseModel):
     drink_id: str
     drink_name: str
@@ -178,6 +187,8 @@ class Decision(BaseModel):
     # Agents intentionally stopped for this deliberation. The arbiter still
     # returns a decision using the agents that remained available.
     missing_agents: list[str] = Field(default_factory=list)
+    # Present only when the optional Critic review was enabled for this round.
+    critique: Critique | None = None
 
 
 class ChoiceRecord(BaseModel):
@@ -206,6 +217,7 @@ class LensEventType(str, Enum):
     preference = "preference"
     offer = "offer"
     agent_lost = "agent_lost"
+    critique = "critique"
 
 
 class LensEvent(BaseModel):
