@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, evening. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sun Oct 11, 1:10 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -23,6 +23,15 @@ Cisco Cloud AI track, "When AI Agents Disagree". We're aiming for **Level 2 (Ada
 7. The app asks the human when the top two are within 0.02 of each other, or when every candidate was ruled out.
 
 ## Done
+
+### Profile photos and rec rules (Andrew)
+
+Track B mirrors this in `frontend/src/api/types.ts`. Demo scores are unchanged (Thai Tea 78, Wintermelon 77, Pearl 71; ordering Pearl is taste 45%, price 36%, Pearl 73).
+
+- `Avatar.photo_url?: string | null`. A JPEG data URL at most 512 px a side, or null. `UserProfile`, feed and comment `Author`, and notification `from` all use `Avatar`, so the photo is on the profile, in the feed, and on the bell. `PATCH /users` with `avatar.photo_url: null` clears the photo and leaves the emoji and color. Omitting `photo_url` leaves the current photo in place.
+- `UserProfile.cover_url` is one of `pearls`, `leaves`, `swirl`, `fruit`, `matcha`, `lineup`, a JPEG data URL at most 1600 px wide (height capped at 1600), or null. Anything else on `PATCH /users` is 422. Null goes back to the automatic placeholder. Post `photo_url` is still a JPEG data URL at most 1080 px a side. `GET /feed` and `GET /feed?author=` return that exact string.
+- `POST /recs` still takes `{ from, to, drink_id, text }`. If `to` does not follow `from`, the response is 403 with detail `you can only send recs to people who follow you`. A successful rec notifies the recipient.
+- `Notification.kind` adds `"rec"`. A rec notification includes `drink_id` and `text` (the note). `from` is still an `Author`.
 
 ### Ordering, posts, and besteas (Andrew, Track A of the 9:30 PM plan)
 

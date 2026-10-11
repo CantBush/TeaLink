@@ -307,6 +307,8 @@ class BobaStats(BaseModel):
 class Avatar(BaseModel):
     emoji: str = Field(min_length=1, max_length=8)
     color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
+    # A JPEG data URL. Null keeps the emoji.
+    photo_url: str | None = None
 
 
 class UserProfile(BaseModel):
@@ -326,7 +328,7 @@ class UserProfile(BaseModel):
     followed_by_me: bool
     taste_match: float | None
     stats: dict
-    # Reserved for a chosen cover. Null until photo uploads exist.
+    # A placeholder id or a JPEG data URL.
     cover_url: str | None = None
     # From the viewer's side. "none" on your own profile.
     bestea: Literal["none", "requested", "incoming", "bestea"] = "none"
@@ -389,10 +391,11 @@ class FeedItem(BaseModel):
 
 class Notification(BaseModel):
     id: str
-    kind: Literal["bestea_request", "bestea_accepted", "bestea_order"]
+    kind: Literal["bestea_request", "bestea_accepted", "bestea_order", "rec"]
     from_user: Author = Field(alias="from")
     drink_id: str | None = None
     shop_id: str | None = None
+    text: str | None = None
     created_at: str
     read: bool = False
 

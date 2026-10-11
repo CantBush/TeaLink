@@ -198,3 +198,66 @@ def test_besteas_notify_on_an_order_and_reset_clears_them():
     assert andrew.get("/notifications").json() == {"items": [], "unread": 0}
     assert andrew.get("/users/sarah", params={"viewer": "andrew"}).json()["bestea"] == "none"
     assert andrew.get("/auth/me").json()["user_id"] == "andrew"
+
+
+def test_profile_photo_and_banner_round_trip_and_reset():
+    andrew = _client()
+    _login(andrew, "andrew@tealink.demo")
+    before = andrew.get("/users/andrew").json()["avatar"]
+    photo = _jpeg(64, 48)
+    banner = _jpeg(1200, 400)
+    saved = andrew.patch(
+        "/users/andrew",
+        json={"avatar": {**before, "photo_url": photo}, "cover_url": banner},
+    ).json()
+    assert saved["avatar"]["photo_url"] == photo
+    assert saved["avatar"]["emoji"] == before["emoji"]
+    assert saved["cover_url"] == banner
+    again = andrew.get("/users/andrew").json()
+    assert again["avatar"]["photo_url"] == photo and again["cover_url"] == banner
+
+    mine = next(item for item in andrew.get("/feed", params={"user_id": "andrew"}).json() if item["user_id"] == "andrew")
+    assert mine["author"]["avatar"]["photo_url"] == photo
+
+    assert andrew.patch("/users/andrew", json={"cover_url": "pearls"}).json()["cover_url"] == "pearls"
+    assert andrew.patch("/users/andrew", json={"cover_url": "not-a-cover"}).status_code == 422
+    assert andrew.patch("/users/andrew", json={"avatar": {**before, "photo_url": _jpeg(513, 10)}}).status_code == 422
+    assert andrew.patch("/users/andrew", json={"cover_url": _jpeg(1601, 10)}).status_code == 422
+    still = andrew.get("/users/andrew").json()
+    assert still["avatar"]["photo_url"] == photo and still["cover_url"] == "pearls"
+
+    cleared = andrew.patch("/users/andrew", json={"avatar": {**before, "photo_url": None}}).json()
+    assert cleared["avatar"]["photo_url"] is None and cleared["avatar"]["emoji"] == before["emoji"]
+
+    andrew.post("/events/reset")
+    reset = andrew.get("/users/andrew").json()
+    assert reset["avatar"]["photo_url"] is None and reset["cover_url"] is None
+
+
+def test_recs_require_a_follow_and_notify():
+    andrew = _client()
+    _login(andrew, "andrew@tealink.demo")
+    denied = andrew.post("/recs", json={"from": "sarah", "to": "nora", "drink_id": "sr_hojicha_cream", "text": "Try it"})
+    assert denied.status_code == 403
+    assert denied.json()["detail"] == "you can only send recs to people who follow you"
+
+    sent = andrew.post("/recs", json={"from": "sarah", "to": "andrew", "drink_id": "sr_hojicha_cream", "text": "Try it"})
+    assert sent.status_code == 200
+    notes = andrew.get("/notifications").json()
+    assert notes["unread"] == 1
+    rec = notes["items"][0]
+    assert rec["kind"] == "rec" and rec["read"] is False
+    assert rec["from"]["handle"] == "sarah"
+    assert rec["drink_id"] == "sr_hojicha_cream" and rec["text"] == "Try it"
+
+
+def test_post_photo_round_trips_on_the_feed():
+    andrew = _client()
+    _login(andrew, "andrew@tealink.demo")
+    photo = _jpeg(32, 32)
+    created = andrew.post("/posts", json={"text": "First sip.", "photo_url": photo}).json()
+    assert created["photo_url"] == photo
+    followed = andrew.get("/feed", params={"user_id": "sarah"}).json()
+    assert next(item for item in followed if item["id"] == created["id"])["photo_url"] == photo
+    by_author = andrew.get("/feed", params={"user_id": "sarah", "author": "andrew"}).json()
+    assert next(item for item in by_author if item["id"] == created["id"])["photo_url"] == photo

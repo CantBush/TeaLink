@@ -38,6 +38,8 @@ from tealink.social.store import MAX_BIO, MAX_COMMENT, QuizRecord, parse_time
 router = APIRouter()
 
 ACTIVITY_KINDS = {"review", "pick", "rec"}
+# Placeholder banners. Same ids as frontend/src/lib/images.ts.
+COVER_IDS = frozenset({"pearls", "leaves", "swirl", "fruit", "matcha", "lineup"})
 
 
 class NewUser(BaseModel):
@@ -60,6 +62,7 @@ class ProfilePatch(BaseModel):
     pinned_drink_id: str | None = None
     pinned_shop_id: str | None = None
     visible_stats: list[StatKey] | None = None
+    cover_url: str | None = None
 
 
 class Viewer(BaseModel):
@@ -211,6 +214,7 @@ async def profile_view(runtime, user_id: str, viewer: str | None) -> UserProfile
         followed_by_me=runtime.social.is_following(viewer, user_id),
         taste_match=taste_match(runtime, viewer, user_id),
         stats=shown,
+        cover_url=settings.cover_url,
         bestea=runtime.social.bestea_status(viewer, user_id),
         besteas=runtime.social.bestea_count(user_id),
     )
@@ -330,8 +334,13 @@ async def edit_user(ref: str, body: ProfilePatch) -> UserProfile:
     for key in ("handle", "display_name", "bio", "avatar", "accent", "visible_stats"):
         if key in changes and changes[key] is None:
             changes.pop(key)
-    if "avatar" in changes:
-        changes["avatar"] = Avatar.model_validate(changes["avatar"])
+    if "avatar" in body.model_fields_set and body.avatar is not None:
+        changes["avatar"] = _avatar_update(settings.avatar, body.avatar)
+    if "cover_url" in changes:
+        try:
+            changes["cover_url"] = _check_cover(changes["cover_url"])
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     if "display_name" in changes:
         changes["display_name"] = changes["display_name"].strip() or settings.display_name
     for key, value in changes.items():
@@ -440,11 +449,15 @@ def send_rec(body: RecBody) -> FeedItem:
         raise HTTPException(status_code=422, detail="send recs to someone else")
     if runtime.catalog.drink(body.drink_id) is None:
         raise HTTPException(status_code=422, detail="drink not found")
-    item = runtime.social.add(sender, "rec", drink_id=body.drink_id, text=body.text.strip() or None, to_user_id=receiver)
+    if not runtime.social.is_following(receiver, sender):
+        raise HTTPException(status_code=403, detail="you can only send recs to people who follow you")
+    note = body.text.strip() or None
+    item = runtime.social.add(sender, "rec", drink_id=body.drink_id, text=note, to_user_id=receiver)
+    runtime.social.notify(receiver, "rec", sender, drink_id=body.drink_id, text=note)
     return _feed(runtime, item, sender)
 
 
-def _check_photo(value: str | None) -> str | None:
+def _check_photo(value: str | None, max_width: int, max_height: int) -> str | None:
     if not value:
         return None
     prefix = "data:image/jpeg;base64,"
@@ -455,9 +468,38 @@ def _check_photo(value: str | None) -> str | None:
     except Exception as exc:
         raise ValueError("photo must be a JPEG") from exc
     width, height = _jpeg_size(raw)
-    if width > 1080 or height > 1080:
-        raise ValueError("photo must be at most 1080 px a side")
+    if width > max_width or height > max_height:
+        if max_width == max_height:
+            raise ValueError(f"photo must be at most {max_width} px a side")
+        raise ValueError(f"photo must be at most {max_width} px wide and {max_height} px tall")
     return value
+
+
+def _check_cover(value: str | None) -> str | None:
+    if value is None or value in COVER_IDS:
+        return value
+    checked = _check_photo(value, 1600, 1600)
+    if checked is None:
+        raise ValueError("cover must be a placeholder or a JPEG")
+    return checked
+
+
+def _avatar_update(current: Avatar, patch: Avatar) -> Avatar:
+    data = patch.model_dump(exclude_unset=True)
+    if "photo_url" in patch.model_fields_set:
+        if patch.photo_url is None:
+            data["photo_url"] = None
+        else:
+            try:
+                checked = _check_photo(patch.photo_url, 512, 512)
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            if checked is None:
+                raise HTTPException(status_code=422, detail="photo must be a JPEG")
+            data["photo_url"] = checked
+    merged = current.model_dump()
+    merged.update(data)
+    return Avatar.model_validate(merged)
 
 
 def _jpeg_size(data: bytes) -> tuple[int, int]:
@@ -492,7 +534,7 @@ def create_post(body: PostBody, request: Request) -> FeedItem:
     if not 1 <= len(text) <= 500:
         raise HTTPException(status_code=422, detail="a post needs 1 to 500 characters")
     try:
-        photo = _check_photo(body.photo_url)
+        photo = _check_photo(body.photo_url, 1080, 1080)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if body.drink_id is not None and runtime.catalog.drink(body.drink_id) is None:
@@ -586,6 +628,7 @@ def _notes(runtime, user_id: str) -> dict:
             from_user=_author(runtime, raw["from_user"]),
             drink_id=raw.get("drink_id"),
             shop_id=raw.get("shop_id"),
+            text=raw.get("text"),
             created_at=raw["created_at"],
             read=raw["read"],
         )

@@ -34,6 +34,8 @@ class ProfileSettings(BaseModel):
     accent: str = DEFAULT_ACCENT
     # Boba-card background chosen in the app. Not in the seed; Reset demo drops it.
     card_color: str | None = None
+    # A placeholder id or a JPEG data URL. Not in the seed, so Reset demo clears it.
+    cover_url: str | None = None
     pinned_drink_id: str | None = None
     pinned_shop_id: str | None = None
     visible_stats: list[StatKey] = Field(default_factory=lambda: list(STAT_KEYS))
@@ -278,6 +280,7 @@ class SocialStore:
         from_user: str,
         drink_id: str | None = None,
         shop_id: str | None = None,
+        text: str | None = None,
     ) -> dict:
         item = {
             "id": self._new_id("n"),
@@ -286,6 +289,7 @@ class SocialStore:
             "from_user": from_user,
             "drink_id": drink_id,
             "shop_id": shop_id,
+            "text": text,
             "created_at": now_iso(),
             "read": False,
         }

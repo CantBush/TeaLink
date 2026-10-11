@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sun Oct 11, 12:55 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sun Oct 11, 1:10 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -781,9 +781,9 @@ Notification.text?: string                        // the note that came with it
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ `PATCH /users` stores `avatar.photo_url` and `cover_url` (a JPEG data URL or a placeholder id). Profiles and `Author` return the photo. Emoji avatar stays when there is no photo. Reset demo clears uploads | An uploaded photo and banner are still there after a reload, and gone after Reset demo |
-| 2 | ⬜ `POST /recs` succeeds only when the recipient follows the sender, and it writes a `rec` notification (who, drink, note) | Sending to someone who does not follow you fails, and a successful rec shows up unread for the recipient |
-| 3 | ⬜ Post photos already accepted on `POST /posts` round-trip as stored, including a JPEG data URL | A photo post is still there after a reload |
+| 1 | ✅ `PATCH /users` stores `avatar.photo_url` and `cover_url` (a JPEG data URL or a placeholder id). Profiles and `Author` return the photo. Emoji avatar stays when there is no photo. Reset demo clears uploads | An uploaded photo and banner are still there after a reload, and gone after Reset demo |
+| 2 | ✅ `POST /recs` succeeds only when the recipient follows the sender, and it writes a `rec` notification (who, drink, note) | Sending to someone who does not follow you fails, and a successful rec shows up unread for the recipient |
+| 3 | ✅ Post photos already accepted on `POST /posts` round-trip as stored, including a JPEG data URL | A photo post is still there after a reload |
 
 #### Track B: profile layout, photos, and recs
 
@@ -850,6 +850,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **1:10 AM:** Track A finished rows 1-3 of "Profile layout, photos, and recs". `PATCH /users` stores `avatar.photo_url` (JPEG, at most 512 px a side) and `cover_url` (a placeholder id, a JPEG at most 1600 px wide and 1600 px tall, or null). `POST /recs` is 403 unless the recipient follows the sender, and a successful rec writes an unread notification. Post photos round-trip as stored. Demo scores stay 78 / 77 / 71. The `types.ts` notes for Track B are in `PROGRESS.md`.
 - **12:55 AM:** Added "Profile layout, photos, and recs". The boba card and boba stats sit side by side when both are on, and a single one is centered. Popups open in the middle of the screen. People can upload a profile photo, a banner, and post photos. Stat rows stay consistent on a narrow window, including favorite shop. Send a rec and Follow sit below the banner. A rec is allowed only when the recipient follows the sender, and it shows in the notification bell. Top 3 cards read "78% match" in front of the rank. Side doodles hide only when the margins are almost gone. Split into Track A rows 1-3 and Track B rows 1-8. First on the cut list. The scripted scores stay 78 / 77 / 71.
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
 - **9:50 PM:** Track B finished its six "Ordering replaces picking" rows on in-browser mocks: ordering from the top 3 is the pick (same 45% / 36% / Pearl 73), no pick posts, photo and caption posts, a past orders stat, besteas, and a notification bell. The demo script now orders Pearl instead of picking it.

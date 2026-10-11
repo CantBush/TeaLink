@@ -163,9 +163,9 @@ def test_picks_post_to_the_feed_and_friends_can_react(client: TestClient):
     assert commented["comments"][-1]["author"]["handle"] == "sarah"
     assert client.post(f"/feed/{top['id']}/comments", json={"viewer": "sarah", "text": "  "}).status_code == 422
 
-    rec = client.post("/recs", json={"from": "sarah", "to": "nora", "drink_id": "sr_hojicha_cream", "text": "Try it"})
-    assert rec.status_code == 200 and rec.json()["to_user_id"] == "nora"
-    assert client.get("/feed", params={"user_id": "nora"}).json()[0]["id"] == rec.json()["id"]
+    rec = client.post("/recs", json={"from": "sarah", "to": "andrew", "drink_id": "sr_hojicha_cream", "text": "Try it"})
+    assert rec.status_code == 200 and rec.json()["to_user_id"] == "andrew"
+    assert client.get("/feed", params={"user_id": "andrew"}).json()[0]["id"] == rec.json()["id"]
     hers = client.get("/feed", params={"user_id": "andrew", "author": "sarah"}).json()
     assert hers and all(item["user_id"] == "sarah" for item in hers)
 
