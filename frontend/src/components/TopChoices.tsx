@@ -81,8 +81,26 @@ function CloseCall({
   );
 }
 
+/** The order sheet lives outside the cards, so the round that re-runs after an order can't close it. */
 export function TopChoices({ decision, running }: { decision: Decision | null; running: boolean }) {
   const [ordering, setOrdering] = useState<string | null>(null);
+  return (
+    <>
+      <Choices decision={decision} running={running} onOrder={setOrdering} />
+      {ordering ? <OrderSheet drinkId={ordering} onClose={() => setOrdering(null)} /> : null}
+    </>
+  );
+}
+
+function Choices({
+  decision,
+  running,
+  onOrder,
+}: {
+  decision: Decision | null;
+  running: boolean;
+  onOrder: (drinkId: string) => void;
+}) {
   if (!decision) {
     return (
       <article className="rounded-[28px] border border-line bg-foam p-6 sm:p-8">
@@ -121,7 +139,7 @@ export function TopChoices({ decision, running }: { decision: Decision | null; r
         </Link>
       </div>
       {decision.ask_human && options.length >= 2 ? (
-        <CloseCall a={options[0]} b={options[1]} running={running} onOrder={(option) => setOrdering(option.drink_id)} />
+        <CloseCall a={options[0]} b={options[1]} running={running} onOrder={(option) => onOrder(option.drink_id)} />
       ) : decision.ask_human && decision.question ? (
         <p className="mt-3 rounded-2xl border border-moss/60 bg-mist px-4 py-3 text-sm">{decision.question}</p>
       ) : null}
@@ -166,7 +184,7 @@ export function TopChoices({ decision, running }: { decision: Decision | null; r
               <button
                 type="button"
                 disabled={running}
-                onClick={() => setOrdering(option.drink_id)}
+                onClick={() => onOrder(option.drink_id)}
                 className="min-h-10 w-full rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam disabled:opacity-40"
               >
                 Order for pickup
@@ -176,7 +194,6 @@ export function TopChoices({ decision, running }: { decision: Decision | null; r
         ))}
       </ol>
       <p className="mt-4 text-[15px] leading-relaxed text-mute">{decision.explanation}</p>
-      {ordering ? <OrderSheet drinkId={ordering} onClose={() => setOrdering(null)} /> : null}
     </section>
   );
 }
