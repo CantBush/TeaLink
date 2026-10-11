@@ -642,6 +642,93 @@ POST /whatif       { user_id, changes: WhatIf[] } -> { ok: true; applied: WhatIf
 
 Until `POST /whatif` is served, the frontend applies sold out, shop offline, shop joins or back online, avoid, and taste through the existing event routes. Restock, a price limit, and a price change are listed as "not applied yet". Until `POST /whatif/parse` is served, the same keyword matcher runs in the browser (`frontend/src/lib/whatif.ts`).
 
+### Ordering replaces picking, custom posts, and besteas (added 9:30 PM)
+
+**Goal:** ordering is the only way to choose a drink, orders stay private unless you choose to share, people post what they want, and close friends ("besteas") can follow each other's orders.
+
+**Customer side:**
+- **Order, don't pick:**
+  - "Pick this" is removed from the top 3 cards, and the close-call buttons ("I'd take Thai Tea") become "Order Thai Tea". Both open the order sheet.
+  - Placing an order for a drink from your current top 3 is the pick: the Preference agent learns from it right away, the same way "Pick this" did, and the round re-runs. Learning moves from pickup to placement so the demo doesn't wait on the shop. A later pickup doesn't teach it twice, and cancelling doesn't undo it.
+  - An order for a drink that isn't in your top 3 (for example from Discover) counts as a taste signal instead. It nudges your taste profile toward that drink, like a good review, and counts toward drinks tried. It doesn't change your priority weights: with no passed-over options to compare against, there's no way to tell whether you chose it for taste, price, novelty, or a friend.
+- **No automatic posts:** ordering (or the old pick route) no longer adds a "pick" item to your profile or anyone's feed. The seeded "pick" posts are removed from the feed; they still count as order history.
+- **Your own posts:**
+  - A photo with a caption (like an Instagram post), or just a caption (like a tweet).
+  - You can tag a drink or a shop. Likes and comments work as they do on reviews.
+  - Posts show in followers' feeds and on your profile: photo posts in the grid, and every post in the list view. You can delete your own.
+- **Past orders on your profile:**
+  - A "past orders" stat: your recent orders (drink, shop, and date; never prices), newest first.
+  - It's one more stat in Edit profile, so you can show it, hide it, or reorder it like the others. Other viewers only see it when it's shown.
+- **Besteas:**
+  - A "Request bestea" button next to Follow on someone's profile. They accept or decline. Either of you can end it at any time.
+  - Besteas get a notification whenever the other places an order: "Sarah ordered Hojicha Cream Tea at Sunright Tea Studio."
+  - A bell in the header shows unread notifications: bestea requests (with accept and decline), accepted requests, and bestea orders.
+
+**Demo safety:**
+- The single-mode numbers must not change: Thai Tea 78, Wintermelon 77, Pearl 71 after Reset demo.
+- The script's "Pick Pearl Milk Tea" step becomes "Order Pearl Milk Tea" (pay at pickup). It must give the same result: taste 45%, price 36%, and Pearl 73.
+- Reset demo removes posts, besteas, and notifications created since, and keeps accounts.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`):
+
+```ts
+// Ordering teaches when the drink is in your current top 3
+POST /orders -> { order_id, total, status, payment_url?, learned?: PreferenceReport }   // learned only when it counted as a pick
+// An order outside the top 3 nudges the taste profile instead (no learned); GET /profile/{user} reflects it
+// POST /choices stays for old clients but no longer adds a feed item
+
+// Posts
+FeedKind = "review" | "rec" | "joined" | "post"                    // "pick" is no longer produced
+POST   /posts { text: string; photo_url?: string | null; drink_id?: string; shop_id?: string } -> FeedItem
+        // text 1-500 characters; photo_url is a JPEG data URL (at most 1080 px a side) or null
+DELETE /posts/{id}
+FeedItem.shop_id?: string | null
+
+// Past orders stat
+StatKey adds "past_orders"
+BobaStats.past_orders: { drink_id: string; shop_id: string; ordered_at: string }[]   // newest 10, no prices
+
+// Besteas
+UserProfile.bestea: "none" | "requested" | "incoming" | "bestea"   // from the viewer's side
+UserProfile.besteas: number
+POST   /bestea/{user_id}/request
+POST   /bestea/{user_id}/accept
+POST   /bestea/{user_id}/decline
+DELETE /bestea/{user_id}                                         // cancel a request or end a bestea
+
+// Notifications
+GET  /notifications -> { items: Notification[]; unread: number }
+POST /notifications/read { ids?: string[] }                     // no ids = mark all read
+Notification = {
+  id: string;
+  kind: "bestea_request" | "bestea_accepted" | "bestea_order";
+  from: Author;
+  drink_id?: string; shop_id?: string;                           // bestea_order only
+  created_at: string;
+  read: boolean;
+}
+```
+
+#### Track A: ordering, posts, and besteas
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Learning on order placement for a drink in the current top 3, returned as `learned`; an order outside the top 3 nudges the taste profile (like a good review) without changing weights; no second update at pickup; no feed item from orders or `/choices`; drop seeded "pick" items from the feed but keep them as history | Ordering Pearl after Reset demo gives taste 45%, price 36%, Pearl 73, and adds nothing to the feed |
+| 2 | ⬜ Posts: `POST /posts` and `DELETE /posts/{id}`, photo or caption only, optional drink or shop tag, likes and comments, in feeds and on profiles | A caption-only post and a photo post both show in a follower's feed |
+| 3 | ⬜ `past_orders` stat from orders and seeded history, respecting `visible_stats` | Hiding it removes it for other viewers |
+| 4 | ⬜ Besteas and notifications: request, accept, decline, end; `bestea` and `besteas` on profiles; notifications for requests, accepts, and bestea orders; mark read; Reset demo clears them | Andrew and Sarah become besteas, Sarah orders, and Andrew gets one unread notification |
+
+#### Track B: ordering, posts, and besteas
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Remove "Pick this"; close-call buttons become "Order …"; after an order that returns `learned`, show the summary and re-run the round like a pick | Ordering Pearl from the top 3 re-ranks the same way the old pick did |
+| 2 | ⬜ Stop showing "pick" items, and stop the social mock from adding them | Ordering adds nothing to Home or your profile |
+| 3 | ⬜ New post composer (photo + caption, or caption only, optional drink or shop tag); tweet-style cards for caption-only posts; photo posts in the profile grid; delete your own | Both kinds post, show on Home and your profile, and can be deleted |
+| 4 | ⬜ "Past orders" stat card on the profile, plus its toggle in Edit profile | It can be shown, hidden, and reordered |
+| 5 | ⬜ "Request bestea" next to Follow with its states (requested, incoming, besteas); notification bell with an unread count, accept and decline, and bestea orders | A request, an accept, and a bestea's order all show up in the bell |
+| 6 | ⬜ Update `docs/demo-script.md` (order Pearl instead of picking it) and re-check the numbers | The script's clicks and numbers match the app |
+
 ### Sync points
 
 | Time | Both of you |
@@ -672,16 +759,16 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
    - card payments (keep pay at pickup);
    - the month and year ranges in demand trends (keep the week);
    - menu sections (keep editing drinks);
-   - the shop picture and description;
-   - ordering.
-   Keep sign in, the demo account buttons, and the discount rules.
-3. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-4. Shop images and cover images (keep the drink images)
-5. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-6. Friends tab (once profiles exist, it folds into them)
-7. Counterfactual page (Why This and the timeline already show the before/after)
-8. LLM wording
-9. AGNTCY (use the local transport)
+   - the shop picture and description.
+   Keep sign in, the demo account buttons, the discount rules, and ordering (it replaces picking).
+3. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
+4. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+5. Shop images and cover images (keep the drink images)
+6. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+7. Friends tab (once profiles exist, it folds into them)
+8. Counterfactual page (Why This and the timeline already show the before/after)
+9. LLM wording
+10. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
@@ -694,6 +781,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 ## Plan change log
 
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
+- **9:30 PM:** Added "Ordering replaces picking, custom posts, and besteas": ordering is the only way to choose (placing an order from your top 3 teaches the Preference agent), orders no longer post automatically, people write their own photo or caption posts, past orders become a profile stat, and besteas get notified of each other's orders. Split into Track A rows 1-4 and Track B rows 1-6. Orders from outside the top 3 (for example Discover) nudge the taste profile but not the priority weights.
 - **9:05 PM:** Track B finished its three custom what-if rows: a text box with confirm chips, a change builder, and the presets unchanged.
 - **8:50 PM:** Track B finished its seven "Accounts, store tools, and ordering" rows on in-browser mocks, including sign-in, the shop pages, and pickup orders. Reset demo now keeps whoever is signed in.
 - **8:15 PM:** Added "Accounts, store tools, and ordering":
