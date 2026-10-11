@@ -6,7 +6,7 @@
 ``TRANSPORT=local`` (the default) never touches NATS. ``TRANSPORT=agntcy``
 sends each deliberation message to that agent's process. Agents that are not
 heartbeating are answered by the in-process fallback, so the HTTP API Emily's
-frontend calls stays the same either way. Schemas are unchanged.
+frontend calls stays the same either way.
 """
 
 from __future__ import annotations
@@ -22,6 +22,14 @@ from tealink.agents.cards import AgentCardInfo, try_a2a_card
 from tealink.bus import CONTROL_SUBJECT, HEARTBEAT_SUBJECT, control_body, parse_body
 from tealink.data.loader import Catalog
 from tealink.schemas import AgentReply, DeliberationRequest
+
+
+class ReviseTimeout(Exception):
+    """A revise send took the NATS failure path. That rebuttal is discarded."""
+
+    def __init__(self, agent_id: str) -> None:
+        self.agent_id = agent_id
+        super().__init__(agent_id)
 
 
 class AgentTransport(Protocol):
@@ -203,6 +211,12 @@ class AgntcyTransport:
             self.remote_replies[card.id] = self.remote_replies.get(card.id, 0) + 1
             return reply
         self._local_only.add(card.id)
+        if msg.round == "revise":
+            print(
+                f"{card.id} did not answer over NATS ({type(last_error).__name__}). Discarding this rebuttal.",
+                file=sys.stderr,
+            )
+            raise ReviseTimeout(card.id)
         print(
             f"{card.id} did not answer over NATS ({type(last_error).__name__}). Using the in-process agent.",
             file=sys.stderr,

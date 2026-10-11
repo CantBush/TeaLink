@@ -16,7 +16,7 @@ class SocialAgent(ObjectiveAgent):
     agent_id = "social"
     dimension = "social"
     name = "Social"
-    description = "Finds the user's most similar people and suggests drinks they rated highly."
+    description = "Finds your most similar people and suggests drinks they rated highly."
 
     def context(self, request: DeliberationRequest, catalog: Catalog) -> Any:
         return objectives.neighbors(catalog, request.user_id)

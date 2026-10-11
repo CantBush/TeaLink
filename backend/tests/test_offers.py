@@ -74,10 +74,13 @@ def test_a_discount_can_flip_first_place():
         explanation="",
         options=[leader, trailer],
         weights={"taste": 0.05, "social": 0.05, "novelty": 0.05, "cost": 0.85},
+        decided_by="agents",
+        rounds=2,
     )
     offer = Offer(shop_id="sunright", percent=10, price_after=4.50, reason="Sunright takes 10% off trailer.")
     updated = apply_offer(decision, "trailer", offer, low=4.50, high=7.00)
     assert updated.drink_id == "trailer"
+    assert updated.decided_by == "agents" and updated.rounds == 2
     assert updated.options[0].offer is not None
     assert updated.options[0].dimension_scores["cost"] > trailer.dimension_scores["cost"]
     assert "moves it to #1" in updated.explanation
@@ -107,8 +110,9 @@ def test_menu_endpoints_and_reserved_photo_fields():
     assert feed and all(item["photo_url"] is None for item in feed[:5])
 
 
-def test_the_scripted_opening_stays_a_close_call():
+def test_the_scripted_opening_stays_a_close_call(monkeypatch):
     """Wintermelon is already cheaper, so Sunright does not buy the #1 spot."""
+    monkeypatch.setenv("DELIBERATION", "single")
     write_dataset()
     app.state.runtime = None
     client = TestClient(app)
@@ -122,6 +126,12 @@ def test_the_scripted_opening_stays_a_close_call():
     assert decision["drink_id"] == "kf_thai"
     assert decision["ask_human"] is True
     assert [round(item["score"] * 100) for item in decision["options"]] == [78, 77, 71]
+    assert decision["rounds"] == 0 and decision["decided_by"] == "arbiter"
+    assert not any(
+        event["payload"].get("revised_from")
+        or any(item.get("revised_from") for item in event["payload"].get("objections", []))
+        for event in events
+    )
     assert not any(event["type"] == "offer" for event in events)
 
 

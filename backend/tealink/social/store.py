@@ -32,6 +32,8 @@ class ProfileSettings(BaseModel):
     bio: str = ""
     avatar: Avatar = Field(default_factory=lambda: DEFAULT_AVATAR.model_copy())
     accent: str = DEFAULT_ACCENT
+    # Boba-card background chosen in the app. Not in the seed; Reset demo drops it.
+    card_color: str | None = None
     pinned_drink_id: str | None = None
     pinned_shop_id: str | None = None
     visible_stats: list[StatKey] = Field(default_factory=lambda: list(STAT_KEYS))

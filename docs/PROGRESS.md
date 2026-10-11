@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sat Oct 10, 3:35 PM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sat Oct 10, evening. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -135,6 +135,23 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 **The social API matches the frontend contract.** `GET /quiz`, `GET /users?viewer=`, and `GET /feed` return bare lists. Likes and comments take `{viewer}`. Every feed item and comment carries an `author`, and `GET /feed?author=` is one person's posts. `toppings` is a 0–1 number. A missing user returns 404 with `detail: "user not found"`, so the frontend does not treat it as a route that has not shipped. After Reset demo, users created through `/users` are gone.
 
+**UI round 2, Track A (branch `a/dialogue`).** `DELIBERATION` defaults to `single`. With that default the scripted opening is unchanged: Thai Tea 78, Wintermelon Tea 77, Pearl Milk Tea 71, a close call, `decided_by` `"arbiter"`, `rounds` 0. The rest of the single-mode button sequence still matches the demo script: after picking Pearl, taste is 45% (was 41%) and price is 36%, and the re-rank is Thai Tea 79 / Wintermelon 75 / Pearl 73; Thai Tea sells out to Wintermelon 75 / Pearl 73 / Thai Milk Tea 70; Lantern Leaf joins at Brown Sugar Hojicha Milk 81 / Osmanthus Milk Tea 75 / Wintermelon 75; no brown sugar leaves Osmanthus 75 / Wintermelon 75 / Pearl 73; Lantern Leaf going offline returns Wintermelon 75 / Pearl 73 / Thai Milk Tea 70.
+
+`DELIBERATION=dialogue` was run as the same buttons: reset, Andrew's opening recommend, pick `options[2]` of that opening top 3 (what the existing tests do), #1 sells out, Lantern Leaf joins, brown sugar override 0, then #1's shop goes offline. Every step used all 3 rebuttals, so `decided_by` is `"arbiter"` and `rounds` is 3. Percents are `Math.round(score * 100)`.
+
+| Step | Top 3 | What changed |
+|---|---|---|
+| Opening | Thai Tea 79, Wintermelon Tea 71, Osmanthus Oolong 64 | Not a close call. `options[2]` is Osmanthus Oolong, not Pearl. Priorities stay price 43%, taste 41%. |
+| Pick `options[2]` | Thai Tea 79, Wintermelon Tea 71, Osmanthus Oolong 64 | "You picked Osmanthus Oolong over Thai Tea, so trying something new now counts for 7% (was 5%)." Price goes from 43% to 42%. |
+| #1 sells out (Thai Tea) | Wintermelon Tea 71, Osmanthus Oolong 64, Pearl Milk Tea 64 | Osmanthus is 0.642 and Pearl is 0.638, so both show as 64. Not a close call. |
+| Lantern Leaf joins | Wintermelon Tea 71, Brown Sugar Hojicha Milk 67, Osmanthus Oolong 64 | Brown Sugar Hojicha does not take #1. |
+| No brown sugar | Wintermelon Tea 71, Osmanthus Oolong 64, Pearl Milk Tea 64 | Brown Sugar Hojicha leaves the top 3. |
+| #1's shop goes offline | Thai Milk Tea 63, House Milk Tea 63, Jasmine Green Milk 62 | #1 is Wintermelon, so this takes Sunright Tea Studio offline, not Lantern Leaf. Thai Milk Tea is 0.6297 and House Milk Tea is 0.6296, so it is a close call. |
+
+Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession text is per drink on `objections[].revised_from` inside each summary objection event.
+
+**Seam for Track B.** Mirror these; `types.ts` stays yours. `round` on a proposal event is `0`. The first objection round is `1`. Rebuttals are `2`, `3`, then `4`. `Decision.rounds` counts finished rebuttals only (`0` in `single`). A summary objection event carries `round` and `objections[]`. A softened objection has `revised_from: { kind: "support" \| "concern" \| "neutral", score: number \| null }` on that objection. The summary payload also has top-level `revised_from` when that agent softened exactly one drink in the round; several softenings live only on the objections. Veto events never have `revised_from`. `GET /health` adds `deliberation: "single" \| "dialogue"`. `GET /drinks?user=` and `GET /shops?user=` add `match` (`null` when `user` is omitted; a 0–1 taste match when it is set; a shop's match is its best drink; unknown user 404; lists stay in catalog order). `UserProfile.card_color` and `PATCH /users` accept `#RRGGBB`; it is in memory only and Reset demo clears it. `AgentSelection` adds `name` and `description` from the agent card.
+
 ## Known issues and decisions to revisit
 
 - **For Andrew, about the customer/store choice (FYI, already handled in the frontend).** With `tealink.role = "store"`, Home, Stats, and Profile redirected to `/shop`, but TeaLink, Discover, and the explainer pages still opened, and the customer tab bar stayed visible, so tabs looked broken. All customer routes now sit inside one `CustomerOnly` route in `App.tsx` that sends a store account to `/shop`, and `NavBar` hides the customer tabs whenever the role is store. A new visitor still opens TeaLink and Discover directly (the demo starts there); Home, Stats, and Profile still send them to `/welcome`. The per-page store checks in Home, Profile, and Stats are now redundant but harmless. Lint still flags a fast-refresh warning in `ShopLayout.tsx` because it exports `useShopCatalog` and `ShopPage` alongside the layout.
@@ -152,6 +169,7 @@ The full schedule is in the "Two-person split" section of [`PLAN.md`](PLAN.md). 
 
 ## Plan change log
 
+- **Evening:** Track A on `a/dialogue`: second-person selection copy, the round-2 contract fields, and `DELIBERATION=dialogue|single` (default `single`). Single-mode demo numbers are unchanged. Dialogue top-3 numbers are in the Track A section above. Track B: mirror the seam before editing `types.ts`, and update `demo-script.md` from the dialogue table. `options[2]` of the dialogue opening is Osmanthus Oolong, not Pearl.
 - **3:35 PM:** Track A: the social backend is in on `a/social-backend`, covering the quiz, boba stats, profiles, follows, feed, likes, comments, and recs. The quiz seeds the Preference agent's prior and the taste profile. The demo numbers and the eval are unchanged. Track B: see "where the API differs from the contract" above before mirroring `types.ts`.
 - **2:10 PM:** Track A: popularity baseline and `GET /eval` are in, and Sarah is Andrew's closest match. Demo order is unchanged (Thai Tea, Wintermelon, Pearl Milk Tea). Priorities are now price 43% and taste 41% (were 42% and 39%), and Wintermelon scores 77 rather than 76.
 - **1:45 PM:** Track A: AGNTCY transport is in. Local remains the default. Next up is the popularity baseline and `GET /eval`.

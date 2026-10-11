@@ -16,7 +16,7 @@ class BudgetAgent(ObjectiveAgent):
     agent_id = "budget"
     dimension = "cost"
     name = "Budget"
-    description = "Argues for the cheapest drinks that still fit the user's taste."
+    description = "Argues for the cheapest drinks that still fit your taste."
 
     def objective(
         self, request: DeliberationRequest, catalog: Catalog, drink: Drink, ctx: Any

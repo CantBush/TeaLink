@@ -88,6 +88,8 @@ class Proposal(BaseModel):
     rationale: str
     price: float = 0.0
     dimension: str | None = None
+    # 0 on the proposal event. Later rounds are objections and rebuttals.
+    round: int | None = None
 
 
 class ObjectionKind(str, Enum):
@@ -97,6 +99,17 @@ class ObjectionKind(str, Enum):
     support = "support"
 
 
+class RevisedFrom(BaseModel):
+    """The stance an objection had before this round softened it.
+
+    Omitted when nothing moved. Vetoes never carry it. Kind is the soften
+    scale (concern, then neutral, then support); veto is outside that scale.
+    """
+
+    kind: Literal["support", "concern", "neutral"]
+    score: float | None = None
+
+
 class Objection(BaseModel):
     agent_id: str
     target_drink_id: str
@@ -104,12 +117,19 @@ class Objection(BaseModel):
     reason: str
     score: float | None = None
     dimension: str | None = None
+    # Set only on the round that softened this stance. Previous kind and score.
+    revised_from: RevisedFrom | None = None
+    # 1 is the first objection round. Rebuttals are 2, 3, then 4.
+    round: int | None = None
 
 
 class AgentSelection(BaseModel):
     agent_id: str
     capabilities: list[str]
     reason: str
+    # Copied from the agent card so a team grid can render without another request.
+    name: str | None = None
+    description: str | None = None
 
 
 class Offer(BaseModel):
@@ -150,6 +170,11 @@ class Decision(BaseModel):
     options: list[RankedDrink] = Field(default_factory=list)
     weights: dict[str, float] = Field(default_factory=dict)
     dropped: list[DroppedDrink] = Field(default_factory=list)
+    # "agents" when a rebuttal changes nothing before the cap, including the third.
+    # "arbiter" in single mode, when all 3 rebuttals still move, or on a revise timeout.
+    decided_by: Literal["agents", "arbiter"] | None = None
+    # Rebuttal rounds that finished. 0 in single mode. A discarded timeout does not count.
+    rounds: int | None = None
 
 
 class ChoiceRecord(BaseModel):
@@ -188,7 +213,7 @@ class LensEvent(BaseModel):
 
 
 class DeliberationRequest(BaseModel):
-    round: Literal["propose", "object", "learn", "offer"]
+    round: Literal["propose", "object", "learn", "offer", "revise"]
     user_id: str
     query: str
     preference_overrides: dict[str, float] = Field(default_factory=dict)
@@ -197,6 +222,8 @@ class DeliberationRequest(BaseModel):
     choice: ChoiceRecord | None = None
     # Starting weights from the onboarding quiz. Picks are learned on top of them.
     prior_weights: dict[str, float] | None = None
+    # Latest objections from every agent. Revise is stateless, so the prior stance travels here.
+    peer_objections: list[Objection] = Field(default_factory=list)
 
 
 class AgentReply(BaseModel):
@@ -276,6 +303,8 @@ class UserProfile(BaseModel):
     bio: str
     avatar: Avatar
     accent: str
+    # In-memory boba-card background. Same #RRGGBB check as accent. Reset demo clears it.
+    card_color: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
     pinned_drink_id: str | None
     pinned_shop_id: str | None
     visible_stats: list[StatKey]

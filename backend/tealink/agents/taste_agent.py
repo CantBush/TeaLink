@@ -14,7 +14,7 @@ class TasteAgent(ObjectiveAgent):
     agent_id = "taste"
     dimension = "taste"
     name = "Taste"
-    description = "Builds a taste profile from this user's reviews and ranks the menu by fit."
+    description = "Builds a taste profile from your reviews and ranks the menu by fit."
 
     def objective(
         self, request: DeliberationRequest, catalog: Catalog, drink: Drink, ctx: Any

@@ -25,15 +25,20 @@ class Settings:
     nats_url: str
     llm_model: str
     data_dir: Path
+    deliberation: str
 
 
 def get_settings() -> Settings:
     load_env()
     data_dir = os.environ.get("DATA_DIR", "").strip()
+    deliberation = os.environ.get("DELIBERATION", "single").strip().lower() or "single"
+    if deliberation not in {"single", "dialogue"}:
+        deliberation = "single"
     return Settings(
         transport=os.environ.get("TRANSPORT", "local").strip() or "local",
         nats_url=os.environ.get("NATS_URL", "nats://localhost:4222").strip()
         or "nats://localhost:4222",
         llm_model=os.environ.get("LLM_MODEL", "").strip(),
         data_dir=Path(data_dir) if data_dir else _BACKEND_DIR / "data",
+        deliberation=deliberation,
     )

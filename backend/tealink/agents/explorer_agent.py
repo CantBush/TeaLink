@@ -16,7 +16,7 @@ class ExplorerAgent(ObjectiveAgent):
     agent_id = "explorer"
     dimension = "novelty"
     name = "Explorer"
-    description = "Suggests drinks unlike the user's past orders that they would still plausibly enjoy."
+    description = "Suggests drinks unlike your past orders that you would still plausibly enjoy."
 
     def objective(
         self, request: DeliberationRequest, catalog: Catalog, drink: Drink, ctx: Any

@@ -12,11 +12,11 @@ HEARTBEAT_TTL_SECONDS = 30.0
 CORE_AGENTS = ("taste", "social", "explorer", "budget", "preference")
 
 _CORE_REASONS = {
-    "taste": "Selected Taste: it ranks drinks by fit to this user's own reviews{query}.",
-    "social": "Selected Social: it knows what this user's most similar people loved{query}.",
-    "explorer": "Selected Explorer: it argues for drinks this user hasn't tried{query}.",
+    "taste": "Selected Taste: it ranks drinks by fit to your own reviews{query}.",
+    "social": "Selected Social: it knows what your most similar people loved{query}.",
+    "explorer": "Selected Explorer: it argues for drinks you haven't tried{query}.",
     "budget": "Selected Budget: it argues for cheaper drinks that still fit{query}.",
-    "preference": "Selected Preference: it knows how much this user weighs taste, friends, novelty, and price.",
+    "preference": "Selected Preference: it knows how much you weigh taste, friends, novelty, and price.",
 }
 
 
@@ -59,6 +59,8 @@ class Registry:
             selected.append(
                 AgentSelection(
                     agent_id=card.id,
+                    name=card.name,
+                    description=card.description,
                     capabilities=list(card.capabilities),
                     reason=_CORE_REASONS[agent_id].format(query=suffix),
                 )
@@ -73,6 +75,8 @@ class Registry:
             selected.append(
                 AgentSelection(
                     agent_id=card.id,
+                    name=card.name,
+                    description=card.description,
                     capabilities=list(card.capabilities),
                     reason=f"Selected {card.name}: it is online and can confirm what is in stock.",
                 )

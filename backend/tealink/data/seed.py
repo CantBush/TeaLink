@@ -271,7 +271,7 @@ def build_social(users: list[User], reviews: list[Review], choices: list[ChoiceR
                 pinned_drink_id=drink_id,
                 pinned_shop_id=shop_id,
                 visible_stats=visible,
-            ).model_dump(mode="json")
+            ).model_dump(mode="json", exclude={"card_color"})
         )
 
     follows: set[tuple[str, str]] = set()
