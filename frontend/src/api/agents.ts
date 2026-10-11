@@ -36,6 +36,17 @@ export async function getTrace(sessionId: string): Promise<TraceSpan[] | null> {
   }
 }
 
+/** Switch the server's Critic on or off. An older API without the route leaves it to the browser. */
+export async function setCritic(on: boolean): Promise<StopMode> {
+  try {
+    await request("POST", on ? "/critic/enable" : "/critic/disable");
+    return "server";
+  } catch (error) {
+    if (!(error instanceof Unavailable)) throw error;
+    return "browser";
+  }
+}
+
 export async function startAgent(agentId: string): Promise<StopMode> {
   try {
     await request("POST", `/agents/${encodeURIComponent(agentId)}/start`);

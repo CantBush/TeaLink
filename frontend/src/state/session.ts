@@ -11,7 +11,7 @@ import type {
   TasteProfile,
 } from "../api/types.ts";
 import { social } from "../api/social.ts";
-import { startAgent, stopAgent } from "../api/agents.ts";
+import { setCritic, startAgent, stopAgent, type StopMode } from "../api/agents.ts";
 import { agentInfo } from "../lib/agents.ts";
 import { critique } from "../lib/critic.ts";
 import { resolveWithout } from "../lib/withoutAgents.ts";
@@ -61,6 +61,8 @@ export interface SessionState {
   phases: { phase: Phase; ms: number }[];
   /** The Critic challenges each #1 before it's final. Off by default. */
   critic: boolean;
+  /** "browser" when the API has no Critic, so the browser plays it from the decision's scores. */
+  criticMode: StopMode;
   /** The latest round's id from the API, for its trace. Null for a saved round. */
   sessionId: string | null;
 }
@@ -98,6 +100,7 @@ let state: SessionState = {
   browserStopped: [],
   phases: [],
   critic: false,
+  criticMode: "server",
   sessionId: null,
 };
 
@@ -164,7 +167,7 @@ export function pushEvent(event: LensEvent) {
     patch.preferenceSummary = event.message;
   }
   set(patch);
-  if (event.type === "decision" && state.critic && !state.events.some((item) => item.type === "critique")) {
+  if (event.type === "decision" && state.critic && state.criticMode === "browser" && !state.events.some((item) => item.type === "critique")) {
     const challenge = critique(event.payload as unknown as Decision);
     if (challenge) {
       localSeq += 1;
@@ -216,7 +219,7 @@ function run(note?: string) {
 
   void client
     .recommend(
-      { user_id: state.userId, query: "What should I get next?", preference_overrides: {}, critic: state.critic },
+      { user_id: state.userId, query: "What should I get next?", preference_overrides: {} },
       forThisRound,
     )
     .catch(() => {
@@ -347,15 +350,24 @@ export async function toggleAgent(agentId: string) {
   }
 }
 
-export function toggleCritic() {
-  set({ critic: !state.critic });
-  rerun(state.critic ? "The Critic joins the table and will challenge the #1." : "The Critic leaves the table.");
+export async function toggleCritic() {
+  const on = !state.critic;
+  let criticMode: StopMode;
+  try {
+    criticMode = await setCritic(on);
+  } catch {
+    pushStatus("The Critic didn't answer (the API did not answer).");
+    return;
+  }
+  set({ critic: on, criticMode });
+  rerun(on ? "The Critic joins the table and will challenge the #1." : "The Critic leaves the table.");
 }
 
 export async function resetAll() {
   const serverStopped = state.stopped.filter((id) => !state.browserStopped.includes(id));
   await Promise.all(serverStopped.map((id) => startAgent(id).catch(() => {})));
-  set({ stopped: [], browserStopped: [], critic: false });
+  if (state.critic) await setCritic(false).catch(() => {});
+  set({ stopped: [], browserStopped: [], critic: false, criticMode: "server" });
   await client.resetDemo().catch(() => {});
   resetSocialMock();
   shopMock.reset();

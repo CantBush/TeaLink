@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import type { Health, LensEvent } from "../api/types.ts";
+import type { Dimension, Health, LensEvent } from "../api/types.ts";
 import { agentInfo, agentKind } from "../lib/agents.ts";
 import { drinkInfo } from "../lib/catalog.ts";
 import { dimensionLabel, price, readableShops } from "../lib/format.ts";
@@ -155,10 +155,16 @@ function buildChat(events: LensEvent[]): { items: ChatItem[]; selections: LensEv
           typeof event.payload.reply === "string"
             ? event.payload.reply
             : event.payload.changed_pick
-              ? "The Critic was right, so the arbiter changed the pick."
-              : "The arbiter answered it, and the pick holds.";
+              ? "Fair point, so the pick changes."
+              : "Keeping the pick, since it still has the highest combined score.";
+        const challenge =
+          typeof event.payload.reply === "string" || typeof event.payload.weakest_reason !== "string"
+            ? event.message
+            : event.payload.weakest_reason.replace(/\b(taste|social|novelty|cost)(?=:)/, (dimension) =>
+                dimensionLabel(dimension as Dimension).toLowerCase(),
+              );
         items.push({ kind: "divider", key: `${key}-critic`, text: "the critic checks the #1" });
-        items.push({ kind: "message", key, agentId: "critic", tag: "challenges", tone: "doubt", text: event.message });
+        items.push({ kind: "message", key, agentId: "critic", tag: "challenges", tone: "doubt", text: challenge });
         items.push({ kind: "system", key: `${key}-reply`, text: `arbiter: ${reply}`, tone: "note" });
         break;
       }

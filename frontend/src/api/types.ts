@@ -103,6 +103,16 @@ export interface Decision {
   rounds?: number;
   /** Agents stopped for this round; the arbiter decided without them. */
   missing_agents?: string[];
+  /** Only when the Critic is switched on (POST /critic/enable). */
+  critique?: Critique | null;
+}
+
+/** The Critic's challenge to the #1, and whether the arbiter kept the pick. */
+export interface Critique {
+  drink_id: string;
+  weakest_reason: string;
+  answered: boolean;
+  changed_pick: boolean;
 }
 
 export interface PreferenceReport {
@@ -368,8 +378,6 @@ export interface RecommendRequest {
   user_id: string;
   query: string;
   preference_overrides: Record<string, number>;
-  /** Planned: ask the Critic to challenge the #1. Older APIs ignore it. */
-  critic?: boolean;
 }
 
 /** GET /drinks. photo_url stays null until real photos exist. */

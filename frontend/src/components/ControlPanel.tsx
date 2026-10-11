@@ -228,7 +228,7 @@ export function ControlPanel({ decision, running }: { decision: Decision | null;
           role="switch"
           aria-checked={critic}
           disabled={busy}
-          onClick={toggleCritic}
+          onClick={() => void toggleCritic()}
           className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-40 ${critic ? "bg-moss" : "bg-line"}`}
         >
           <span
