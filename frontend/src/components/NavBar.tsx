@@ -79,7 +79,6 @@ export function NavBar() {
             aria-label={store ? "TeaLink shop" : "TeaLink home"}
           >
             <BobaMark className="h-9 w-12" />
-            <span className="font-display text-[24px] leading-none tracking-[0.14em]">TeaLink</span>
           </NavLink>
           {store ? null : (
             <nav className="hidden items-center gap-7 text-[15px] tracking-[0.08em] lowercase md:flex" aria-label="Main">
