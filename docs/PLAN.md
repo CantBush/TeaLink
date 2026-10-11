@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sun Oct 11, 1:10 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sun Oct 11, 1:20 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -789,14 +789,14 @@ Notification.text?: string                        // the note that came with it
 
 | Order | Task | Done when |
 |---|---|---|
-| 1 | ⬜ Boba card and boba stats side by side when both are on; either one alone is centered. Same on the Stats page, stacking on a narrow window | Both on is a row; one on is centered |
-| 2 | ⬜ Sheets and menus open in the middle of the viewport and scroll inside themselves | Order, new post, edit profile, and drink detail are usable without scrolling the page |
-| 3 | ⬜ Upload a profile photo and a banner, and keep the post photo upload. Show the photo on the profile, in the feed, and on notifications. Emoji and placeholder covers remain the fallback | A photo, a banner, and a post photo all show, and clearing the photo returns the emoji |
-| 4 | ⬜ Stat categories use one width rule on a narrow window. Favorite shop spans the full row the same way favorite drink and the other wide stats do | Shrinking the window does not leave one stat at half width beside a full-width one |
-| 5 | ⬜ Send a rec, Follow / Following, and Request bestea sit below the banner | They no longer cover the banner at any width |
-| 6 | ⬜ Send a rec only to someone who follows you. A rec notification appears in the bell with the person, the drink, and the note | The button is absent otherwise, and accepting a rec from someone you follow shows in the bell |
-| 7 | ⬜ Top 3 cards lead with the score as "78% match", in front of "no. 1" | The scripted 78 / 77 / 71 now read as percents with the word match, and the order is unchanged |
-| 8 | ⬜ Side doodles stay until the margins are almost too narrow for them | They remain visible on a wide laptop and hide only when the drawings would collide with the page |
+| 1 | ✅ Boba card and boba stats side by side when both are on; either one alone is centered. Same on the Stats page, stacking on a narrow window | Both on is a row; one on is centered |
+| 2 | ✅ Sheets and menus open in the middle of the viewport and scroll inside themselves | Order, new post, edit profile, and drink detail are usable without scrolling the page |
+| 3 | ✅ Upload a profile photo and a banner, and keep the post photo upload. Show the photo on the profile, in the feed, and on notifications. Emoji and placeholder covers remain the fallback | A photo, a banner, and a post photo all show, and clearing the photo returns the emoji |
+| 4 | ✅ Stat categories use one width rule on a narrow window. Favorite shop spans the full row the same way favorite drink and the other wide stats do | Shrinking the window does not leave one stat at half width beside a full-width one |
+| 5 | ✅ Send a rec, Follow / Following, and Request bestea sit below the banner | They no longer cover the banner at any width |
+| 6 | ✅ Send a rec only to someone who follows you. A rec notification appears in the bell with the person, the drink, and the note | The button is absent otherwise, and accepting a rec from someone you follow shows in the bell |
+| 7 | ✅ Top 3 cards lead with the score as "78% match", in front of "no. 1" | The scripted 78 / 77 / 71 now read as percents with the word match, and the order is unchanged |
+| 8 | ✅ Side doodles stay until the margins are almost too narrow for them | They remain visible on a wide laptop and hide only when the drawings would collide with the page |
 
 ### Sync points
 
@@ -850,6 +850,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **1:20 AM:** Track B finished its eight "Profile layout, photos, and recs" rows. Card and stats sit side by side (stacked and centered on a narrow window). Sheets open in the middle and scroll inside themselves. Profile photo and banner uploads show on the profile, in the feed, and on notifications, with emoji and placeholder covers as the fallback. Favorite shop spans the full row on a narrow window. Send a rec, Follow, and Request bestea sit below the banner. A rec only goes to someone who follows you, and it shows in the bell. Top 3 cards lead with "78% match". Side doodles stay in the margin until it gets too narrow. The scripted scores stay 78 / 77 / 71.
 - **1:10 AM:** Track A finished rows 1-3 of "Profile layout, photos, and recs". `PATCH /users` stores `avatar.photo_url` (JPEG, at most 512 px a side) and `cover_url` (a placeholder id, a JPEG at most 1600 px wide and 1600 px tall, or null). `POST /recs` is 403 unless the recipient follows the sender, and a successful rec writes an unread notification. Post photos round-trip as stored. Demo scores stay 78 / 77 / 71. The `types.ts` notes for Track B are in `PROGRESS.md`.
 - **12:55 AM:** Added "Profile layout, photos, and recs". The boba card and boba stats sit side by side when both are on, and a single one is centered. Popups open in the middle of the screen. People can upload a profile photo, a banner, and post photos. Stat rows stay consistent on a narrow window, including favorite shop. Send a rec and Follow sit below the banner. A rec is allowed only when the recipient follows the sender, and it shows in the notification bell. Top 3 cards read "78% match" in front of the rank. Side doodles hide only when the margins are almost gone. Split into Track A rows 1-3 and Track B rows 1-8. First on the cut list. The scripted scores stay 78 / 77 / 71.
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.

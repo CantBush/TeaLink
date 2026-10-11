@@ -110,10 +110,16 @@ export function Vine({ className = "h-5 w-40" }: DoodleProps) {
 
 const backdropStroke = 1.65;
 
-/** Large tea-garden drawings in the page margins. Wide screens only. */
+/**
+ * Tea-garden drawings clipped to the margins beside the widest page (72rem).
+ * They stay while that margin can hold them, and hide once it gets too narrow to draw in.
+ */
 export function GardenBackdrop() {
+  const gutter =
+    "pointer-events-none absolute inset-y-0 hidden overflow-hidden text-moss/35 min-[1360px]:block w-[max(0px,calc((100vw-72rem)/2))]";
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 hidden overflow-hidden text-moss/35 xl:block" aria-hidden>
+    <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden>
+      <div className={`${gutter} left-0`}>
       <Doodle className="absolute -left-10 top-28 h-[380px] w-[220px] -rotate-12" viewBox="0 0 120 210" strokeWidth={backdropStroke}>
         <path d="M70 208C64 160 58 110 66 60 70 36 80 18 92 4" />
         <path d="M92 4c-8 2-14 10-12 20 8-3 13-10 12-20Z" />
@@ -123,6 +129,20 @@ export function GardenBackdrop() {
         <path d="M64 150c14-7 30-6 41 6-14 9-30 7-41-6Z" />
         <path d="M66 182c-15 1-28-6-35-20 15-2 28 5 35 20Z" />
       </Doodle>
+      <Doodle className="absolute -left-4 bottom-6 h-[300px] w-[170px]" viewBox="0 0 130 220" strokeWidth={backdropStroke}>
+        <path d="M4 96c18 7 32-5 50 0s32 8 50 0 22-6 26 0" />
+        <path d="M2 118c20 6 34-6 54 0s34 7 52 0 18-5 22 0" />
+        <path d="M86 208V92" />
+        <path d="M86 98 74 122h8l-14 22h8l-16 24h44l-16-24h8l-14-22h8Z" />
+        <path d="M48 208V118" />
+        <path d="M48 124 38 144h6l-12 18h7l-14 20h40l-14-20h7l-12-18h6Z" />
+        <path d="M108 208V78" />
+        <path d="M108 84 98 106h7l-13 20h8l-15 22h40l-15-22h8l-13-20h7Z" />
+        <path d="M18 196c10-12 26-10 32 2" />
+        <path d="M62 202c8-10 22-8 28 2" />
+      </Doodle>
+      </div>
+      <div className={`${gutter} right-0`}>
       <Doodle className="absolute -right-8 bottom-10 h-[320px] w-[200px] rotate-[18deg]" viewBox="0 0 120 210" strokeWidth={backdropStroke}>
         <path d="M50 208C56 160 62 112 54 64 50 40 42 22 30 6" />
         <path d="M30 6c8 2 13 10 11 20-8-3-12-10-11-20Z" />
@@ -145,19 +165,6 @@ export function GardenBackdrop() {
         <path d="M96 78c-6 8-2 14 1 16 5-2 6-10-1-16Z" />
       </Doodle>
 
-      <Doodle className="absolute -left-4 bottom-6 h-[300px] w-[170px]" viewBox="0 0 130 220" strokeWidth={backdropStroke}>
-        <path d="M4 96c18 7 32-5 50 0s32 8 50 0 22-6 26 0" />
-        <path d="M2 118c20 6 34-6 54 0s34 7 52 0 18-5 22 0" />
-        <path d="M86 208V92" />
-        <path d="M86 98 74 122h8l-14 22h8l-16 24h44l-16-24h8l-14-22h8Z" />
-        <path d="M48 208V118" />
-        <path d="M48 124 38 144h6l-12 18h7l-14 20h40l-14-20h7l-12-18h6Z" />
-        <path d="M108 208V78" />
-        <path d="M108 84 98 106h7l-13 20h8l-15 22h40l-15-22h8l-13-20h7Z" />
-        <path d="M18 196c10-12 26-10 32 2" />
-        <path d="M62 202c8-10 22-8 28 2" />
-      </Doodle>
-
       <Doodle className="absolute -right-2 top-[36%] h-[210px] w-[170px] rotate-[12deg]" viewBox="0 0 180 200" strokeWidth={backdropStroke}>
         <path d="M176 18C140 28 112 48 92 72 70 98 48 128 28 162" />
         <path d="M118 42c14-12 32-8 34 6-16 4-30-2-34-6Z" />
@@ -171,6 +178,7 @@ export function GardenBackdrop() {
         <circle cx="76" cy="94" r="1.2" />
         <circle cx="56" cy="122" r="1.2" />
       </Doodle>
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { shopLabel } from "../lib/format.ts";
 import { drinkPhoto } from "../lib/images.ts";
 import { useMe } from "../state/me.ts";
 import { Avatar } from "./Avatar.tsx";
+import { Sheet } from "./Sheet.tsx";
 
 const input = "w-full rounded-2xl border border-line bg-cream px-4 py-3 text-[15px] outline-none focus:border-moss";
 
@@ -24,8 +25,7 @@ export function SendRec({ drinkId, to, onClose }: { drinkId?: string; to?: UserP
     social
       .listUsers(me)
       .then((users) => {
-        const others = users.filter((user) => user.user_id !== me);
-        others.sort((a, b) => Number(b.followed_by_me) - Number(a.followed_by_me));
+        const others = users.filter((user) => user.user_id !== me && user.follows_me);
         setPeople(others);
       })
       .catch(() => {});
@@ -47,22 +47,17 @@ export function SendRec({ drinkId, to, onClose }: { drinkId?: string; to?: UserP
       });
   };
 
+  const canSend = !to || to.follows_me;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
-      <section
-        role="dialog"
-        aria-modal
-        aria-label="Send a rec"
-        onClick={(event) => event.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[32px] bg-foam p-6 sm:rounded-[32px]"
-      >
+    <Sheet label="Send a rec" onClose={onClose}>
         {state === "sent" ? (
           <div className="py-6 text-center">
             <p className="text-4xl" aria-hidden>
               🧋
             </p>
             <h2 className="mt-3 font-display text-2xl">Sent to {target?.display_name ?? "your friend"}</h2>
-            <p className="mt-1 text-mute">It shows up at the top of their Home feed.</p>
+            <p className="mt-1 text-mute">It shows up in their notifications, and at the top of their Home feed.</p>
             <button type="button" onClick={onClose} className="mt-6 min-h-11 rounded-full bg-ink px-6 font-semibold text-foam">
               Done
             </button>
@@ -140,17 +135,22 @@ export function SendRec({ drinkId, to, onClose }: { drinkId?: string; to?: UserP
 
             {error ? <p className="mt-3 text-sm font-semibold text-[#b33]">{error}</p> : null}
 
+            {!canSend ? (
+              <p className="mt-4 text-sm text-mute">You can send a rec only to someone who follows you.</p>
+            ) : !to && people.length === 0 ? (
+              <p className="mt-4 text-sm text-mute">Nobody who follows you is here yet, so there's no one to send this to.</p>
+            ) : null}
+
             <button
               type="button"
               onClick={send}
-              disabled={!friend || !drink || state === "sending"}
+              disabled={!canSend || !friend || !drink || state === "sending"}
               className="mt-5 min-h-12 w-full rounded-full bg-ink font-semibold text-foam disabled:opacity-40"
             >
               {state === "sending" ? "Sending…" : target ? `Send to ${target.display_name}` : "Send"}
             </button>
           </>
         )}
-      </section>
-    </div>
+    </Sheet>
   );
 }

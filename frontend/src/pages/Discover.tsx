@@ -8,6 +8,7 @@ import { PreviewNote } from "../components/PreviewNote.tsx";
 import { TasteBars } from "../components/TasteBars.tsx";
 import { OrderSheet } from "../components/OrderSheet.tsx";
 import { SendRec } from "../components/SendRec.tsx";
+import { Sheet } from "../components/Sheet.tsx";
 import { type CatalogDrink, type DrinkBase, allDrinks, drinkBase, drinkInfo } from "../lib/catalog.ts";
 import { SHOP_IDS, matchPercent, price, shopLabel } from "../lib/format.ts";
 import { drinkPhoto, shopPhoto } from "../lib/images.ts";
@@ -116,15 +117,9 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
   if (sharing) return <SendRec drinkId={drink.id} onClose={onClose} />;
   if (ordering) return <OrderSheet drinkId={drink.id} onClose={onClose} />;
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
-      <section
-        role="dialog"
-        aria-modal
-        aria-label={drink.name}
-        onClick={(event) => event.stopPropagation()}
-        className="max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-t-[32px] bg-foam p-6 sm:rounded-[32px]"
-      >
-        <img src={drinkPhoto(drink.id) ?? ""} alt={drink.name} className="-mx-6 -mt-6 mb-5 aspect-[4/3] w-[calc(100%+3rem)] max-w-none object-cover" />
+    <Sheet label={drink.name} onClose={onClose} padded={false}>
+        <img src={drinkPhoto(drink.id) ?? ""} alt={drink.name} className="aspect-[4/3] w-full object-cover" />
+        <div className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="font-display text-3xl leading-tight">{drink.name}</h2>
@@ -179,8 +174,8 @@ function DrinkSheet({ drink, reviews, onClose }: { drink: CatalogDrink; reviews:
             ))}
           </ul>
         )}
-      </section>
-    </div>
+        </div>
+    </Sheet>
   );
 }
 

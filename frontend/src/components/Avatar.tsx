@@ -20,14 +20,18 @@ export function Avatar({
 }) {
   return (
     <span
-      className={`inline-grid shrink-0 place-items-center rounded-full ${SIZES[size]}`}
+      className={`inline-grid shrink-0 place-items-center overflow-hidden rounded-full ${SIZES[size]}`}
       style={{
         background: tint(avatar?.color) ?? "#e2ebdd",
         boxShadow: ring ? `0 0 0 3px #ffffff, 0 0 0 5px ${tint(ring)}` : undefined,
       }}
       aria-hidden
     >
-      {avatar?.emoji ?? "🧋"}
+      {avatar?.photo_url ? (
+        <img src={avatar.photo_url} alt="" className="h-full w-full rounded-full object-cover" />
+      ) : (
+        (avatar?.emoji ?? "🧋")
+      )}
     </span>
   );
 }

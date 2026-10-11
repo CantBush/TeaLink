@@ -1,3 +1,4 @@
+import type { Author, Avatar as AvatarData } from "../api/types.ts";
 import { type CatalogDrink, drinkBase, drinkInfo } from "./catalog.ts";
 
 /** Placeholder pictures in public/img. A real photo_url or cover_url always wins over these. */
@@ -63,6 +64,61 @@ export function resetCovers() {
   localStorage.removeItem(COVER_KEY);
 }
 
+const PORTRAIT_KEY = "tealink.portraits.v1";
+
+interface Portrait {
+  photo_url: string | null;
+  cover_url: string | null;
+}
+
+function portraits(): Record<string, Portrait> {
+  try {
+    return JSON.parse(localStorage.getItem(PORTRAIT_KEY) ?? "{}") as Record<string, Portrait>;
+  } catch {
+    return {};
+  }
+}
+
+/** Keep an uploaded photo and banner in this browser when the API does not store them yet. */
+export function rememberPortrait(userId: string, handle: string, portrait: Partial<Portrait>) {
+  const all = portraits();
+  const previous = all[userId] ?? { photo_url: null, cover_url: null };
+  const next = { ...previous, ...portrait };
+  all[userId] = next;
+  if (handle && handle !== userId) all[handle] = next;
+  localStorage.setItem(PORTRAIT_KEY, JSON.stringify(all));
+}
+
+export function resetPortraits() {
+  localStorage.removeItem(PORTRAIT_KEY);
+}
+
+function savedPortrait(userId?: string, handle?: string): Portrait | undefined {
+  const all = portraits();
+  return (userId && all[userId]) || (handle && all[handle]) || undefined;
+}
+
+/** Prefer a photo the API returned. Otherwise use the one saved in this browser. */
+export function paintAvatar(avatar: AvatarData, handle?: string): AvatarData {
+  if (avatar.photo_url) return avatar;
+  const saved = savedPortrait(undefined, handle);
+  if (!saved?.photo_url) return avatar;
+  return { ...avatar, photo_url: saved.photo_url };
+}
+
+export function paintAuthor(author: Author): Author {
+  return { ...author, avatar: paintAvatar(author.avatar, author.handle) };
+}
+
+export function paintProfile<T extends CoverOwner & { handle: string; avatar: AvatarData }>(profile: T): T {
+  const saved = savedPortrait(profile.user_id, profile.handle);
+  return {
+    ...profile,
+    avatar: profile.avatar.photo_url ? profile.avatar : { ...profile.avatar, photo_url: saved?.photo_url ?? null },
+    cover_url: profile.cover_url || saved?.cover_url || null,
+  };
+}
+
 const COVER_BY_NOTE: Record<string, CoverId> = {
   brown_sugar: "pearls",
   fruit: "fruit",
@@ -80,8 +136,20 @@ interface CoverOwner {
   stats?: { top_notes?: string[] };
 }
 
+function isCoverId(value: string): value is CoverId {
+  return (COVERS as readonly string[]).includes(value);
+}
+
+/** A data URL, a site path, or a placeholder id. Anything else is not a picture. */
+function coverSrc(value: string): string | null {
+  if (value.startsWith("data:") || value.startsWith("/") || value.startsWith("http")) return value;
+  if (isCoverId(value)) return `/img/covers/${value}.jpg`;
+  return null;
+}
+
 /** The user's pick if they made one, else one that fits their top flavor. */
 export function coverId(owner: CoverOwner): CoverId {
+  if (owner.cover_url && isCoverId(owner.cover_url)) return owner.cover_url;
   const chosen = chosenCovers()[owner.user_id];
   if (chosen && COVERS.includes(chosen)) return chosen;
   const byNote = COVER_BY_NOTE[owner.stats?.top_notes?.[0] ?? ""];
@@ -91,7 +159,11 @@ export function coverId(owner: CoverOwner): CoverId {
   return COVERS[hash % COVERS.length];
 }
 
-export function coverPhoto(owner: CoverOwner, preview?: CoverId): string {
-  if (!preview && owner.cover_url) return owner.cover_url;
-  return `/img/covers/${preview ?? coverId(owner)}.jpg`;
+export function coverPhoto(owner: CoverOwner, preview?: string): string {
+  const chosen = preview ?? owner.cover_url;
+  if (chosen) {
+    const src = coverSrc(chosen);
+    if (src) return src;
+  }
+  return `/img/covers/${coverId(owner)}.jpg`;
 }

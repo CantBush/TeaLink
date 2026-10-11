@@ -91,7 +91,8 @@ function body(key: StatKey, stats: Partial<Stats>, accent: string, shown: StatKe
   }
 }
 
-const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", "past_orders", ...RUN_STATS];
+/** On a narrow window every stat spans the whole row, including favorite shop. */
+const WIDE: StatKey[] = ["priorities", "top_notes", "fav_drink", "fav_shop", "past_orders", ...RUN_STATS];
 
 /** The stats a profile chose to show, in the order it chose. Keys in `hidden` are marked as private. */
 export function BobaStatsGrid({

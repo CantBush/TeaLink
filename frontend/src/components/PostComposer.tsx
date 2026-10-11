@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { social } from "../api/social.ts";
 import type { FeedItem } from "../api/types.ts";
 import { allDrinks } from "../lib/catalog.ts";
 import { SHOP_IDS, shopLabel } from "../lib/format.ts";
 import { resizePhoto } from "../lib/photo.ts";
 import { useMe } from "../state/me.ts";
+import { Sheet } from "./Sheet.tsx";
 
 const MAX = 500;
 
@@ -37,15 +37,8 @@ export function PostComposer({ onClose, onPosted }: { onClose: () => void; onPos
       .finally(() => setBusy(false));
   };
 
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
-      <section
-        role="dialog"
-        aria-modal
-        aria-label="New post"
-        onClick={(event) => event.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[32px] bg-foam p-6 sm:rounded-[32px]"
-      >
+  return (
+    <Sheet label="New post" onClose={onClose}>
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-display text-2xl">new post</h2>
           <button type="button" onClick={onClose} className="min-h-11 rounded-full px-3 text-sm font-semibold text-mute">
@@ -124,8 +117,6 @@ export function PostComposer({ onClose, onPosted }: { onClose: () => void; onPos
         >
           {busy ? "Posting…" : "Post"}
         </button>
-      </section>
-    </div>,
-    document.body,
+    </Sheet>
   );
 }

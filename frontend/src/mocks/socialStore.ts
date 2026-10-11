@@ -29,7 +29,7 @@ import { orderMock } from "./orderStore.ts";
  * so the social screens work before the API ships them. Changes persist in localStorage.
  */
 
-interface StoredUser extends Omit<UserProfile, "followers" | "following" | "followed_by_me" | "taste_match" | "stats"> {
+interface StoredUser extends Omit<UserProfile, "followers" | "following" | "followed_by_me" | "follows_me" | "taste_match" | "stats"> {
   following: string[];
   taste: TasteProfile;
   stats: BobaStats;
@@ -87,6 +87,16 @@ function seed(): Store {
         created_at: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
         read: false,
       },
+      {
+        id: "n_seed_rec",
+        to: "andrew",
+        from: "sarah",
+        kind: "rec",
+        drink_id: "sr_hojicha_cream",
+        text: "This is the one I keep going back to.",
+        created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+        read: false,
+      },
     ],
   });
 }
@@ -103,6 +113,21 @@ function load(): Store {
 
 let store = load();
 
+/** Older saved mocks predate rec notifications. Andrew still gets Sarah's seeded rec. */
+if (!store.notifications.some((note) => note.kind === "rec")) {
+  store.notifications.unshift({
+    id: "n_seed_rec",
+    to: "andrew",
+    from: "sarah",
+    kind: "rec",
+    drink_id: "sr_hojicha_cream",
+    text: "This is the one I keep going back to.",
+    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    read: false,
+  });
+  save();
+}
+
 function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify(store));
@@ -117,7 +142,14 @@ export function resetSocialMock() {
   const seeded = new Set(fresh.users.map((user) => user.user_id));
   const signedUp = store.users.filter((user) => !seeded.has(user.user_id));
   const known = new Set([...seeded, ...signedUp.map((user) => user.user_id)]);
-  fresh.users.push(...signedUp.map((user) => ({ ...user, following: user.following.filter((id) => known.has(id)) })));
+  fresh.users.push(
+    ...signedUp.map((user) => ({
+      ...user,
+      following: user.following.filter((id) => known.has(id)),
+      avatar: { emoji: user.avatar.emoji, color: user.avatar.color },
+      cover_url: null,
+    })),
+  );
   store = fresh;
   if (signedUp.length > 0) save();
   else {
@@ -174,6 +206,7 @@ function view(user: StoredUser, viewerId: string): UserProfile {
     followers: store.users.filter((item) => item.following.includes(user.user_id)).length,
     following: following.length,
     followed_by_me: viewer?.following.includes(user.user_id) ?? false,
+    follows_me: !own && user.following.includes(viewerId),
     bestea: own ? "none" : besteaState(viewerId, user.user_id),
     besteas: store.besteas.filter((link) => link.status === "bestea" && (link.from === user.user_id || link.to === user.user_id)).length,
     taste_match: own || !viewer ? null : similarity(viewer.taste, user.taste),
@@ -202,7 +235,12 @@ function pastOrders(userId: string): PastOrder[] {
     .map((order) => ({ drink_id: order.items[0].drink_id, shop_id: order.shop_id, ordered_at: order.created_at }));
 }
 
-function notify(to: string, from: string, kind: NotificationKind, extra: { drink_id?: string; shop_id?: string } = {}) {
+function notify(
+  to: string,
+  from: string,
+  kind: NotificationKind,
+  extra: { drink_id?: string; shop_id?: string; text?: string } = {},
+) {
   store.notifications.unshift({
     id: `n_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     to,
@@ -426,14 +464,21 @@ export const socialMock = {
   },
 
   sendRec(from: string, to: string, drinkId: string, text: string): FeedItem {
+    const sender = find(from);
+    const recipient = find(to);
+    if (!recipient.following.includes(sender.user_id)) {
+      throw new Error("You can only send a rec to someone who follows you.");
+    }
+    const note = text.trim();
+    notify(recipient.user_id, sender.user_id, "rec", { drink_id: drinkId, text: note || undefined });
     const item: StoredFeedItem = {
       id: `f_rec_${Date.now()}`,
-      user_id: from,
+      user_id: sender.user_id,
       kind: "rec",
       drink_id: drinkId,
       rating: null,
-      text: text.trim() || null,
-      to_user_id: to,
+      text: note || null,
+      to_user_id: recipient.user_id,
       created_at: new Date().toISOString(),
       liked_by: [],
       comments: [],

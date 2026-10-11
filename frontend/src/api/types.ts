@@ -216,6 +216,8 @@ export interface PastOrder {
 export interface Avatar {
   emoji: string;
   color: string;
+  /** A JPEG data URL. Absent or null keeps the emoji. */
+  photo_url?: string | null;
 }
 
 export interface UserProfile {
@@ -234,6 +236,8 @@ export interface UserProfile {
   followers: number;
   following: number;
   followed_by_me: boolean;
+  /** True when this person follows the viewer, so a rec can be sent. The mock sets it; a live profile is filled in from their followers. */
+  follows_me?: boolean;
   /** From the viewer's side. Missing until the API serves besteas. */
   bestea?: BesteaState;
   besteas?: number;
@@ -241,12 +245,15 @@ export interface UserProfile {
   taste_match: number | null;
   /** Other viewers only receive the visible stats. */
   stats: Partial<BobaStats>;
-  /** Reserved for uploads; always null for now. */
+  /** A placeholder id ("pearls", "leaves", …) or a JPEG data URL. Absent keeps the flavor cover. */
   cover_url?: string | null;
 }
 
 export type ProfilePatch = Partial<
-  Pick<UserProfile, "display_name" | "bio" | "avatar" | "accent" | "pinned_drink_id" | "pinned_shop_id" | "visible_stats" | "card_color">
+  Pick<
+    UserProfile,
+    "display_name" | "bio" | "avatar" | "accent" | "pinned_drink_id" | "pinned_shop_id" | "visible_stats" | "card_color" | "cover_url"
+  >
 >;
 
 export interface QuizOption {
@@ -300,7 +307,7 @@ export interface PostInput {
   shop_id?: string;
 }
 
-export type NotificationKind = "bestea_request" | "bestea_accepted" | "bestea_order";
+export type NotificationKind = "bestea_request" | "bestea_accepted" | "bestea_order" | "rec";
 
 export interface AppNotification {
   id: string;
@@ -308,6 +315,8 @@ export interface AppNotification {
   from: Author;
   drink_id?: string;
   shop_id?: string;
+  /** The note that came with a rec. */
+  text?: string;
   created_at: string;
   read: boolean;
 }
@@ -334,8 +343,6 @@ export interface FeedItem {
   comments: FeedComment[];
   /** A review's or post's photo, when there is one. */
   photo_url?: string | null;
-  /** A post tagged with a shop. */
-  shop_id?: string | null;
 }
 
 export interface RecommendRequest {

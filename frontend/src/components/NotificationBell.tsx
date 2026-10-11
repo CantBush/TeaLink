@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { social } from "../api/social.ts";
 import type { AppNotification, Notifications } from "../api/types.ts";
@@ -7,6 +7,7 @@ import { shopLabel, timeAgo } from "../lib/format.ts";
 import { useMe } from "../state/me.ts";
 import { onProfilesChanged, profilesChanged } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
+import { Sheet } from "./Sheet.tsx";
 
 const POLL_MS = 10000;
 
@@ -21,6 +22,10 @@ function message(note: AppNotification): string {
       const drink = drinkInfo(note.drink_id)?.name ?? "a drink";
       return `${name} ordered ${drink}${note.shop_id ? ` at ${shopLabel(note.shop_id)}` : ""}.`;
     }
+    case "rec": {
+      const drink = drinkInfo(note.drink_id)?.name ?? "a drink";
+      return `${name} recommended ${drink}${note.text ? `: “${note.text}”` : "."}`;
+    }
   }
 }
 
@@ -29,7 +34,6 @@ export function NotificationBell() {
   const me = useMe();
   const [data, setData] = useState<Notifications>({ items: [], unread: 0 });
   const [open, setOpen] = useState(false);
-  const panel = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(() => {
     if (!me) return;
@@ -47,15 +51,6 @@ export function NotificationBell() {
       unsubscribe();
     };
   }, [refresh]);
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: MouseEvent) => {
-      if (!panel.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, [open]);
 
   const toggle = () => {
     const next = !open;
@@ -76,7 +71,7 @@ export function NotificationBell() {
   };
 
   return (
-    <div ref={panel} className="relative">
+    <div className="relative">
       <button
         type="button"
         onClick={toggle}
@@ -95,12 +90,17 @@ export function NotificationBell() {
         ) : null}
       </button>
       {open ? (
-        <div className="absolute right-0 z-40 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-3xl border border-line bg-foam p-3 shadow-[0_12px_32px_rgba(21,35,27,0.12)]">
-          <p className="px-2 pb-2 font-display text-lg">notifications</p>
+        <Sheet label="Notifications" onClose={() => setOpen(false)}>
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-display text-2xl">notifications</p>
+            <button type="button" onClick={() => setOpen(false)} className="min-h-11 px-2 text-sm font-semibold text-mute">
+              Close
+            </button>
+          </div>
           {data.items.length === 0 ? (
-            <p className="px-2 pb-2 text-sm text-mute">Nothing yet. Request a bestea from someone's profile to see their orders here.</p>
+            <p className="mt-3 text-sm text-mute">Nothing yet. Request a bestea from someone's profile to see their orders here.</p>
           ) : (
-            <ul className="max-h-96 space-y-1 overflow-y-auto">
+            <ul className="mt-3 space-y-1">
               {data.items.map((note) => (
                 <li key={note.id} className={`flex gap-3 rounded-2xl p-2 ${note.read ? "" : "bg-mist"}`}>
                   <Link to={`/u/${note.from.handle}`} onClick={() => setOpen(false)} className="shrink-0">
@@ -118,13 +118,21 @@ export function NotificationBell() {
                           Decline
                         </button>
                       </div>
+                    ) : note.kind === "rec" && note.drink_id ? (
+                      <Link
+                        to={`/discover?drink=${note.drink_id}`}
+                        onClick={() => setOpen(false)}
+                        className="mt-2 inline-flex rounded-full bg-sage px-3 py-1 text-xs font-semibold"
+                      >
+                        {drinkInfo(note.drink_id)?.name ?? "See the drink"}
+                      </Link>
                     ) : null}
                   </div>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Sheet>
       ) : null}
     </div>
   );

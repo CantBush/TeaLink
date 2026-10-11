@@ -134,8 +134,8 @@ export function TopChoices({ decision, running }: { decision: Decision | null; r
             }`}
           >
             <div className="flex items-start justify-between gap-2">
+              <span className="font-display text-2xl leading-none text-moss">{matchPercent(option.score)}% match</span>
               <span className="text-xs tracking-[0.12em] text-mute">no. {index + 1}</span>
-              <span className="font-display text-2xl leading-none text-moss">{matchPercent(option.score)}</span>
             </div>
             <div className="mt-2 flex min-w-0 items-center gap-3 @lg:flex-col @lg:items-start">
               {drinkPhoto(option.drink_id) ? (

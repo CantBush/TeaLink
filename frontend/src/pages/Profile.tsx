@@ -159,20 +159,22 @@ export function Profile() {
           style={{ background: tint(profile.accent) }}
         />
         <div className="px-5 pb-5 sm:px-7">
-          <div className="-mt-12 flex items-end justify-between gap-3 sm:-mt-14">
+          <div className="-mt-12 sm:-mt-14">
             <Avatar avatar={profile.avatar} size="xl" ring={tint(profile.accent)} />
-            <div className="flex flex-wrap justify-end gap-2 pb-1">
-              {own ? (
-                <>
-                  <button type="button" onClick={() => setEditing(true)} className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam">
-                    Edit profile
-                  </button>
-                  <button type="button" onClick={() => setComposing(true)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold">
-                    New post
-                  </button>
-                </>
-              ) : (
-                <>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {own ? (
+              <>
+                <button type="button" onClick={() => setEditing(true)} className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-foam">
+                  Edit profile
+                </button>
+                <button type="button" onClick={() => setComposing(true)} className="rounded-full border border-line px-4 py-2 text-sm font-semibold">
+                  New post
+                </button>
+              </>
+            ) : (
+              <>
+                {profile.follows_me ? (
                   <button
                     type="button"
                     onClick={() => setRecOpen(true)}
@@ -180,21 +182,21 @@ export function Profile() {
                   >
                     Send a rec
                   </button>
-                  <button
-                    type="button"
-                    onClick={toggleFollow}
-                    disabled={busy}
-                    className={`rounded-full px-5 py-2 text-sm font-semibold ${
-                      profile.followed_by_me ? "border border-line text-ink" : "text-foam"
-                    }`}
-                    style={profile.followed_by_me ? undefined : { background: tint(profile.accent) }}
-                  >
-                    {profile.followed_by_me ? "Following" : "Follow"}
-                  </button>
-                  <BesteaButton state={profile.bestea ?? "none"} busy={busy} onAction={besteaAction} />
-                </>
-              )}
-            </div>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={toggleFollow}
+                  disabled={busy}
+                  className={`rounded-full px-5 py-2 text-sm font-semibold ${
+                    profile.followed_by_me ? "border border-line text-ink" : "text-foam"
+                  }`}
+                  style={profile.followed_by_me ? undefined : { background: tint(profile.accent) }}
+                >
+                  {profile.followed_by_me ? "Following" : "Follow"}
+                </button>
+                <BesteaButton state={profile.bestea ?? "none"} busy={busy} onAction={besteaAction} />
+              </>
+            )}
           </div>
 
           <h1 className="mt-3 font-display text-3xl leading-tight sm:text-4xl">{profile.display_name}</h1>
@@ -250,35 +252,37 @@ export function Profile() {
         </section>
       ) : null}
 
-      {sharedCard ? (
-        <section aria-label={`${profile.display_name}'s boba card`} className="mx-auto max-w-sm">
-          <BobaCard
-            name={profile.display_name}
-            handle={profile.handle}
-            avatar={profile.avatar}
-            accent={profile.accent}
-            color={cardColor(profile)}
+      <div className={sharedCard ? "grid items-start gap-6 md:grid-cols-2" : ""}>
+        {sharedCard ? (
+          <section aria-label={`${profile.display_name}'s boba card`} className="mx-auto w-full max-w-sm">
+            <BobaCard
+              name={profile.display_name}
+              handle={profile.handle}
+              avatar={profile.avatar}
+              accent={profile.accent}
+              color={cardColor(profile)}
+              stats={profile.stats}
+              yours={false}
+            />
+          </section>
+        ) : null}
+
+        <section className={sharedCard ? "mx-auto w-full min-w-0" : "mx-auto w-full"}>
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="font-display text-2xl">{own ? "Highlights" : "Boba stats"}</h2>
+            {own ? (
+              <Link to="/stats" className="text-sm font-semibold text-moss">
+                All stats{hiddenCount > 0 ? ` (${hiddenCount} hidden)` : ""}
+              </Link>
+            ) : null}
+          </div>
+          <BobaStatsGrid
             stats={profile.stats}
-            yours={false}
+            order={own ? profile.visible_stats.slice(0, 3) : profile.visible_stats}
+            accent={profile.accent}
           />
         </section>
-      ) : null}
-
-      <section>
-        <div className="mb-3 flex items-baseline justify-between gap-3">
-          <h2 className="font-display text-2xl">{own ? "Highlights" : "Boba stats"}</h2>
-          {own ? (
-            <Link to="/stats" className="text-sm font-semibold text-moss">
-              All stats{hiddenCount > 0 ? ` (${hiddenCount} hidden)` : ""}
-            </Link>
-          ) : null}
-        </div>
-        <BobaStatsGrid
-          stats={profile.stats}
-          order={own ? profile.visible_stats.slice(0, 3) : profile.visible_stats}
-          accent={profile.accent}
-        />
-      </section>
+      </div>
 
       <section>
         <div className="mb-3 flex items-center justify-between gap-3">

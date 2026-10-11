@@ -1,6 +1,6 @@
 # TeaLink progress and to-dos
 
-*Last updated: Sun Oct 11, 1:10 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
+*Last updated: Sun Oct 11, 1:20 AM. Update this file whenever work lands or the plan changes. Newest plan changes go at the top of the log.*
 
 The full plan, with phases, the agent team, the demo script, and the cut order, is in [`PLAN.md`](PLAN.md).
 
@@ -32,6 +32,16 @@ Track B mirrors this in `frontend/src/api/types.ts`. Demo scores are unchanged (
 - `UserProfile.cover_url` is one of `pearls`, `leaves`, `swirl`, `fruit`, `matcha`, `lineup`, a JPEG data URL at most 1600 px wide (height capped at 1600), or null. Anything else on `PATCH /users` is 422. Null goes back to the automatic placeholder. Post `photo_url` is still a JPEG data URL at most 1080 px a side. `GET /feed` and `GET /feed?author=` return that exact string.
 - `POST /recs` still takes `{ from, to, drink_id, text }`. If `to` does not follow `from`, the response is 403 with detail `you can only send recs to people who follow you`. A successful rec notifies the recipient.
 - `Notification.kind` adds `"rec"`. A rec notification includes `drink_id` and `text` (the note). `from` is still an `Author`.
+
+### Profile layout, photos, and recs (Emily, Track B of the 12:55 AM plan)
+
+- The boba card and boba stats sit side by side when both are on, and a single one is centered. The Stats page does the same, and the pair stacks on a narrow window.
+- Order, new post, edit profile, drink detail, send-a-rec, and the notification list open in the middle of the screen and scroll inside themselves.
+- Edit profile can upload a photo (emoji is the fallback) and a banner (placeholder covers remain). The photo shows on the profile, in the feed, and on notifications. Reset demo clears uploads.
+- On a narrow window every stat, including favorite shop, spans the whole row.
+- Send a rec, Follow, and Request bestea sit below the banner. Send a rec is hidden unless that person follows you. A rec from someone you follow shows in the bell with the person, the drink, and the note. Sarah's seeded rec to Andrew is Hojicha Cream Tea.
+- Top 3 cards lead with the score as "78% match", then "no. 1". The scripted order is unchanged.
+- Side doodles stay in the margin beside the widest page and hide once that margin gets too narrow to draw in (under 1360px).
 
 ### Ordering, posts, and besteas (Andrew, Track A of the 9:30 PM plan)
 
@@ -231,6 +241,7 @@ Neighbor names stay in social rationales ("Sarah ... rated it 5/5"). Concession 
 
 ## Plan change log
 
+- **1:20 AM:** Track B finished the eight profile-layout rows from 12:55 AM. Details are in the Done section above. Track A's photo and rec routes from 1:10 AM are on main, and the frontend uses them.
 - **Evening:** Track A on `a/dialogue`: second-person selection copy, the round-2 contract fields, and `DELIBERATION=dialogue|single` (default `single`). Single-mode demo numbers are unchanged. Dialogue top-3 numbers are in the Track A section above. Track B: mirror the seam before editing `types.ts`, and update `demo-script.md` from the dialogue table. `options[2]` of the dialogue opening is Osmanthus Oolong, not Pearl.
 - **3:35 PM:** Track A: the social backend is in on `a/social-backend`, covering the quiz, boba stats, profiles, follows, feed, likes, comments, and recs. The quiz seeds the Preference agent's prior and the taste profile. The demo numbers and the eval are unchanged. Track B: see "where the API differs from the contract" above before mirroring `types.ts`.
 - **2:10 PM:** Track A: popularity baseline and `GET /eval` are in, and Sarah is Andrew's closest match. Demo order is unchanged (Thai Tea, Wintermelon, Pearl Milk Tea). Priorities are now price 43% and taste 41% (were 42% and 39%), and Wintermelon scores 77 rather than 76.

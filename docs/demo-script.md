@@ -25,7 +25,7 @@ Start on **at the counter** and go top to bottom:
 5. **Ruled out:** "Lantern Leaf's drinks are ruled out, because no shop agent is online to confirm they're in stock."
 6. **The arbiter decided:** "In this mode the agents get one round, and then the arbiter weighs their scores by Andrew's priorities. It's too close to call, so it hands the choice to him."
 
-Switch to **today's picks** and point at the top 3: **Thai Tea 78, Wintermelon Tea 77, Pearl Milk Tea 71**, with the close-call box.
+Switch to **today's picks** and point at the top 3: **Thai Tea 78% match, Wintermelon Tea 77% match, Pearl Milk Tea 71% match**, with the close-call box. The scores are unchanged.
 
 > "Thai Tea and Wintermelon are too close to call, so instead of guessing, the team asks Andrew. And it says why: Thai Tea wins on taste and on what people like him rate highly; Wintermelon wins on price and on being new."
 

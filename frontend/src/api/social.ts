@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from "react";
+import { paintAuthor, paintProfile } from "../lib/images.ts";
 import { socialMock } from "../mocks/socialStore.ts";
 import { apiBase } from "./client.ts";
-import type { FeedItem, Notifications, PostInput, ProfilePatch, QuizAnswers, QuizQuestion, QuizResult, UserProfile } from "./types.ts";
+import type { FeedComment, FeedItem, Notifications, PostInput, ProfilePatch, QuizAnswers, QuizQuestion, QuizResult, UserProfile } from "./types.ts";
 
 /**
  * Social-layer calls (contract in docs/PLAN.md). Each one tries Track A's endpoint first and
@@ -96,6 +97,62 @@ function withMockBestea(profile: UserProfile, viewer: string): UserProfile {
   }
 }
 
+const followerCache = new Map<string, Promise<Set<string> | null>>();
+
+/** Who follows `viewer`. Null when that route is not served yet. */
+function followerIds(viewer: string): Promise<Set<string> | null> {
+  const cached = followerCache.get(viewer);
+  if (cached) return cached;
+  const pending = request<{ users: { user_id?: string }[] }>("GET", `/users/${id(viewer)}/followers?${q(viewer)}`)
+    .then((data) => new Set(data.users.map((user) => user.user_id).filter((userId): userId is string => Boolean(userId))))
+    .catch((error: unknown) => {
+      followerCache.delete(viewer);
+      if (error instanceof Unavailable) return null;
+      return new Set<string>();
+    });
+  followerCache.set(viewer, pending);
+  return pending;
+}
+
+async function withFollowsMe(users: UserProfile[], viewer: string): Promise<UserProfile[]> {
+  const painted = users.map((user) => paintProfile(user));
+  if (!viewer || painted.every((user) => user.follows_me !== undefined || user.user_id === viewer)) return painted;
+  const ids = await followerIds(viewer);
+  if (!ids) return painted;
+  return painted.map((user) => (user.follows_me !== undefined ? user : { ...user, follows_me: ids.has(user.user_id) }));
+}
+
+function paintComment(comment: FeedComment): FeedComment {
+  return { ...comment, author: paintAuthor(comment.author) };
+}
+
+function paintFeed(items: FeedItem[]): FeedItem[] {
+  return items.map((item) => ({
+    ...item,
+    author: paintAuthor(item.author),
+    to_author: item.to_author ? paintAuthor(item.to_author) : item.to_author,
+    comments: item.comments.map(paintComment),
+  }));
+}
+
+function paintNotes(data: Notifications): Notifications {
+  return { ...data, items: data.items.map((note) => ({ ...note, from: paintAuthor(note.from) })) };
+}
+
+/** Rec notifications live in the mock until the API writes them. */
+function withMockRecs(data: Notifications, viewer: string): Notifications {
+  if (data.items.some((item) => item.kind === "rec")) return paintNotes(data);
+  let extra: Notifications["items"] = [];
+  try {
+    extra = socialMock.notifications(viewer).items.filter((item) => item.kind === "rec");
+  } catch {
+    return paintNotes(data);
+  }
+  if (extra.length === 0) return paintNotes(data);
+  const items = [...extra, ...data.items].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return paintNotes({ items, unread: items.filter((item) => !item.read).length });
+}
+
 function withMockPosts(items: FeedItem[], local: () => FeedItem[]): FeedItem[] {
   if (items.some((item) => item.kind === "post")) return items;
   let posts: FeedItem[];
@@ -128,14 +185,24 @@ export const social = {
 
   listUsers: (viewer: string) =>
     withFallback(
-      () => request<UserProfile[]>("GET", `/users?${q(viewer)}`).then((users) => users.map((user) => withMockBestea(user, viewer))),
-      () => socialMock.listUsers(viewer),
+      () =>
+        request<UserProfile[]>("GET", `/users?${q(viewer)}`).then((users) =>
+          withFollowsMe(
+            users.map((user) => withMockBestea(user, viewer)),
+            viewer,
+          ),
+        ),
+      () => socialMock.listUsers(viewer).map((user) => paintProfile(user)),
     ),
 
   getUser: (handle: string, viewer: string) =>
     withFallback(
-      () => request<UserProfile>("GET", `/users/${id(handle)}?${q(viewer)}`).then((user) => withMockBestea(user, viewer)),
-      () => socialMock.getUser(handle, viewer),
+      () =>
+        request<UserProfile>("GET", `/users/${id(handle)}?${q(viewer)}`).then(async (user) => {
+          const [painted] = await withFollowsMe([withMockBestea(user, viewer)], viewer);
+          return painted;
+        }),
+      () => paintProfile(socialMock.getUser(handle, viewer)),
     ),
 
   patchUser: (userId: string, patch: ProfilePatch) =>
@@ -143,18 +210,30 @@ export const social = {
       () =>
         request<UserProfile>("PATCH", `/users/${id(userId)}`, patch)
           .catch((error: unknown) => {
-            // An API from before "past_orders" rejects the key; keep that one choice in the mock.
-            if (!(error instanceof HttpError && error.status === 422 && patch.visible_stats?.includes("past_orders"))) throw error;
-            try {
-              const local = socialMock.getUser(userId, userId);
-              const rest = local.visible_stats.filter((key) => key !== "past_orders");
-              socialMock.patchUser(userId, { visible_stats: [...rest, "past_orders"] });
-            } catch {
-              /* Not in the mock. */
-            }
-            return request<UserProfile>("PATCH", `/users/${id(userId)}`, {
+            if (!(error instanceof HttpError) || error.status !== 422) throw error;
+            // Picture fields are new. An API that doesn't store them yet still saves the rest.
+            const withoutPictures: ProfilePatch = {
               ...patch,
-              visible_stats: patch.visible_stats.filter((key) => key !== "past_orders"),
+              cover_url: undefined,
+              avatar: patch.avatar ? { emoji: patch.avatar.emoji, color: patch.avatar.color } : patch.avatar,
+            };
+            const sentPictures = patch.cover_url !== undefined || patch.avatar?.photo_url !== undefined;
+            const retry = (body: ProfilePatch) => request<UserProfile>("PATCH", `/users/${id(userId)}`, body);
+            const afterPictures = sentPictures ? retry(withoutPictures) : Promise.reject(error);
+            return afterPictures.catch((again: unknown) => {
+              const body = sentPictures ? withoutPictures : patch;
+              if (!(again instanceof HttpError && again.status === 422 && body.visible_stats?.includes("past_orders"))) throw again;
+              try {
+                const local = socialMock.getUser(userId, userId);
+                const rest = local.visible_stats.filter((key) => key !== "past_orders");
+                socialMock.patchUser(userId, { visible_stats: [...rest, "past_orders"] });
+              } catch {
+                /* Not in the mock. */
+              }
+              return retry({
+                ...body,
+                visible_stats: body.visible_stats?.filter((key) => key !== "past_orders"),
+              });
             });
           })
           .then((user) => {
@@ -166,9 +245,9 @@ export const social = {
                 /* Not in the mock. */
               }
             }
-            return withMockBestea(user, userId);
+            return paintProfile(withMockBestea(user, userId));
           }),
-      () => socialMock.patchUser(userId, patch),
+      () => paintProfile(socialMock.patchUser(userId, patch)),
     ),
 
   follow: (userId: string, viewer: string, on: boolean) =>
@@ -184,7 +263,9 @@ export const social = {
     withFallback(
       () => request<FeedItem[]>("GET", `/feed?user_id=${id(viewer)}`).then((items) => withMockPosts(items, () => socialMock.getFeed(viewer))),
       () => socialMock.getFeed(viewer),
-    ).then(hidePicks),
+    )
+      .then(hidePicks)
+      .then(paintFeed),
 
   getUserFeed: (handle: string, viewer: string) =>
     withFallback(
@@ -193,7 +274,9 @@ export const social = {
           withMockPosts(items, () => socialMock.getUserFeed(handle, viewer)),
         ),
       () => socialMock.getUserFeed(handle, viewer),
-    ).then(hidePicks),
+    )
+      .then(hidePicks)
+      .then(paintFeed),
 
   like: (itemId: string, viewer: string, on: boolean) =>
     withFallback(
@@ -232,19 +315,35 @@ export const social = {
 
   notifications: (viewer: string) =>
     withFallback(
-      () => request<Notifications>("GET", "/notifications"),
-      () => socialMock.notifications(viewer),
+      () => request<Notifications>("GET", "/notifications").then((data) => withMockRecs(data, viewer)),
+      () => paintNotes(socialMock.notifications(viewer)),
     ),
 
   readNotifications: (viewer: string, ids?: string[]) =>
     withFallback(
-      () => request<unknown>("POST", "/notifications/read", ids ? { ids } : {}),
+      () =>
+        request<unknown>("POST", "/notifications/read", ids ? { ids } : {}).then((result) => {
+          try {
+            socialMock.readNotifications(viewer, ids);
+          } catch {
+            /* The mock has nothing for this account. */
+          }
+          return result;
+        }),
       () => socialMock.readNotifications(viewer, ids),
     ),
 
   sendRec: (from: string, to: string, drinkId: string, text: string) =>
     withFallback(
-      () => request<FeedItem>("POST", "/recs", { from, to, drink_id: drinkId, text }),
+      () =>
+        request<FeedItem>("POST", "/recs", { from, to, drink_id: drinkId, text }).then((item) => {
+          try {
+            socialMock.sendRec(from, to, drinkId, text);
+          } catch {
+            /* The live API already accepted it. The mock only mirrors the notification. */
+          }
+          return paintFeed([item])[0];
+        }),
       () => socialMock.sendRec(from, to, drinkId, text),
     ),
 };

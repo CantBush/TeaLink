@@ -11,7 +11,7 @@ import type {
   TasteProfile,
 } from "../api/types.ts";
 import { social } from "../api/social.ts";
-import { resetCovers } from "../lib/images.ts";
+import { resetCovers, resetPortraits } from "../lib/images.ts";
 import { sampleSession } from "../mocks/sample.ts";
 import { orderMock } from "../mocks/orderStore.ts";
 import { shopMock } from "../mocks/shopStore.ts";
@@ -245,6 +245,7 @@ export async function resetAll() {
   orderMock.reset();
   shopProfilesChanged();
   resetCovers();
+  resetPortraits();
   profilesChanged();
   set({ learned: null, previousDecision: null, decision: null, change: null });
   rerun("Demo reset to the seeded state.");

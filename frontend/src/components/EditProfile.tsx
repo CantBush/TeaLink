@@ -3,11 +3,13 @@ import { social } from "../api/social.ts";
 import type { StatKey, UserProfile } from "../api/types.ts";
 import { allDrinks } from "../lib/catalog.ts";
 import { SHOP_IDS, shopLabel } from "../lib/format.ts";
-import { COVERS, type CoverId, coverId, coverPhoto, setCover } from "../lib/images.ts";
+import { COVERS, type CoverId, coverId, coverPhoto, rememberPortrait, setCover } from "../lib/images.ts";
 import { ACCENT_COLORS, AVATAR_COLORS } from "../lib/palette.ts";
+import { resizePhoto } from "../lib/photo.ts";
 import { ALL_STATS, STAT_LABELS, shownStats } from "../lib/stats.ts";
 import { profilesChanged } from "../state/social.ts";
 import { Avatar } from "./Avatar.tsx";
+import { Sheet } from "./Sheet.tsx";
 
 const EMOJIS = ["🧋", "🍵", "🐯", "🌸", "🍓", "🥭", "🍑", "🫖", "🍯", "🐼", "🦊", "🐻", "🍡", "🌙", "⭐", "🐸", "🦄", "🍉", "🌈", "🔥"];
 
@@ -51,6 +53,8 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
   const [shop, setShop] = useState(profile.pinned_shop_id ?? "");
   const [shown, setShown] = useState<StatKey[]>(shownStats(profile.visible_stats));
   const [cover, setCoverChoice] = useState<CoverId>(coverId(profile));
+  const [banner, setBanner] = useState<string | null>(profile.cover_url?.startsWith("data:") ? profile.cover_url : null);
+  const [photo, setPhoto] = useState<string | null>(profile.avatar.photo_url ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,17 +69,20 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
 
   const save = () => {
     setCover(profile.user_id, cover);
+    const coverUrl = banner ?? cover;
+    rememberPortrait(profile.user_id, profile.handle, { photo_url: photo, cover_url: coverUrl });
     setSaving(true);
     setError(null);
     social
       .patchUser(profile.user_id, {
         display_name: name.trim() || profile.display_name,
         bio: bio.trim(),
-        avatar: { emoji, color },
+        avatar: { emoji, color, photo_url: photo },
         accent,
         pinned_drink_id: drink || null,
         pinned_shop_id: shop || null,
         visible_stats: shown,
+        cover_url: coverUrl,
       })
       .then(() => {
         profilesChanged();
@@ -87,15 +94,10 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
       });
   };
 
+  const shownCover = banner ?? cover;
+
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
-      <section
-        role="dialog"
-        aria-modal
-        aria-label="Edit profile"
-        onClick={(event) => event.stopPropagation()}
-        className="flex max-h-[92vh] w-full max-w-lg flex-col rounded-t-[32px] bg-foam sm:rounded-[32px]"
-      >
+    <Sheet label="Edit profile" onClose={onClose} padded={false} fill>
         <header className="flex items-center justify-between border-b border-line px-5 py-4">
           <button type="button" onClick={onClose} className="text-sm font-semibold text-mute hover:text-ink">
             Cancel
@@ -106,25 +108,48 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
           </button>
         </header>
 
-        <div className="space-y-6 overflow-y-auto px-5 py-5">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
           <div className="relative">
-            <img src={coverPhoto(profile, cover)} alt="" className="h-24 w-full rounded-2xl object-cover" />
+            <img src={coverPhoto(profile, shownCover)} alt="" className="h-24 w-full rounded-2xl object-cover" />
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
-              <Avatar avatar={{ emoji, color }} size="lg" ring={accent} />
+              <Avatar avatar={{ emoji, color, photo_url: photo }} size="lg" ring={accent} />
             </div>
           </div>
 
-          <Field label="Cover">
+          <Field label="Banner">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <label className="min-h-11 cursor-pointer rounded-full border border-line px-4 py-2 text-sm font-semibold">
+                Upload a banner
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) resizePhoto(file, 1600).then(setBanner, (reason: Error) => setError(reason.message));
+                    event.target.value = "";
+                  }}
+                />
+              </label>
+              {banner ? (
+                <button type="button" onClick={() => setBanner(null)} className="min-h-11 rounded-full px-4 py-2 text-sm font-semibold text-mute">
+                  Use a placeholder
+                </button>
+              ) : null}
+            </div>
             <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Cover">
               {COVERS.map((item) => (
                 <button
                   key={item}
                   type="button"
                   role="radio"
-                  aria-checked={cover === item}
+                  aria-checked={!banner && cover === item}
                   aria-label={`${item} cover`}
-                  onClick={() => setCoverChoice(item)}
-                  className={`overflow-hidden rounded-xl border-2 ${cover === item ? "border-ink" : "border-transparent"}`}
+                  onClick={() => {
+                    setBanner(null);
+                    setCoverChoice(item);
+                  }}
+                  className={`overflow-hidden rounded-xl border-2 ${!banner && cover === item ? "border-ink" : "border-transparent"}`}
                 >
                   <img src={`/img/covers/${item}.jpg`} alt="" className="aspect-[16/9] w-full object-cover" />
                 </button>
@@ -133,6 +158,26 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
           </Field>
 
           <Field label="Avatar">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <label className="min-h-11 cursor-pointer rounded-full border border-line px-4 py-2 text-sm font-semibold">
+                Upload a photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) resizePhoto(file, 512).then(setPhoto, (reason: Error) => setError(reason.message));
+                    event.target.value = "";
+                  }}
+                />
+              </label>
+              {photo ? (
+                <button type="button" onClick={() => setPhoto(null)} className="min-h-11 rounded-full px-4 py-2 text-sm font-semibold text-mute">
+                  Use the emoji
+                </button>
+              ) : null}
+            </div>
             <div className="grid grid-cols-10 gap-1">
               {EMOJIS.map((item) => (
                 <button
@@ -221,7 +266,6 @@ export function EditProfile({ profile, onClose }: { profile: UserProfile; onClos
 
           {error ? <p className="text-sm font-semibold text-[#b33]">{error}</p> : null}
         </div>
-      </section>
-    </div>
+    </Sheet>
   );
 }

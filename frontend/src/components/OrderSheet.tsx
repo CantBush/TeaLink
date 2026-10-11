@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { useStorePreview } from "../api/http.ts";
 import { orders } from "../api/orders.ts";
@@ -11,6 +10,7 @@ import { price, shopLabel } from "../lib/format.ts";
 import { drinkPhoto } from "../lib/images.ts";
 import { quote } from "../lib/order.ts";
 import { orderedFromTop3, useSession } from "../state/session.ts";
+import { Sheet } from "./Sheet.tsx";
 
 function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; children: string }) {
   return (
@@ -98,15 +98,8 @@ export function OrderSheet({ drinkId, onClose }: { drinkId: string; onClose: () 
       .finally(() => setBusy(false));
   };
 
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 sm:items-center" onClick={onClose}>
-      <section
-        role="dialog"
-        aria-modal
-        aria-label={`Order ${catalog?.name ?? "a drink"}`}
-        onClick={(event) => event.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-[32px] bg-foam p-6 sm:rounded-[32px]"
-      >
+  return (
+    <Sheet label={`Order ${catalog?.name ?? "a drink"}`} onClose={onClose}>
         <div className="flex items-start gap-4">
           {drinkPhoto(drinkId) ? <img src={drinkPhoto(drinkId)!} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" /> : null}
           <div className="min-w-0 flex-1">
@@ -219,8 +212,6 @@ export function OrderSheet({ drinkId, onClose }: { drinkId: string; onClose: () 
             </button>
           </div>
         )}
-      </section>
-    </div>,
-    document.body,
+    </Sheet>
   );
 }
