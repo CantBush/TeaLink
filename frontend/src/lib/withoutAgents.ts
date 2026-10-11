@@ -1,30 +1,20 @@
 import type { Decision, Dimension, DimensionScores, LensEvent, Proposal, RankedDrink } from "../api/types.ts";
-import { agentInfo } from "./agents.ts";
 import { DIMENSIONS, dimensionLabel } from "./format.ts";
 
 /** Same near-tie rule as the backend resolver. */
 const TIE_GAP = 0.02;
 
-const DIMENSION_OF: Record<string, Dimension> = { taste: "taste", social: "social", explorer: "novelty", budget: "cost" };
-
-function names(agentIds: string[]): string {
-  const list = agentIds.map((id) => agentInfo(id).name);
-  return list.length <= 1 ? (list[0] ?? "") : `${list.slice(0, -1).join(", ")} and ${list[list.length - 1]}`;
-}
+/** The priority each core agent speaks for. */
+export const DIMENSION_OF: Record<string, Dimension> = { taste: "taste", social: "social", explorer: "novelty", budget: "cost" };
 
 /**
- * Re-rank a round as if `stopped` never answered: their proposals and scores are left out, and their
- * share of your priorities is spread over the rest. Mirrors `core/resolution.py`, so the arbiter's
- * maths is the same one the API runs; only the missing agents differ.
+ * Re-rank a round as if `stopped` never answered, for an API without `POST /agents/{id}/stop`.
+ * Mirrors `core/resolution.py` with the agents missing: their proposals are gone, and the priority
+ * they speak for scores 0 for every drink while your weights stay as they are.
  */
 export function resolveWithout(decision: Decision, proposals: Proposal[], objections: LensEvent[], stopped: string[]): Decision {
   const lost = new Set(stopped.map((id) => DIMENSION_OF[id]).filter(Boolean));
-  const base = decision.weights ?? { taste: 0.55, social: 0.15, novelty: 0.15, cost: 0.15 };
-  const kept = DIMENSIONS.filter((dimension) => !lost.has(dimension));
-  const keptTotal = kept.reduce((sum, dimension) => sum + base[dimension], 0) || 1;
-  const weights = Object.fromEntries(
-    DIMENSIONS.map((dimension) => [dimension, lost.has(dimension) ? 0 : base[dimension] / keptTotal]),
-  ) as DimensionScores;
+  const weights: DimensionScores = decision.weights ?? { taste: 0.55, social: 0.15, novelty: 0.15, cost: 0.15 };
 
   const first = new Map<string, Proposal>();
   for (const proposal of proposals) if (!first.has(proposal.drink_id)) first.set(proposal.drink_id, proposal);
@@ -49,7 +39,9 @@ export function resolveWithout(decision: Decision, proposals: Proposal[], object
     .filter((proposal) => !removed.has(proposal.drink_id))
     .map((proposal) => {
       const own = scores.get(proposal.drink_id) ?? {};
-      const dimension_scores = Object.fromEntries(DIMENSIONS.map((dimension) => [dimension, own[dimension] ?? 0])) as DimensionScores;
+      const dimension_scores = Object.fromEntries(
+        DIMENSIONS.map((dimension) => [dimension, lost.has(dimension) ? 0 : (own[dimension] ?? 0)]),
+      ) as DimensionScores;
       return {
         drink_id: proposal.drink_id,
         drink_name: proposal.drink_name,
@@ -60,9 +52,6 @@ export function resolveWithout(decision: Decision, proposals: Proposal[], object
       };
     })
     .sort((a, b) => b.score - a.score || a.drink_id.localeCompare(b.drink_id));
-
-  const share = Math.round(DIMENSIONS.filter((dimension) => lost.has(dimension)).reduce((sum, dimension) => sum + base[dimension], 0) * 100);
-  const lead = `Without ${names(stopped)}, the arbiter spread ${share}% of your priorities over the others.`;
 
   if (ranked.length === 0) {
     return {
@@ -75,7 +64,7 @@ export function resolveWithout(decision: Decision, proposals: Proposal[], object
       question: "Every suggested drink was ruled out. What would you like instead?",
       alternatives: [],
       options: [],
-      explanation: `${lead} No candidate survived.`,
+      explanation: "No candidate survived.",
       weights,
       dropped,
       missing_agents: stopped,
@@ -87,7 +76,7 @@ export function resolveWithout(decision: Decision, proposals: Proposal[], object
   const tie = runner !== undefined && winner.score - runner.score <= TIE_GAP;
   const top = winner.dimension_scores!;
   const boost = DIMENSIONS.reduce((best, dimension) => (weights[dimension] * top[dimension] > weights[best] * top[best] ? dimension : best));
-  let explanation = `${lead} ${winner.drink_name} ranks first (${winner.score.toFixed(2)}). Its biggest boost is ${dimensionLabel(boost).toLowerCase()}, which now counts for ${Math.round(weights[boost] * 100)}% for you.`;
+  let explanation = `${winner.drink_name} ranks first (${winner.score.toFixed(2)}). Its biggest boost is ${dimensionLabel(boost).toLowerCase()}, which counts for ${Math.round(weights[boost] * 100)}% for you.`;
   if (runner) {
     const other = runner.dimension_scores!;
     const edge = DIMENSIONS.reduce((best, dimension) =>

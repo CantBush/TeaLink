@@ -9,9 +9,9 @@ export type StopMode = "server" | "browser";
 const shopId = (agentId: string) => agentId.replace(/^shop[_:]/, "");
 
 /**
- * Take an agent out of the team (docs/PLAN.md "More of the Cisco challenge"). Until
- * `POST /agents/{id}/stop` is served, a shop goes offline through the existing event route and a
- * core agent is left out of the next round in the browser.
+ * Take an agent out of the team with `POST /agents/{id}/stop`. An older API without the route
+ * takes a shop offline through the shop event route instead, and the browser leaves a core agent
+ * out of the next round.
  */
 export async function stopAgent(agentId: string): Promise<StopMode> {
   try {
@@ -27,10 +27,10 @@ export async function stopAgent(agentId: string): Promise<StopMode> {
   return "browser";
 }
 
-/** The latest round's trace, or null until `GET /trace/{session_id}` is served. The user id is the session. */
-export async function getTrace(userId: string): Promise<TraceSpan[] | null> {
+/** A round's trace, or null when the API has none for it (an older API, or a saved round). */
+export async function getTrace(sessionId: string): Promise<TraceSpan[] | null> {
   try {
-    return await request<TraceSpan[]>("GET", `/trace/${encodeURIComponent(userId)}`);
+    return await request<TraceSpan[]>("GET", `/trace/${encodeURIComponent(sessionId)}`);
   } catch {
     return null;
   }

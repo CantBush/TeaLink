@@ -61,6 +61,8 @@ export interface SessionState {
   phases: { phase: Phase; ms: number }[];
   /** The Critic challenges each #1 before it's final. Off by default. */
   critic: boolean;
+  /** The latest round's id from the API, for its trace. Null for a saved round. */
+  sessionId: string | null;
 }
 
 export type Phase = "selected" | "proposed" | "scored" | "decided";
@@ -96,6 +98,7 @@ let state: SessionState = {
   browserStopped: [],
   phases: [],
   critic: false,
+  sessionId: null,
 };
 
 const listeners = new Set<() => void>();
@@ -129,7 +132,7 @@ export function pushEvent(event: LensEvent) {
   const key = eventKey(event);
   if (seen.has(key)) return;
   seen.add(key);
-  if (event.agent_id && state.browserStopped.includes(event.agent_id)) return;
+  if (event.type !== "agent_lost" && event.agent_id && state.browserStopped.includes(event.agent_id)) return;
   if (event.type === "decision" && state.browserStopped.length > 0) {
     const decision = resolveWithout(
       event.payload as unknown as Decision,
@@ -142,6 +145,7 @@ export function pushEvent(event: LensEvent) {
     event = { ...event, payload: { ...event.payload, missing_agents: state.stopped } };
   }
   const patch: Partial<SessionState> = { events: [...state.events, event] };
+  if (event.session_id && !state.sessionId) patch.sessionId = event.session_id;
   const phase = PHASE_OF[event.type];
   if (phase && !state.phases.some((item) => item.phase === phase)) {
     patch.phases = [...state.phases, { phase, ms: Math.round(performance.now() - roundStartedAt) }];
@@ -194,6 +198,7 @@ function run(note?: string) {
   set({
     round,
     phases: [],
+    sessionId: null,
     events: [],
     proposals: [],
     previousDecision: state.decision ?? state.previousDecision,
@@ -305,20 +310,41 @@ export async function toggleAgent(agentId: string) {
   const name = agentInfo(agentId).name;
   const midRound = state.running;
   if (state.stopped.includes(agentId)) {
-    await startAgent(agentId);
+    try {
+      await startAgent(agentId);
+    } catch {
+      pushStatus(`${name} couldn't be brought back (the API did not answer).`);
+      return;
+    }
     set({
       stopped: state.stopped.filter((id) => id !== agentId),
       browserStopped: state.browserStopped.filter((id) => id !== agentId),
     });
-    rerun(`${name} is back at the counter.`);
+    rerun(`You brought ${name} back.`);
     return;
   }
-  const mode = await stopAgent(agentId);
+  let mode: Awaited<ReturnType<typeof stopAgent>>;
+  try {
+    mode = await stopAgent(agentId);
+  } catch {
+    pushStatus(`${name} couldn't be stopped (the API did not answer).`);
+    return;
+  }
   set({
     stopped: [...state.stopped, agentId],
     browserStopped: mode === "browser" ? [...state.browserStopped, agentId] : state.browserStopped,
   });
-  rerun(`${name} dropped out${midRound ? " mid-round" : ""}. The team re-plans without it.`);
+  rerun(`You stopped ${name}${midRound ? " mid-round" : ""}.`);
+  if (mode === "browser") {
+    localSeq += 1;
+    pushEvent({
+      type: "agent_lost",
+      agent_id: agentId,
+      message: `${name} is unavailable, so the team will decide without it.`,
+      payload: { agent_id: agentId, reason: "stopped for this round", when: midRound ? "mid_round" : "before_round" },
+      seq: localSeq,
+    });
+  }
 }
 
 export function toggleCritic() {

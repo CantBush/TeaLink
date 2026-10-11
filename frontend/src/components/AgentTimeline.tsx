@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import type { Health, LensEvent } from "../api/types.ts";
 import { agentInfo, agentKind } from "../lib/agents.ts";
 import { drinkInfo } from "../lib/catalog.ts";
-import { price, readableShops } from "../lib/format.ts";
+import { dimensionLabel, price, readableShops } from "../lib/format.ts";
+import { DIMENSION_OF } from "../lib/withoutAgents.ts";
 import { AgentSymbol } from "./AgentSymbol.tsx";
 import { LeafPair, TeaBowl } from "./Doodles.tsx";
 
@@ -380,6 +381,14 @@ function DecisionCard({ decision }: { decision: LensEvent }) {
   const askHuman = payload.ask_human === true;
   const missing = Array.isArray(payload.missing_agents) ? (payload.missing_agents as string[]) : [];
   const without = missing.map((id) => agentInfo(id).name).join(", ");
+  const unspoken = missing.flatMap((id) => (DIMENSION_OF[id] ? [dimensionLabel(DIMENSION_OF[id]).toLowerCase()] : []));
+  const shopsGone = missing.filter((id) => agentKind(id) === "shop").map((id) => agentInfo(id).name);
+  const lost = [
+    unspoken.length ? `Nobody spoke for ${unspoken.join(" or ")}, so it counted for nothing this round.` : "",
+    shopsGone.length ? `${shopsGone.join(" and ")} couldn't confirm stock, so ${shopsGone.length === 1 ? "its" : "their"} drinks were ruled out.` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const who = byAgents ? "the agents agreed" : "the arbiter decided";
   const how = byAgents
     ? `They settled it themselves after ${rounds} ${rounds === 1 ? "round" : "rounds"} of back-and-forth.`
@@ -395,6 +404,7 @@ function DecisionCard({ decision }: { decision: LensEvent }) {
         {without ? <span className="font-sans text-base text-[#8a3b2a]">without {without.toLowerCase()}</span> : null}
       </p>
       <p className="mt-2 text-sm text-mute">{how}</p>
+      {lost ? <p className="mt-2 text-sm text-[#8a3b2a]">{lost}</p> : null}
       <p className="mt-3 text-[15px] leading-relaxed">{decision.message}</p>
       {askHuman ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-sage px-4 py-3">

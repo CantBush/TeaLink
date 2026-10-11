@@ -101,7 +101,7 @@ export interface Decision {
   decided_by?: "agents" | "arbiter";
   /** Planned: rebuttal rounds that ran before the decision. */
   rounds?: number;
-  /** Planned: agents the arbiter decided without, after "kill an agent". */
+  /** Agents stopped for this round; the arbiter decided without them. */
   missing_agents?: string[];
 }
 
@@ -137,6 +137,8 @@ export interface LensEvent {
   /** Planned extras: `round` (1-based) and `revised_from` on objections that soften in a rebuttal. */
   payload: Record<string, unknown>;
   seq: number;
+  /** The round's id on every event from POST /recommend; GET /trace/{session_id} serves its trace. */
+  session_id?: string | null;
 }
 
 export type EvalMethodName = "popularity" | "fixed_weights" | "learning";
@@ -165,8 +167,10 @@ export interface EvalResult {
   personas: EvalPersona[];
 }
 
-/** GET /health. `effective` is what is actually answering: "pending" means AGNTCY is configured but not connected. */
-/** One agent's part in one round (planned GET /trace/{session_id}, from AGNTCY observability). */
+/**
+ * One gateway-to-agent call (GET /trace/{session_id}). `round` is 0 for opening picks, 1 for the
+ * first scores, then rebuttals; the close-call offer comes last.
+ */
 export interface TraceSpan {
   round: number;
   agent_id: string;
@@ -176,6 +180,7 @@ export interface TraceSpan {
   fell_back: boolean;
 }
 
+/** GET /health. `effective` is what is actually answering: "pending" means AGNTCY is configured but not connected. */
 export interface Health {
   status: string;
   transport: "local" | "agntcy";
