@@ -1,6 +1,6 @@
 # TeaLink plan
 
-*Living document, so anyone can edit it. Last edited Sat Oct 10, 3:35 PM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
+*Living document, so anyone can edit it. Last edited Sun Oct 11, 12:55 AM. Mark status with ✅ done, 🟡 in progress, ⬜ not started, or ✂️ cut. Log what you finished in [`PROGRESS.md`](PROGRESS.md) and record plan changes in the log at the bottom.*
 
 ## Goal
 
@@ -729,6 +729,75 @@ Notification = {
 | 5 | ✅ "Request bestea" next to Follow with its states (requested, incoming, besteas); notification bell with an unread count, accept and decline, and bestea orders | A request, an accept, and a bestea's order all show up in the bell |
 | 6 | ✅ Update `docs/demo-script.md` (order Pearl instead of picking it) and re-check the numbers | The script's clicks and numbers match the app |
 
+### Profile layout, photos, and recs (added 12:55 AM)
+
+**Goal:** profiles read clearly at any window size, pictures are yours, and a recommendation only moves between people who already follow each other.
+
+**Customer side:**
+- **Card and stats sit together:**
+  - When the boba card and the boba stats are both on, they sit side by side.
+  - When only the card is on, or only the stats are on, that one is centered.
+  - Your own Stats page follows the same rule. On a narrow window the pair stacks, and each half stays centered.
+- **Popups stay on screen.** Sheets and menus (order, new post, edit profile, drink detail, and the notification list) open in the middle of the viewport. If the content is taller than the screen, the popup scrolls inside itself. You never scroll the page to reach it.
+- **Your own pictures:**
+  - A profile photo replaces the emoji avatar, and a banner replaces the cover. Posts keep a photo with a caption, as they do now.
+  - You can still fall back to an emoji avatar and a placeholder banner.
+  - The photo shows on your profile, in the feed, and on notifications.
+- **Stats stay even when the window shrinks.** Every stat category uses the same width rule. On a narrow window, a category that spans the row spans the whole row. Favorite shop does this too. It no longer sits at half width while favorite drink, top flavors, and the others stretch across.
+- **Buttons stay off the banner.** Send a rec, Follow / Following, and Request bestea sit below the banner, not on top of it.
+- **Recommendations follow the follow.**
+  - You can send a rec only to someone who follows you. The button is hidden otherwise.
+  - You only receive a rec from someone you follow. Anyone else is turned away.
+  - A rec you do receive shows in the notification bell: who sent it, the drink, and the note.
+- **The top 3 says what the number is.** Each card leads with the score as a percentage and the word "match", in front of the rank. Pearl at 71 reads "71% match", then "no. 3". The scores themselves do not change.
+
+**Demo safety:**
+- After Reset demo the top 3 is still Thai Tea 78, Wintermelon 77, Pearl 71. The cards now read "78% match", "77% match", and "71% match".
+- Ordering Pearl still gives taste 45%, price 36%, and Pearl 73.
+- Reset demo clears uploaded profile photos and banners, and keeps accounts.
+
+**Contract additions** (A adds them; B mirrors them in `types.ts`):
+
+```ts
+// Profile photo and banner. Emoji avatar and a placeholder cover still work when these are absent.
+avatar: { emoji: string; color: string; photo_url?: string | null }
+UserProfile.cover_url?: string | null
+        // a placeholder id ("pearls", "leaves", …) or a JPEG data URL
+PATCH /users/{id} accepts avatar.photo_url and cover_url
+        // photo_url at most 512 px a side; cover_url at most 1600 px wide. Both usually under 200 KB.
+Author.avatar.photo_url?: string | null          // so the feed and the bell can show it
+
+// Post photos already go through POST /posts { photo_url } (JPEG data URL, at most 1080 px)
+
+// Recs only travel along a follow, and they notify
+POST /recs
+        // rejected unless `to` follows `from` (you send only to a follower; you receive only from someone you follow)
+Notification.kind adds "rec"
+Notification.drink_id?: string                    // the recommended drink
+Notification.text?: string                        // the note that came with it
+```
+
+#### Track A: profile photos and rec rules
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ `PATCH /users` stores `avatar.photo_url` and `cover_url` (a JPEG data URL or a placeholder id). Profiles and `Author` return the photo. Emoji avatar stays when there is no photo. Reset demo clears uploads | An uploaded photo and banner are still there after a reload, and gone after Reset demo |
+| 2 | ⬜ `POST /recs` succeeds only when the recipient follows the sender, and it writes a `rec` notification (who, drink, note) | Sending to someone who does not follow you fails, and a successful rec shows up unread for the recipient |
+| 3 | ⬜ Post photos already accepted on `POST /posts` round-trip as stored, including a JPEG data URL | A photo post is still there after a reload |
+
+#### Track B: profile layout, photos, and recs
+
+| Order | Task | Done when |
+|---|---|---|
+| 1 | ⬜ Boba card and boba stats side by side when both are on; either one alone is centered. Same on the Stats page, stacking on a narrow window | Both on is a row; one on is centered |
+| 2 | ⬜ Sheets and menus open in the middle of the viewport and scroll inside themselves | Order, new post, edit profile, and drink detail are usable without scrolling the page |
+| 3 | ⬜ Upload a profile photo and a banner, and keep the post photo upload. Show the photo on the profile, in the feed, and on notifications. Emoji and placeholder covers remain the fallback | A photo, a banner, and a post photo all show, and clearing the photo returns the emoji |
+| 4 | ⬜ Stat categories use one width rule on a narrow window. Favorite shop spans the full row the same way favorite drink and the other wide stats do | Shrinking the window does not leave one stat at half width beside a full-width one |
+| 5 | ⬜ Send a rec, Follow / Following, and Request bestea sit below the banner | They no longer cover the banner at any width |
+| 6 | ⬜ Send a rec only to someone who follows you. A rec notification appears in the bell with the person, the drink, and the note | The button is absent otherwise, and accepting a rec from someone you follow shows in the bell |
+| 7 | ⬜ Top 3 cards lead with the score as "78% match", in front of "no. 1" | The scripted 78 / 77 / 71 now read as percents with the word match, and the order is unchanged |
+| 8 | ⬜ Side doodles stay until the margins are almost too narrow for them | They remain visible on a wide laptop and hide only when the drawings would collide with the page |
+
 ### Sync points
 
 | Time | Both of you |
@@ -748,27 +817,28 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## If we fall behind, cut in this order
 
-1. UI round 2 extras, in this order:
+1. Profile layout, photos, and recs (12:55 AM). The 3-minute script does not depend on them. If you cut partway, keep the top 3 scores readable: the "78% match" label is one line and stays.
+2. UI round 2 extras, in this order:
    - typed custom what-ifs (keep the change builder), then the change builder (keep the preset buttons);
    - agent dialogue (keep `single`);
    - the Stats receipt layout and card color;
    - transition animations;
    - Discover match ordering.
    Keep the at the counter sub-tab and the trimmed today's picks.
-2. Accounts, store tools, and ordering, in this order:
+3. Accounts, store tools, and ordering, in this order:
    - card payments (keep pay at pickup);
    - the month and year ranges in demand trends (keep the week);
    - menu sections (keep editing drinks);
    - the shop picture and description.
    Keep sign in, the demo account buttons, the discount rules, and ordering (it replaces picking).
-3. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
-4. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
-5. Shop images and cover images (keep the drink images)
-6. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
-7. Friends tab (once profiles exist, it folds into them)
-8. Counterfactual page (Why This and the timeline already show the before/after)
-9. LLM wording
-10. AGNTCY (use the local transport)
+4. Ordering, posts, and besteas, in this order: notifications for bestea orders (keep the bestea relationship), photo posts (keep caption posts), and the past orders stat. **Keep:** order instead of pick, and no automatic posts.
+5. UI cleanup extras: the Discover filters and detail sheet (keep the search box)
+6. Shop images and cover images (keep the drink images)
+7. Social layer extras: comments and recs, then the feed (keep the quiz and profile if at all possible)
+8. Friends tab (once profiles exist, it folds into them)
+9. Counterfactual page (Why This and the timeline already show the before/after)
+10. LLM wording
+11. AGNTCY (use the local transport)
 
 **Never cut:** conflict resolution, sold-out, the Lens timeline, top 3 with learning, the baseline comparison, or the TeaLink tab at `/` (the demo runs there).
 
@@ -780,6 +850,7 @@ See [`demo-script.md`](demo-script.md): a 3-minute run with exact clicks, lines,
 
 ## Plan change log
 
+- **12:55 AM:** Added "Profile layout, photos, and recs". The boba card and boba stats sit side by side when both are on, and a single one is centered. Popups open in the middle of the screen. People can upload a profile photo, a banner, and post photos. Stat rows stay consistent on a narrow window, including favorite shop. Send a rec and Follow sit below the banner. A rec is allowed only when the recipient follows the sender, and it shows in the notification bell. Top 3 cards read "78% match" in front of the rank. Side doodles hide only when the margins are almost gone. Split into Track A rows 1-3 and Track B rows 1-8. First on the cut list. The scripted scores stay 78 / 77 / 71.
 - **8:20 PM:** Added "Custom what-if at the counter": a change builder and a text box, so you can enter your own changes (sold out or restocked, a shop offline, online, or joining, a flavor to avoid, a taste direction, a price limit, a price change). Typed text becomes structured changes you confirm first. An LLM may parse it but never scores. The preset buttons stay, so the demo is unchanged. It's first on the cut list.
 - **9:50 PM:** Track B finished its six "Ordering replaces picking" rows on in-browser mocks: ordering from the top 3 is the pick (same 45% / 36% / Pearl 73), no pick posts, photo and caption posts, a past orders stat, besteas, and a notification bell. The demo script now orders Pearl instead of picking it.
 - **9:30 PM:** Added "Ordering replaces picking, custom posts, and besteas": ordering is the only way to choose (placing an order from your top 3 teaches the Preference agent), orders no longer post automatically, people write their own photo or caption posts, past orders become a profile stat, and besteas get notified of each other's orders. Split into Track A rows 1-4 and Track B rows 1-6. Orders from outside the top 3 (for example Discover) nudge the taste profile but not the priority weights.
