@@ -110,13 +110,17 @@ export function Vine({ className = "h-5 w-40" }: DoodleProps) {
 
 const backdropStroke = 1.65;
 
+// The widest drawing needs 276px of each side rail before it would meet the
+// 72rem (1152px) content frame. Below 1704px, hide the full backdrop instead
+// of clipping its inboard edge as the available margin narrows.
+
 /**
  * Tea-garden drawings clipped to the margins beside the widest page (72rem).
  * They stay while that margin can hold them, and hide once it gets too narrow to draw in.
  */
 export function GardenBackdrop() {
   const gutter =
-    "pointer-events-none absolute inset-y-0 hidden overflow-hidden text-moss/35 min-[1360px]:block w-[max(0px,calc((100vw-72rem)/2))]";
+    "pointer-events-none absolute inset-y-0 hidden overflow-hidden text-moss/35 min-[1704px]:block w-[max(0px,calc((100vw-72rem)/2))]";
   return (
     <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden>
       <div className={`${gutter} left-0`}>

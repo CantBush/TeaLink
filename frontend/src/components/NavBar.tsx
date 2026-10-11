@@ -146,7 +146,7 @@ export function NavBar() {
                 <span
                   className={`grid place-items-center ${
                     center
-                      ? `-mt-5 h-12 w-12 rounded-full border-4 border-foam ${on ? "bg-ink text-foam" : "bg-sage text-ink"}`
+                      ? `-mt-5 h-12 w-12 rounded-full border-4 bg-sage text-ink ${on ? "border-ink" : "border-foam"}`
                       : "h-7"
                   }`}
                 >
